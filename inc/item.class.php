@@ -99,45 +99,102 @@ class PluginOpenvasItem extends CommonDBTM {
    }
 
    public static function showForItem(CommonDBTM $item, PluginOpenvasItem $openvas_item) {
+      global $CFG_GLPI;
       if (isset($openvas_item->fields['id'])) {
          $id = $openvas_item->getID();
       } else {
          $id = 0;
       }
-      $options = array('formtitle'   => __("OpenVAS", "openvas"),
-                       'target' => $openvas_item->getFormURL().
-                                   '?id='.$id.'&itemtype='
-                                     .$item->getType().'&items_id='.$item->getID());
+
+      $form_url = $openvas_item->getFormURL().'?id='.$id.'&itemtype='
+                    .$item->getType().'&items_id='.$item->getID();
+      $options = array('candel' => false,
+                       'formtitle'   => __("OpenVAS", "openvas"),
+                       'target' => $form_url, 'colspan' => 4);
       $openvas_item->showFormHeader($options);
 
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>" . __("OpenVAS Target UUID", "openvas") . "</td>";
+      echo "<td>" . __("OpenVAS Target", "openvas") . "</td>";
       echo "<td>";
       PluginOpenvasOmp::dropdownTargets('openvas_id', $openvas_item->fields['openvas_id']);
-      echo "</td>";
-      echo "<td>" . __("Severity", "openvas") . "</td>";
-      echo "<td>";
-      if ($openvas_item->fields['openvas_severity'] >= 0) {
-         echo $openvas_item->fields['openvas_severity'];
-      } else {
-         echo __('Error');
+      if ($openvas_item->fields['openvas_id']) {
+         $link = PluginOpenvasConfig::getConsoleURL();
+         $link.= "?cmd=get_target&target_id=".$openvas_item->fields['openvas_id'];
+         echo "&nbsp;<a href='$link' target='_blank'>";
+         echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
+            .__('View in OpenVAS', 'openvas')."\" title=\""
+            .__('View in OpenVAS', 'openvas')."\" >";
+         echo "</a></td>";
       }
-      echo "</td>";
-      echo "</tr>";
 
-      echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>" . __("Date of last scan", "openvas") . "</td>";
-      echo "<td>";
-      echo Html::convDateTime($openvas_item->fields['openvas_date_last_scan']);
-      echo "</td><td colspan='2'>";
-      echo "</tr>";
+      $openvas_item->showFormButtons($options);
 
-      if (PluginOpenvasOmp::doPing()) {
-         $buttons = array('addbuttons' => array('refresh' => __('Synchronize')));
-      } else {
-         $buttons = array();
+      echo "<br/>";
+      if ($openvas_item->fields['openvas_id']) {
+         echo "<form name='formtasks' method='post' action='$form_url' enctype=\"multipart/form-data\">";
+
+         echo "<input type='hidden' name='id' value='$form_url'>";
+
+         echo "<div class='spaced' id='tabsbody'>";
+         echo "<table class='tab_cadre_fixe' id='taskformtable'>";
+         echo "<th colspan='4'>".__('Target Infos', 'openvas')."</th></tr>";
+
+         echo "<tr class='tab_bg_1' align='center'>";
+         echo "<td>" . __("Severity", "openvas") . "</td>";
+         echo "<td>";
+         if ($openvas_item->fields['openvas_severity'] >= 0) {
+            echo $openvas_item->fields['openvas_severity'];
+         } else {
+            echo __('Error');
+         }
+         echo "<td>" . __("Date of last scan", "openvas") . "</td>";
+         echo "<td>";
+         echo Html::convDateTime($openvas_item->fields['openvas_date_last_scan']);
+         echo "</td>";
+         echo "</tr>";
+
+         echo "<tr class='tab_bg_1' align='center'>";
+         echo "<td>" . __("Target UUID", "openvas") . "</td>";
+         echo "<td>";
+         echo $openvas_item->fields['openvas_id'];
+         echo "</td>";
+         echo "<td>";
+         if (PluginOpenvasOmp::doPing()) {
+            echo Html::submit( __('Synchronize'),
+                              array('name'  => 'refresh',
+                                    'image' => $CFG_GLPI["root_doc"].'/pics/web.png'));
+         }
+         echo "</td>";
+         echo "</tr>";
+
+         echo "</table>";
+
+
+         $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
+         if (is_array($tasks) && !empty($tasks)) {
+            echo "<table class='tab_cadre_fixe' id='taskformtable'>";
+            echo "<tr class='tab_bg_1' align='center'>";
+            echo "<th colspan='4'>".__('OpenVAS tasks', 'openvas')."</th></tr>";
+            echo "<tr class='tab_bg_1' align='center'>";
+            echo "<th>".__('Name')."</th><th>"
+               .__('State')."</th><th>"
+               .__('Severity', 'openvas')."</th><th>"
+               .__("Date last scan", 'openvas')."</th></tr>";
+            foreach ($tasks as $task_id => $task) {
+               echo "<tr class='tab_bg_1' align='center'>";
+               $link = PluginOpenvasConfig::getConsoleURL();
+               $link.= "?cmd=get_task&task_id=".$task_id;
+               echo "<td><a href='$link' target='_blank'>".$task['name']."</a></td>";
+               echo "<td>".$task['status']."</td>";
+               echo "<td>".$task['severity']."</td>";
+               echo "<td>".$task['date_last_scan']."</td>";
+               echo "</tr>";
+            }
+            echo "</table>";
+         }
+         echo "</div>";
+         Html::closeForm();
       }
-      $openvas_item->showFormButtons($buttons);
    }
 
    /**
@@ -150,12 +207,11 @@ class PluginOpenvasItem extends CommonDBTM {
       $item = new PluginOpenvasItem();
       $item->getFromDB($openvas_line_id);
       $tasks = PluginOpenvasOmp::getTasksForATarget($item->fields['openvas_id']);
-      if (!empty($tasks)) {
+      if (is_array($tasks) && !empty($tasks)) {
          $task                          = array_pop($tasks);
          $tmp['openvas_severity']       = $task['severity'];
          $tmp['openvas_date_last_scan'] = $task['date_last_scan'];
          $tmp['id'] = $openvas_line_id;
-         Toolbox::logDebug($tmp);
          $item->update($tmp);
          return true;
       } else {

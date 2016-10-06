@@ -57,9 +57,21 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_host");
       echo "</td>";
-      echo "<td>" . __("Port", "openvas") . "</td>";
+      echo "<td>" . __("OpenVAS Manager port", "openvas") . "</td>";
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_port");
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1' align='center'>";
+      echo "<td>" . __("Path to omp", "openvas") . "</td>";
+      echo "<td>";
+      Html::autocompletionTextField($this, "openvas_omp_path");
+      echo "</td>";
+      echo "<td>" . __("OpenVAS Console port", "openvas") . "</td>";
+      echo "<td>";
+      Html::autocompletionTextField($this, "openvas_console_port");
+      echo "</td>";
       echo "</td>";
       echo "</tr>";
 
@@ -70,15 +82,6 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</td>";
       echo "<td>" . __("Password") . "</td>";
       echo "<td><input type='password' name='openvas_password' value='".$this->fields['openvas_password']."'>";
-      echo "</td>";
-      echo "</tr>";
-
-      echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>" . __("Path to omp", "openvas") . "</td>";
-      echo "<td>";
-      Html::autocompletionTextField($this, "openvas_omp_path");
-      echo "</td>";
-      echo "<td colspan='2'>";
       echo "</td>";
       echo "</tr>";
 
@@ -95,6 +98,18 @@ class PluginOpenvasConfig extends CommonDBTM {
    }
 
 
+   /**
+   * @since 1.0
+   * Get OpenVAS console URL
+   * @return the URL
+   */
+   public static function getConsoleURL() {
+      $config = new self();
+      $config->getFromDB(1);
+      return 'https://'.$config->fields['openvas_host'].':'
+             .$config->fields['openvas_console_port'].'/omp';
+   }
+
    //----------------- Install & uninstall -------------------//
    public static function install(Migration $migration) {
       global $DB;
@@ -109,7 +124,8 @@ class PluginOpenvasConfig extends CommonDBTM {
          $query = "CREATE TABLE `glpi_plugin_openvas_configs` (
                      `id` int(11) NOT NULL auto_increment,
                      `openvas_host` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `openvas_port` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `openvas_port` int(11) NOT NULL DEFAULT '0',
+                     `openvas_console_port` int(11) NOT NULL DEFAULT '0',
                      `openvas_username` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
@@ -119,13 +135,14 @@ class PluginOpenvasConfig extends CommonDBTM {
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
-         $tmp = array('id'                  => 1,
-                      'fusioninventory_url' => 'localhost',
-                      'openvas_port'        => '9390',
-                      'openvas_username'    => 'admin',
-                      'openvas_password'    => '',
-                      'openvas_omp_path'    => '/usr/bin/omp',
-                      'retention_delay'     => 30);
+         $tmp = array('id'                   => 1,
+                      'fusioninventory_url'  => 'localhost',
+                      'openvas_port'         => '9390',
+                      'openvas_console_port' => '9392',
+                      'openvas_username'     => 'admin',
+                      'openvas_password'     => '',
+                      'openvas_omp_path'     => '/usr/bin/omp',
+                      'retention_delay'      => 30);
          $config->add($tmp);
       }
    }

@@ -294,13 +294,17 @@ class PluginOpenvasOmp {
    }
 
 
+   /**
+   * Function to be called to test OpenVAS connection
+   * @return true if ping is ok, false is an error occured
+   */
    static function doPing() {
       $config = new PluginOpenvasConfig();
       $config->getFromDB(1);
       $omp = new self();
       return $omp->ping($config);
    }
-   
+
    /**
    * @since 1.0
    *
@@ -308,7 +312,7 @@ class PluginOpenvasOmp {
    * @param $config a plugin configuration object
    * @return true if a connection can be opened to the server
    */
-   function ping(PluginOpenvasConfig $config) {
+   private function ping(PluginOpenvasConfig $config) {
       $errCode = $errStr = '';
       $result  = false;
       $fp = @fsockopen($config->fields['openvas_host'], $config->fields['openvas_port'],
@@ -367,43 +371,67 @@ class PluginOpenvasOmp {
       if (!$target_id) {
          return true;
       }
+
+      //To get all tasks for a target, we first need to get all tasks, and check for each
+      //task if it's linked to our target...
+
+      //Get all tasks
       $tasks_response = self::getTasks();
-      $results         = array();
+
+      //Array to store the results
+      $results        = array();
+
       foreach ($tasks_response->task as $response) {
-         $tid = $response->target->attributes()->id->__toString();
-         if (!$response->attributes()->id->__toString()) {
+         //For each task, get the target id associated with
+         $tid = strval($response->target->attributes()->id);
+         //If there's no target, go to the next task
+         if (!isset($response->attributes()->id) ||!strval($response->attributes()->id)) {
             continue;
          }
-         $id = $response->attributes()->id->__toString();
+
+         //Check it the tasks
+         $id = strval($response->attributes()->id);
          if ($tid == $target_id) {
 
-            $progress = "";
-            $severity = 0;
+            $progress  = "";
+            $severity  = 0;
+            $scan_date = '';
 
-            $name   = $response->name->__toString();
-            $status = $response->status->__toString();
+            $name    = strval($response->name);
+            $status  = strval($response->status);
             if ($status != 'done') {
-               $progress = $response->progress->__toString();
-               $severity = $response->last_report->report->severity->__toString();
-               $tmp_scan_date = $response->last_report->report->scan_end->__toString();
-               if (!empty($tmp_scan_date)) {
-                  $date_scan_end = new DateTime($tmp_scan_date);
-                  $scan_date = date_format($date_scan_end, 'Y-m-d H:i:s');
+               $progress      = strval($response->progress);
+               if (isset($response->last_report->report->severity)) {
+                  $severity = strval($response->last_report->report->severity);
+               } else {
+                  $severity = 0;
+               }
+               if (isset($response->last_report->report->scan_end)) {
+                  $tmp_scan_date = strval($response->last_report->report->scan_end);
+                  if (!empty($tmp_scan_date)) {
+                     $date_scan_end = new DateTime($tmp_scan_date);
+                     $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
+                  }
                }
             }
 
-            $config = $response->config->name->__toString();
-            $scanner = $response->scanner->name->__toString();
+            $config  = strval($response->config->name);
+            $scanner = strval($response->scanner->name);
 
-            $results[$id] = array('name' => $name, 'config' => $config,
-                                  'scanner' => $scanner, 'status' => $status, 'progress' => $progress,
-                                  'date_last_scan' => $scan_date, 'severity' => $severity);
+            $results[$id] = array('name'           => $name,
+                                  'config'         => $config,
+                                  'scanner'        => $scanner,
+                                  'status'         => $status,
+                                  'progress'       => $progress,
+                                  'date_last_scan' => $scan_date,
+                                  'severity'       => $severity,
+                                  'id'             => $id);
          }
       }
-
       return $results;
 
    }
+
 
    static function getReportsForATarget($target_id = false) {
       $reports_response = self::getReports($target_id);
