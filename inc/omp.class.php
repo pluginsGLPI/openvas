@@ -40,25 +40,23 @@ if (!defined('GLPI_ROOT')){
 */
 class PluginOpenvasOmp {
 
+   //Actions to be processed through the API
+
+   //Read actions
    const TARGET = 'get_targets';
    const RESULT = 'get_results';
    const REPORT = 'get_reports';
    const TASK   = 'get_tasks';
 
+   //Execute actions
+   const START_TASK  = 'start_task';
+   const CANCEL_TASK = 'stop_task';
+
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
 
-   /**
-   * @since 1.0
-   *
-   * XML to authenticate a user
-   * @param username user to authenticate again OpenVAS manager
-   * @param password password to use
-   * @return the XML string
-   */
-   private function getXMLForAuthentication($username, $password) {
-      return "<authenticate><credentials><username>$username</username><password>$password</password></credentials></authenticate>";
-   }
+   const DETAIL = 1; //Get details (for results)
+   const NO_DETAIL    = 0; //Do not ask for details
 
    /**
    * Get the X first or last item
@@ -73,7 +71,7 @@ class PluginOpenvasOmp {
       //Default params
       $params = [ 'filter' => [ self::SORT_ASC  => 'name',
                               'first'          => 1,
-                              'rows'           => -1
+                              'rows'           => -1,
                              ]
                ];
       foreach ($options as $key => $value) {
@@ -90,12 +88,19 @@ class PluginOpenvasOmp {
             if ($key == self::SORT_ASC || $key == self::SORT_DESC) {
                unset($params['filter'][self::SORT_ASC]);
             }
-            $params['filter'][$key] = $value;
+            if ($key != 'extra') {
+               $params['filter'][$key] = $value;
+            }
          }
       }
 
+      if (!isset($options['filter']['extra']) || !$options['filter']['extra']) {
+         $extra = '';
+      } else {
+         $extra = " AND ".$options['filter']['extra'];
+      }
       if (!empty($params['filter'])) {
-         $filter.= " filter='".http_build_query($params['filter'], '', ' AND ')."'";
+         $filter.= " filter='".http_build_query($params['filter'], '', ' AND ')." $extra'";
       }
 
       return $filter;
@@ -106,21 +111,12 @@ class PluginOpenvasOmp {
    * @since 1.0
    *
    * Build the XML command
+   * @param $action the action to perform
+   * @param $options optional params for this action
    * @return the XML command as a string
    */
    static function getXMLForAction($action, $options) {
       return "<$action ".self::getFilter($options)." />";
-   }
-
-   /**
-   * @since 1.0
-   *
-   * Authenticate a user
-   * @return true if authenticate, false is not
-   */
-   static function authenticate() {
-      $omp    = new self();
-      return $omp->executeCommand();
    }
 
    /**
@@ -137,15 +133,16 @@ class PluginOpenvasOmp {
    }
 
    /**
+   * Get one or all results
    * @since 1.0
    *
-   * Get one or all results
-   * @param result_id the uuid of a result, or false to get all results
+   * @param details bool display a result with it's details
+   * @params $extra_params extra params to add to the filter
    * @return an array of results, or false if an error occured
    */
-   static function getResults($host = false) {
-      $options = [ 'filter' => [ 'host' => $host ] ];
-      return $omp->executeCommand(self::RESULT, $options);
+   static function getResults($details = 0, $extra_params = false) {
+      return self::executeCommand(self::RESULT, [ 'details' => $details,
+                                                  'filter'  => [ 'extra' => $extra_params] ]);
    }
 
    /**
@@ -193,7 +190,7 @@ class PluginOpenvasOmp {
 
       //Get the command in XML format
       $command = self::getXMLForAction($action, $options);
-      $content = $omp->sendCommand($omp, $config, $command);
+      $content = $omp->sendCommand($config, $command);
       if ($content) {
          return simplexml_load_string($content);
       } else {
@@ -211,7 +208,7 @@ class PluginOpenvasOmp {
    * @param $xml is is a command in XML format ? If yes, it means that the response will also be in XML
    * @return the XML response from OpenVAS
    */
-   private function sendCommand(PluginOpenvasOmp $omp, PluginOpenvasConfig $config, $command = '',
+   private function sendCommand(PluginOpenvasConfig $config, $command = '',
                                 $xml = false) {
 
       /*
@@ -267,25 +264,30 @@ class PluginOpenvasOmp {
      //Build the omp command line
      //By using the -X flag, we can send XML commands
      $url = $config->fields['openvas_omp_path']." -h "
-         .$config->fields['openvas_host']." -p "
-         .$config->fields['openvas_port']."  -u "
-         .$config->fields['openvas_username']." -w "
-         .$config->fields['openvas_password']." -X \"$command\"";
+           .$config->fields['openvas_host']." -p "
+           .$config->fields['openvas_port']."  -u "
+           .$config->fields['openvas_username']." -w "
+           .$config->fields['openvas_password']." -X \"$command\"";
 
      Toolbox::logDebug("Execute command : ".$url);
 
      $content    = '';
-     $return_var = '';
 
      //Launch omp executable and get the command's result in $content array
-     exec($url, $content, $return_var);
-     if (!is_array($content) || empty($content)) {
+     //We do not use exec() because output is truncated
+     $handle = popen($url, 'r');
+     //Read until there's no data left
+     while(!feof($handle)) {
+        $content.=fread($handle, 1024);
+     }
+
+     if (empty($content)) {
         return false;
      } else {
-        if (!Toolbox::seems_utf8($content[0])) {
-           $content[0] = Toolbox::encodeInUtf8($content[0]);
+        if (!Toolbox::seems_utf8($content)) {
+           $content = Toolbox::encodeInUtf8($content);
         }
-        return $content[0];
+        return $content;
      }
    }
 

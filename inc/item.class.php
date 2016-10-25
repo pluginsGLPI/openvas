@@ -244,8 +244,20 @@ class PluginOpenvasItem extends CommonDBTM {
       }
    }
 
+   public static function getItemByHost($host) {
+      global $DB;
+
+      $iterator = $DB->request('glpi_plugin_openvas_items', [ 'openvas_host' => $host]);
+      if ($iterator->numrows()) {
+         return $iterator->next();
+      } else {
+         return false;
+      }
+   }
+
    /**
    * Import or update data coming from OpenVAS
+   * @since 1.0
    */
    static function cronOpenvasSynchronize($task) {
       global $DB;
@@ -265,6 +277,8 @@ class PluginOpenvasItem extends CommonDBTM {
 
    /**
    * Clean informations that are too old, and not relevant anymore
+   * @since 1.0
+   * @return the number of targets deleted
    */
    static function cronOpenvasClean($task) {
       global $DB;
@@ -273,6 +287,8 @@ class PluginOpenvasItem extends CommonDBTM {
       $item   = new self();
 
       $index = 0;
+
+      //TODO to replace by a non SQL query when dbiterator will be able to handle the query
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_items`
                 WHERE `date_mod` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";

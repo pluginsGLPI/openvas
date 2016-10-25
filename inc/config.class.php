@@ -136,6 +136,11 @@ class PluginOpenvasConfig extends CommonDBTM {
              .$config->fields['openvas_console_port'].'/omp';
    }
 
+   public static function updateVulnerabilitySyncDate() {
+      $config = new self();
+      $config->update(['id' => 1, 'openvas_results_last_sync' => $_SESSION['glpi_currenttime']]);
+   }
+
    //----------------- Install & uninstall -------------------//
    public static function install(Migration $migration) {
       global $DB;
@@ -156,12 +161,10 @@ class PluginOpenvasConfig extends CommonDBTM {
                      `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `retention_delay` int(11) NOT NULL DEFAULT '0',
-                     `openvas_targets_last_sync` datetime DEFAULT NULL,
                      `openvas_results_last_sync` datetime DEFAULT NULL,
                      PRIMARY KEY  (`id`),
                      KEY `openvas_host` (`openvas_host`),
-                     KEY `openvas_targets_last_sync` (`openvas_targets_last_sync`),
-                     KEY `openvas_targets_last_sync` (`openvas_targets_last_sync`)
+                     KEY `openvas_results_last_sync` (`openvas_results_last_sync`)
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
