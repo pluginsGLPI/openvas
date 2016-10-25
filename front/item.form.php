@@ -35,8 +35,8 @@ $item = new PluginOpenvasItem();
 if (isset($_POST['update'])) {
    $item->update($_POST);
 }
-if (isset($_POST['refresh'])) {
-   PluginOpenvasItem::updateItemFromOpenvas($_POST['id']);
+if (isset($_REQUEST['refresh'])) {
+   PluginOpenvasItem::updateItemFromOpenvas($_REQUEST['id']);
 }
 if (isset($_POST['add'])) {
    if (isset($_REQUEST['id'])) {

@@ -30,6 +30,7 @@
  ---------------------------------------------------------------------- */
 
 define ("PLUGIN_OPENVAS_VERSION", "1.0");
+
 function plugin_init_openvas() {
    global $PLUGIN_HOOKS,$CFG_GLPI,$LANG;
    $PLUGIN_HOOKS['csrf_compliant']['openvas'] = true;
@@ -53,12 +54,12 @@ function plugin_version_openvas() {
                  'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
                  'license'        => 'GPLv2+',
                  'homepage'       => 'https://github.com/pluginsglpi/openvas',
-                 'minGlpiVersion' => "0.90");
+                 'minGlpiVersion' => "9.1");
 }
 
 function plugin_openvas_check_prerequisites() {
-   if (version_compare(GLPI_VERSION, '0.90', 'lt')) {
-      echo "This plugin requires GLPI 0.90 or higher";
+   if (version_compare(GLPI_VERSION, '9.1', 'lt')) {
+      echo "This plugin requires GLPI 9.1 or higher";
       return false;
    }
 

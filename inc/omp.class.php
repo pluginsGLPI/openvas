@@ -40,6 +40,14 @@ if (!defined('GLPI_ROOT')){
 */
 class PluginOpenvasOmp {
 
+   const TARGET = 'get_targets';
+   const RESULT = 'get_results';
+   const REPORT = 'get_reports';
+   const TASK   = 'get_tasks';
+
+   const SORT_ASC   = 'sort'; //Ascending sort
+   const SORT_DESC  = 'sort-reverse'; //Descending sort
+
    /**
    * @since 1.0
    *
@@ -53,93 +61,55 @@ class PluginOpenvasOmp {
    }
 
    /**
+   * Get the X first or last item
    * @since 1.0
-   *
-   * XML to get all targets or one target
-   * @param target_id one target uuid or false to get all targets
-   * @return the XML string
+   * @param $options options as an array
+   * @return a string representing the filter to be applied during query
    */
-   private function getXMLForTargets($target_id = false, $tasks_id = false) {
-      $command = "<get_targets";
-      if ($target_id) {
-         $command.= " target_id=\"$target_id\"";
+   private static function getFilter($options = array ()) {
+
+      $filter = '';
+
+      //Default params
+      $params = [ 'filter' => [ self::SORT_ASC  => 'name',
+                              'first'          => 1,
+                              'rows'           => -1
+                             ]
+               ];
+      foreach ($options as $key => $value) {
+         if ($key == 'filter') {
+            continue;
+         }
+         $filter.= $key."='$value' ";
       }
-      if ($tasks_id) {
-         $command.= " tasks=\"1\"";
+
+      //Override filter params if needed
+      if (isset($options['filter'])) {
+         foreach ($options['filter'] as $key => $value) {
+            //If we override a sort filter, remove the default one
+            if ($key == self::SORT_ASC || $key == self::SORT_DESC) {
+               unset($params['filter'][self::SORT_ASC]);
+            }
+            $params['filter'][$key] = $value;
+         }
       }
-      $command.="/>";
-      return $command;
+
+      if (!empty($params['filter'])) {
+         $filter.= " filter='".http_build_query($params['filter'], '', ' AND ')."'";
+      }
+
+      return $filter;
    }
+
 
    /**
    * @since 1.0
    *
-   * XML to get all reports or one report
-   * @param report_id one report uuid or false to get all reports
-   * @param host_id get report for one host, identified by it's uuid
-   * @return the XML string
+   * Build the XML command
+   * @return the XML command as a string
    */
-   private function getXMLForReports($report_id = false, $host_id = false) {
-      $command = "<get_reports";
-      if ($report_id) {
-         $command.= " report_id=\"$report_id\"";
-      }
-      if ($host_id) {
-         $command.= " host=\"$host_id\"";
-      }
-      $command.="/>";
-      return $command;
-   }
-
-   /**
-   * @since 1.0
-   *
-   * XML to start a task
-   * @param task_id the task to start
-   * @return the XML string
-   */
-   private function getXMLToStartTask($task_id = false) {
-      if ($task_id) {
-         return "<resume_or_start_task task_id=\"$task_id\"/>";
-      }
-   }
-
-   /**
-   * @since 1.0
-   *
-   * XML to get all results or just one
-   * @param result_id one result uuid of false to get all reports
-   * @return the XML string
-   */
-   private function getXMLForResults($result_id = false, $details = false) {
-      $command = "<get_results";
-      if ($result_id) {
-         $command.= " result_id=\"$result_id\"";
-      }
-      if ($details) {
-         $command.= " details=\"1\"";
-      }
-      $command.= "/>";
-      return $command;
-   }
-
-   /**
-   * @since 1.0
-   *
-   * XML to get all tasks or just one
-   * @param task_id one result uuid of false to get all tasks
-   * @return the XML string
-   */
-   private function getXMLForTasks($result_id = false, $details = false, $start = 1, $rows=35) {
-      $command = "<get_tasks";
-      if ($result_id) {
-         $command.= " task_id=\"$result_id\"";
-      }
-      if ($details) {
-         $command.= " details=\"1\"";
-      }
-      $command.= "/>";
-      return $command;
+   static function getXMLForAction($action, $options) {
+      return "<$action ".self::getFilter($options)." />";
    }
 
    /**
@@ -150,7 +120,7 @@ class PluginOpenvasOmp {
    */
    static function authenticate() {
       $omp    = new self();
-      return $omp->executeCommandWithAuthentication();
+      return $omp->executeCommand();
    }
 
    /**
@@ -162,8 +132,8 @@ class PluginOpenvasOmp {
    * @return an array of targets, or false if an error occured
    */
    static function getTargets($target_id = false, $tasks = false) {
-      $omp    = new self();
-      return $omp->executeCommandWithAuthentication($omp->getXMLForTargets($target_id, $tasks));
+      $options = [ 'filter' => ['target_id' => $target_id, 'tasks' => $tasks ] ];
+      return self::executeCommand(self::TARGET, $options);
    }
 
    /**
@@ -171,12 +141,11 @@ class PluginOpenvasOmp {
    *
    * Get one or all results
    * @param result_id the uuid of a result, or false to get all results
-   * @param details true to get full details
    * @return an array of results, or false if an error occured
    */
-   static function getResults($result_id = false, $details = false) {
-      $omp = new self();
-      return $omp->executeCommandWithAuthentication($omp->getXMLForResults($result_id, $details));
+   static function getResults($host = false) {
+      $options = [ 'filter' => [ 'host' => $host ] ];
+      return $omp->executeCommand(self::RESULT, $options);
    }
 
    /**
@@ -184,12 +153,17 @@ class PluginOpenvasOmp {
    *
    * Get one or all tasks
    * @param task_id the uuid of a task, or false to get all tasks
-   * @param details true to get full details
    * @return an array of tasks, or false if an error occured
    */
-   static function getTasks($task_id = false, $details = false) {
-      $omp = new self();
-      return $omp->executeCommandWithAuthentication($omp->getXMLForTasks($task_id, $details));
+   static function getTasks($task_id = false) {
+      $options = [ 'filter' => [ 'task_id' => $task_id ] ];
+      return self::executeCommand(self::TASK, $options);
+   }
+
+   static function getLastTaskForATarget($target_id) {
+      $options = [ 'filter' => [ 'target_id' => $target_id,
+                                'first' => 1, 'rows' => 1, self::SORT_DESC => 'name' ] ];
+      return self::executeCommand(self::TASK, $options);
    }
 
    /**
@@ -201,15 +175,25 @@ class PluginOpenvasOmp {
    * @return an array of reports, or false if an error occured
    */
    static function getReports($report_id = false, $host_id = false) {
-      $omp = new self();
-      return $omp->executeCommandWithAuthentication($omp->getXMLForReports($report_id, $host_id));
+      $options = [ 'filter' => [ 'report_id' => $report_id, 'host_id' => $host_id] ];
+      return self::executeCommand(self::REPORT, $options);
    }
 
-   function executeCommandWithAuthentication($command = "") {
-      $config = new PluginOpenvasConfig();
-      $config->getFromDB(1);
+   /**
+   * @since 1.0
+   *
+   * Execute a command, and get it's result
+   * @param $action the action to be performed
+   * @param $options options passed to the command
+   * @return the command's result, as a SimpleXMLObject
+   */
+   private static function executeCommand($action, $options = array()) {
+      $config = PluginOpenvasConfig::getInstance();
       $omp    = new self();
-      $content = $this->sendCommand($omp, $config, $command);
+
+      //Get the command in XML format
+      $command = self::getXMLForAction($action, $options);
+      $content = $omp->sendCommand($omp, $config, $command);
       if ($content) {
          return simplexml_load_string($content);
       } else {
@@ -219,13 +203,16 @@ class PluginOpenvasOmp {
 
    /**
    * @since 1.0
+   *
    * Send a command to OpenVAS
    * @param $omp OpenVAS object
    * @param $config plugin configuration
    * @param $command the XML command to send to OpenVAS
+   * @param $xml is is a command in XML format ? If yes, it means that the response will also be in XML
    * @return the XML response from OpenVAS
    */
-   private function sendCommand(PluginOpenvasOmp $omp, PluginOpenvasConfig $config, $command = '') {
+   private function sendCommand(PluginOpenvasOmp $omp, PluginOpenvasConfig $config, $command = '',
+                                $xml = false) {
 
       /*
       if ($config->fields['openvas_verify_peer']) {
@@ -284,25 +271,22 @@ class PluginOpenvasOmp {
          .$config->fields['openvas_port']."  -u "
          .$config->fields['openvas_username']." -w "
          .$config->fields['openvas_password']." -X \"$command\"";
+
+     Toolbox::logDebug("Execute command : ".$url);
+
+     $content    = '';
+     $return_var = '';
+
      //Launch omp executable and get the command's result in $content array
-     exec($url, $content);
-     if (!is_array($content) && !empty($content)) {
+     exec($url, $content, $return_var);
+     if (!is_array($content) || empty($content)) {
         return false;
      } else {
+        if (!Toolbox::seems_utf8($content[0])) {
+           $content[0] = Toolbox::encodeInUtf8($content[0]);
+        }
         return $content[0];
      }
-   }
-
-
-   /**
-   * Function to be called to test OpenVAS connection
-   * @return true if ping is ok, false is an error occured
-   */
-   static function doPing() {
-      $config = new PluginOpenvasConfig();
-      $config->getFromDB(1);
-      $omp = new self();
-      return $omp->ping($config);
    }
 
    /**
@@ -312,7 +296,8 @@ class PluginOpenvasOmp {
    * @param $config a plugin configuration object
    * @return true if a connection can be opened to the server
    */
-   private function ping(PluginOpenvasConfig $config) {
+   static function ping() {
+      $config  = PluginOpenvasConfig::getInstance();
       $errCode = $errStr = '';
       $result  = false;
       $fp = @fsockopen($config->fields['openvas_host'], $config->fields['openvas_port'],
@@ -335,36 +320,70 @@ class PluginOpenvasOmp {
    static function dropdownTargets($name, $value='') {
       global $DB;
 
+      //Get all targets
       $results = self::getTargetsAsArray();
-      $query   = "SELECT `openvas_id`
-                  FROM `glpi_plugin_openvas_items`
-                  WHERE `openvas_id` NOT IN ('$value')";
+
+      //Get targets uuid already in use
       $used    = array();
-      foreach ($DB->request($query) as $val) {
+      foreach ($DB->request('glpi_plugin_openvas_items',
+                            [ 'NOT' => [ 'openvas_id' => $value]]) as $val) {
          $used[$val['openvas_id']] = $val['openvas_id'];
       }
 
       asort($results);
+      //Display a dropdown with targets data
       return Dropdown::showFromArray($name, $results,
-                                     array('value' => $value,
-                                           'used'  => $used, 'display_emptychoice' => true));
+                                     ['value' => $value,
+                                      'used'  => $used,
+                                      'display_emptychoice' => true
+                                     ]);
    }
 
    /**
    * @since 1.0
+   *
    * Get all available targets in OpenVAS
    * @return all targets as an array of target uuid => target name or IP address
    */
    static function getTargetsAsArray() {
-      $target_response = self::getTargets();
+      $target_response = self::executeCommand(self::TARGET);
 
       $results       = array();
       foreach ($target_response->target as $response) {
          $host         = $response->hosts->__toString();
+         $name         = $response->name->__toString();
          $id           = $response->attributes()->id->__toString();
-         $results[$id] = $host;
+         $results[$id] = $host." ($name)";
       }
       return $results;
+   }
+
+   /**
+   * @since 1.0
+   *
+   * Get all available targets in OpenVAS
+   * @return all targets as an array of target uuid => target name or IP address
+   */
+   static function getOneTargetsDetail($target_id = false) {
+      if (!$target_id) {
+         return false;
+      }
+
+      $options = [ 'filter'     => [ 'first'         => 1,
+                                    self::SORT_DESC => 'name',
+                                    'rows'          => 1, ],
+                   'target_id' => $target_id
+                 ];
+      $target_response = self::executeCommand(self::TARGET, $options);
+
+      $target          = array();
+      foreach ($target_response->target as $response) {
+         $target['host']    = $response->hosts->__toString();
+         $target['name']    = $response->name->__toString();
+         $target['id']      = $response->attributes()->id->__toString();
+         $target['comment'] = $response->comment->__toString();
+      }
+      return $target;
    }
 
    static function getTasksForATarget($target_id = false) {
@@ -376,7 +395,8 @@ class PluginOpenvasOmp {
       //task if it's linked to our target...
 
       //Get all tasks
-      $tasks_response = self::getTasks();
+      $tasks_response = self::executeCommand(self::TASK,
+                                             [ 'filter' => [ self::SORT_DESC => 'last'] ]);
 
       //Array to store the results
       $results        = array();
@@ -418,14 +438,15 @@ class PluginOpenvasOmp {
             $config  = strval($response->config->name);
             $scanner = strval($response->scanner->name);
 
-            $results[$id] = array('name'           => $name,
-                                  'config'         => $config,
-                                  'scanner'        => $scanner,
-                                  'status'         => $status,
-                                  'progress'       => $progress,
-                                  'date_last_scan' => $scan_date,
-                                  'severity'       => $severity,
-                                  'id'             => $id);
+            $results[$id] = [ 'name'           => $name,
+                               'config'         => $config,
+                               'scanner'        => $scanner,
+                               'status'         => $status,
+                               'progress'       => $progress,
+                               'date_last_scan' => $scan_date,
+                               'severity'       => $severity,
+                               'id'             => $id
+                            ];
          }
       }
       return $results;
@@ -434,7 +455,7 @@ class PluginOpenvasOmp {
 
 
    static function getReportsForATarget($target_id = false) {
-      $reports_response = self::getReports($target_id);
+      $target_response = self::executeCommand(self::REPORT, ['target_id' => $target_id]);
       $results         = array();
       foreach ($target_response->reports as $response) {
          $host         = $response->hosts->__toString();
@@ -445,5 +466,4 @@ class PluginOpenvasOmp {
       return $results;
 
    }
-
 }

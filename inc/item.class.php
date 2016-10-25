@@ -82,15 +82,12 @@ class PluginOpenvasItem extends CommonDBTM {
    function getFromDBForItem($itemtype, $items_id) {
       global $DB;
 
-      $query = "SELECT `id`
-                FROM `glpi_plugin_openvas_items`
-                WHERE `itemtype`='".$itemtype."'
-                   AND `items_id`='$items_id'";
-
-      $result = $DB->query($query);
-      if ($DB->numrows($result)) {
-         $id = $DB->result($result, 0, 'id');
-         $this->getFromDB($id);
+      $iterator = $DB->request('glpi_plugin_openvas_items',
+                               [ 'itemtype' => $itemtype, 'items_id' => $items_id,
+                                 'FIELDS' => ['id']
+                               ]);
+      if ($result = $iterator->next()) {
+         $this->getFromDB($result['id']);
          return true;
       } else {
          $this->getEmpty();
@@ -131,9 +128,9 @@ class PluginOpenvasItem extends CommonDBTM {
 
       echo "<br/>";
       if ($openvas_item->fields['openvas_id']) {
-         echo "<form name='formtasks' method='post' action='$form_url' enctype=\"multipart/form-data\">";
+         echo "<form name='formtasks' method='post' action='$form_url&refresh' enctype=\"multipart/form-data\">";
 
-         echo "<input type='hidden' name='id' value='$form_url'>";
+         echo "<input type='hidden' name='id' value='".$openvas_item->fields['id']."'>";
 
          echo "<div class='spaced' id='tabsbody'>";
          echo "<table class='tab_cadre_fixe' id='taskformtable'>";
@@ -159,7 +156,7 @@ class PluginOpenvasItem extends CommonDBTM {
          echo $openvas_item->fields['openvas_id'];
          echo "</td>";
          echo "<td>";
-         if (PluginOpenvasOmp::doPing()) {
+         if (PluginOpenvasOmp::ping()) {
             echo Html::submit( __('Synchronize'),
                               array('name'  => 'refresh',
                                     'image' => $CFG_GLPI["root_doc"].'/pics/web.png'));
@@ -167,8 +164,16 @@ class PluginOpenvasItem extends CommonDBTM {
          echo "</td>";
          echo "</tr>";
 
-         echo "</table>";
+         echo "<tr class='tab_bg_1' align='center'>";
+         echo "<td>" . __("Name") . "</td>";
+         echo "<td>";
+         echo $openvas_item->fields['openvas_name'];
+         echo "</td>";
+         echo "<td>" . __("Comment") . "</td>";
+         echo "<td>".$openvas_item->fields['openvas_comment']."</td>";
+         echo "</tr>";
 
+         echo "</table>";
 
          $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
          if (is_array($tasks) && !empty($tasks)) {
@@ -206,17 +211,29 @@ class PluginOpenvasItem extends CommonDBTM {
    public static function updateItemFromOpenvas($openvas_line_id) {
       $item = new PluginOpenvasItem();
       $item->getFromDB($openvas_line_id);
-      $tasks = PluginOpenvasOmp::getTasksForATarget($item->fields['openvas_id']);
-      if (is_array($tasks) && !empty($tasks)) {
-         $task                          = array_pop($tasks);
-         $tmp['openvas_severity']       = $task['severity'];
-         $tmp['openvas_date_last_scan'] = $task['date_last_scan'];
-         $tmp['id'] = $openvas_line_id;
-         $item->update($tmp);
-         return true;
-      } else {
-         return false;
+      //Get the target
+      $target = PluginOpenvasOmp::getOneTargetsDetail($item->fields['openvas_id']);
+      //If no target, do not go further
+      if (is_array($target) && !empty($target)) {
+         $tmp = array();
+         //Sync target infos
+         $tmp['openvas_name']    = $target['name'];
+         $tmp['openvas_host']    = $target['host'];
+         $tmp['openvas_comment'] = $target['comment'];
+
+         //Get tasks for this target
+         $tasks = PluginOpenvasOmp::getTasksForATarget($item->fields['openvas_id']);
+         if (is_array($tasks) && !empty($tasks)) {
+            //Get the last task
+            $task                          = array_pop($tasks);
+            $tmp['openvas_severity']       = $task['severity'];
+            $tmp['openvas_date_last_scan'] = $task['date_last_scan'];
+            $tmp['id'] = $openvas_line_id;
+            $item->update($tmp);
+            return true;
+         }
       }
+      return false;
    }
 
    public static function showTasksForATarget(CommonDBTM $item, PluginOpenvasItem $openvas_item) {
@@ -232,9 +249,18 @@ class PluginOpenvasItem extends CommonDBTM {
 
       //Total of export lines
       $index   = 0;
-      $targets = PluginOpenvasOmp::getTargetsAsArray();
+      /*$targets = PluginOpenvasOmp::getTargetsAsArray();
       foreach ($targets as $uuid => $host) {
 
+      }*/
+      //Total of export lines
+      $index = 0;
+      foreach ($DB->request('glpi_plugin_openvas_items',
+                            array('FIELDS' => array('openvas_id', 'id', 'openvas_host'))) as $target) {
+         //Update target first
+         if (PluginOpenvasItem::updateItemFromOpenvas($target['id'])) {
+            $index++;
+         }
       }
       $task->addVolume($index);
       return true;
@@ -276,6 +302,9 @@ class PluginOpenvasItem extends CommonDBTM {
                      `itemtype` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `items_id` int(11) NOT NULL DEFAULT '0',
                      `openvas_id` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `openvas_name` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `openvas_host` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `openvas_comment` text COLLATE utf8_unicode_ci,
                      `openvas_severity` float(11) NOT NULL DEFAULT '0',
                      `openvas_date_last_scan` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `date_creation` datetime DEFAULT NULL,
@@ -284,6 +313,8 @@ class PluginOpenvasItem extends CommonDBTM {
                      KEY `name` (`name`),
                      KEY `item` (`itemtype`,`items_id`),
                      KEY `openvas_id` (`openvas_id`),
+                     KEY `openvas_name` (`openvas_name`),
+                     KEY `openvas_host` (`openvas_host`),
                      KEY `openvas_severity` (`openvas_severity`),
                      KEY `openvas_date_last_scan` (`openvas_date_last_scan`),
                      KEY `date_creation` (`date_creation`),

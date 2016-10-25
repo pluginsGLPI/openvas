@@ -36,6 +36,23 @@ if (!defined('GLPI_ROOT')){
 class PluginOpenvasConfig extends CommonDBTM {
    static $rightname = 'config';
 
+   //Store plugin's configuration
+   private static $_config = null;
+
+   /**
+   * Singleton to get configuration
+   * @since 1.0
+   * @return an instance of the plugin's configuration
+   */
+   public static function getInstance() {
+      if (is_null(self::$_config)) {
+         $config = new self();
+         $config->getFromDB(1);
+         self::$_config = $config;
+      }
+      return self::$_config;
+   }
+
    public static function getTypeName($nb = 0) {
       return __("GLPi openvas Connector", 'openvas');
    }
