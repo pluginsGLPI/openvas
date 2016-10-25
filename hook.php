@@ -55,6 +55,30 @@
          $sopt[6102]['joinparams']    = array('jointype' => 'itemtype_item');
          $sopt[6102]['massiveaction'] = FALSE;
 
+         $sopt[6103]['table']         = 'glpi_plugin_openvas_items';
+         $sopt[6103]['field']         = 'openvas_name';
+         $sopt[6103]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Target Name', 'openvas');
+         $sopt[6103]['datatype']      = 'string';
+         $sopt[6103]['joinparams']    = array('jointype' => 'itemtype_item');
+         $sopt[6103]['massiveaction'] = FALSE;
+
+         $sopt[6104]['table']         = 'glpi_plugin_openvas_items';
+         $sopt[6104]['field']         = 'openvas_name';
+         $sopt[6104]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Comment');
+         $sopt[6104]['datatype']      = 'text';
+         $sopt[6104]['joinparams']    = array('jointype' => 'itemtype_item');
+         $sopt[6104]['massiveaction'] = FALSE;
+
+         $sopt[6105]['table']         = 'glpi_plugin_openvas_items';
+         $sopt[6105]['field']         = 'openvas_host';
+         $sopt[6105]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Host', 'openvas');
+         $sopt[6105]['datatype']      = 'string';
+         $sopt[6105]['joinparams']    = array('jointype' => 'itemtype_item');
+         $sopt[6105]['massiveaction'] = FALSE;
+
        }
 
    return $sopt;

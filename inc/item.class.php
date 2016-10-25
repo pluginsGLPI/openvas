@@ -246,17 +246,12 @@ class PluginOpenvasItem extends CommonDBTM {
    * Import or update data coming from OpenVAS
    */
    static function cronOpenvasSynchronize($task) {
+      global $DB;
 
-      //Total of export lines
-      $index   = 0;
-      /*$targets = PluginOpenvasOmp::getTargetsAsArray();
-      foreach ($targets as $uuid => $host) {
-
-      }*/
       //Total of export lines
       $index = 0;
       foreach ($DB->request('glpi_plugin_openvas_items',
-                            array('FIELDS' => array('openvas_id', 'id', 'openvas_host'))) as $target) {
+                            ['FIELDS' => ['openvas_id', 'id', 'openvas_host'] ]) as $target) {
          //Update target first
          if (PluginOpenvasItem::updateItemFromOpenvas($target['id'])) {
             $index++;
