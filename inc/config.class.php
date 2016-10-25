@@ -103,6 +103,15 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
+      echo "<td>" . __("Target retention delay", "openvas") . "</td>";
+      echo "<td>";
+      Dropdown::showNumber("retention_delay", ['value' => $this->fields['retention_delay'],
+                                               'unit' => _n('Day', 'Days', $this->fields['retention_delay'])]);
+      echo "</td>";
+      echo "<td colspan='2'></td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1' align='center'>";
       echo "<td colspan='4' align='center'>";
       echo "<input type='submit' name='update' value=\"" . _sx("button", "Post") . "\" class='submit' >";
       echo "&nbsp<input type='submit' name='test' value=\"" . _sx("button", "Test connexion") . "\" class='submit' >";
@@ -147,8 +156,12 @@ class PluginOpenvasConfig extends CommonDBTM {
                      `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `retention_delay` int(11) NOT NULL DEFAULT '0',
+                     `openvas_targets_last_sync` datetime DEFAULT NULL,
+                     `openvas_results_last_sync` datetime DEFAULT NULL,
                      PRIMARY KEY  (`id`),
-                     KEY `openvas_host` (`openvas_host`)
+                     KEY `openvas_host` (`openvas_host`),
+                     KEY `openvas_targets_last_sync` (`openvas_targets_last_sync`),
+                     KEY `openvas_targets_last_sync` (`openvas_targets_last_sync`)
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 

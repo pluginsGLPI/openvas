@@ -203,23 +203,25 @@ class PluginOpenvasItem extends CommonDBTM {
    }
 
    /**
-   * @since 1.0
    * Update device informations in GLPi by directly requesting OpenVAS
+   *
+   * @since 1.0
    * @param $target_id the target UUID in OpenVAS
    * @return boolean the update status
    */
    public static function updateItemFromOpenvas($openvas_line_id) {
       $item = new PluginOpenvasItem();
       $item->getFromDB($openvas_line_id);
+
       //Get the target
       $target = PluginOpenvasOmp::getOneTargetsDetail($item->fields['openvas_id']);
       //If no target, do not go further
       if (is_array($target) && !empty($target)) {
-         $tmp = array();
          //Sync target infos
-         $tmp['openvas_name']    = $target['name'];
-         $tmp['openvas_host']    = $target['host'];
-         $tmp['openvas_comment'] = $target['comment'];
+         $tmp = ['openvas_name'    => $target['name'],
+                 'openvas_host'    => $target['host'],
+                 'openvas_comment' => $target['comment']
+               ];
 
          //Get tasks for this target
          $tasks = PluginOpenvasOmp::getTasksForATarget($item->fields['openvas_id']);
@@ -265,13 +267,21 @@ class PluginOpenvasItem extends CommonDBTM {
    * Clean informations that are too old, and not relevant anymore
    */
    static function cronOpenvasClean($task) {
+      global $DB;
 
-      //Total of export lines
+      $config = PluginOpenvasConfig::getInstance();
+      $item   = new self();
+
       $index = 0;
-      $item  = new self();
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_items`
-                WHERE `openvas_date_last_scan`";
+                WHERE `date_mod` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+      foreach ($DB->request($query) as $target) {
+                                   Toolbox::logDebug($target);
+         if ($item->delete($target, true)) {
+            $index++;
+         }
+      }
       $task->addVolume($index);
       return true;
    }
