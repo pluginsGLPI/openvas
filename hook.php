@@ -79,6 +79,29 @@
          $sopt[6105]['joinparams']    = array('jointype' => 'itemtype_item');
          $sopt[6105]['massiveaction'] = FALSE;
 
+         $sopt[6106]['table']         = 'glpi_plugin_openvas_vulnerabilities';
+         $sopt[6106]['field']         = 'name';
+         $sopt[6106]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Vulnerability', 'openvas');
+         $sopt[6106]['datatype']      = 'string';
+         $sopt[6106]['joinparams']    = array('jointype' => 'itemtype_item');
+         $sopt[6106]['massiveaction'] = FALSE;
+
+         $sopt[6107]['table']         = 'glpi_plugin_openvas_vulnerabilities';
+         $sopt[6107]['field']         = 'name';
+         $sopt[6107]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Severity', 'openvas');
+         $sopt[6107]['datatype']      = 'number';
+         $sopt[6107]['joinparams']    = array('jointype' => 'itemtype_item');
+         $sopt[6107]['massiveaction'] = FALSE;
+
+         $sopt[6108]['table']         = 'glpi_plugin_openvas_vulnerabilities';
+         $sopt[6108]['field']         = 'description';
+         $sopt[6108]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Comment');
+         $sopt[6108]['datatype']      = 'text';
+         $sopt[6108]['joinparams']    = array('jointype' => 'itemtype_item');
+         $sopt[6108]['massiveaction'] = FALSE;
        }
 
    return $sopt;

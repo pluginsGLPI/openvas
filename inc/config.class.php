@@ -136,6 +136,10 @@ class PluginOpenvasConfig extends CommonDBTM {
              .$config->fields['openvas_console_port'].'/omp';
    }
 
+   /**
+   * Set the last Vulnerability scan date to the current time
+   * @since 1.0
+   */
    public static function updateVulnerabilitySyncDate() {
       $config = new self();
       $config->update(['id' => 1, 'openvas_results_last_sync' => $_SESSION['glpi_currenttime']]);

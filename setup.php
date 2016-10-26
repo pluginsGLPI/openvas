@@ -43,6 +43,10 @@ function plugin_init_openvas() {
 
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
+
+      if (Session::haveRight('config', UPDATE)) {
+         $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';
+      }
    }
 }
 

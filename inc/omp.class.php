@@ -388,6 +388,14 @@ class PluginOpenvasOmp {
       return $target;
    }
 
+   static function convertDateTime($datetime) {
+      $tmpdate = strval($datetime);
+      if (!empty($tmpdate)) {
+         $date = new DateTime($tmpdate);
+         $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
+      }
+
+   }
    static function getTasksForATarget($target_id = false) {
       if (!$target_id) {
          return true;
