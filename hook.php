@@ -96,7 +96,7 @@
          $sopt[6107]['massiveaction'] = FALSE;
 
          $sopt[6108]['table']         = 'glpi_plugin_openvas_vulnerabilities';
-         $sopt[6108]['field']         = 'description';
+         $sopt[6108]['field']         = 'comment';
          $sopt[6108]['name']          = __('OpenVAS', 'openvas').'-'.
                                           __('Comment');
          $sopt[6108]['datatype']      = 'text';
