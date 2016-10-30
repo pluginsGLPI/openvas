@@ -34,6 +34,7 @@ include ("../../../inc/includes.php");
 $item = new PluginOpenvasItem();
 if (isset($_POST['update'])) {
    $item->update($_POST);
+   PluginOpenvasItem::updateItemFromOpenvas($_REQUEST['id']);
 }
 if (isset($_REQUEST['refresh'])) {
    PluginOpenvasItem::updateItemFromOpenvas($_REQUEST['id']);

@@ -40,6 +40,8 @@ function plugin_init_openvas() {
 
       Plugin::registerClass('PluginOpenvasItem',
                             array('addtabon' => array('Computer', 'NetworkEquipment')));
+      Plugin::registerClass('PluginOpenvasVulnerability_Item',
+                             array('addtabon' => array('PluginOpenvasVulnerability')));
 
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';

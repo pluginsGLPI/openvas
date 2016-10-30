@@ -244,10 +244,17 @@ class PluginOpenvasItem extends CommonDBTM {
       }
    }
 
+   /**
+   * Try to get an OpenVAS target by it's host
+   * @since 1.0
+   * @param $host the host as provided by OpenVAS (in general an IP address)
+   * @return an array representing a PluginOpenvasItem or false if none found
+   */
    public static function getItemByHost($host) {
       global $DB;
 
-      $iterator = $DB->request('glpi_plugin_openvas_items', [ 'openvas_host' => $host]);
+      $iterator = $DB->request('glpi_plugin_openvas_items',
+                               [ 'OR' => [ 'openvas_host' => $host, 'openvas_name' => $host] ]);
       if ($iterator->numrows()) {
          return $iterator->next();
       } else {
