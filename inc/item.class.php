@@ -58,8 +58,9 @@ class PluginOpenvasItem extends CommonDBTM {
       // can exists for template
       if ($itemtype::canView()) {
          $nb = countElementsInTable('glpi_plugin_openvas_items',
-                                    "`itemtype`='".$item->getType()."'
-                                       && `items_id` = '".$item->getID()."'");
+                                    [ 'itemtype' => $item->getType(),
+                                      'items_id' => $item->getID()
+                                    ]);
          return self::createTabEntry(self::getTypeName(Session::getPluralNumber()), $nb);
       }
    }
@@ -201,6 +202,59 @@ class PluginOpenvasItem extends CommonDBTM {
          Html::closeForm();
       }
    }
+
+   function getFromDBByID($itemtype, $items_id) {
+      global $DB;
+
+      $iterator = $DB->request('glpi_plugin_openvas_items',
+                               [ 'AND'   => [ 'itemtype' => $itemtype, 'items_id' => $items_id],
+                                 'LIMIT' => 1
+                              ]);
+      if (!$iterator->numrows()) {
+         return false;
+      } else {
+         $this->fields = $iterator->next();
+         return true;
+      }
+   }
+
+   /**
+   * Display informations about OpenVAS
+   *
+   * @param $item the CommonDBTM item
+   */
+   static function showInfo(CommonDBTM $item) {
+      global $CFG_GLPI;
+
+      $detail = new self();
+      if (!$detail->getFromDBByID(get_class($item), $item->getID())) {
+         return true;
+      }
+
+      echo '<table class="tab_glpi" width="100%">';
+      echo '<tr>';
+      echo '<th colspan="2">'.__('OpenVAS', 'openvas').'</th>';
+      echo '</tr>';
+
+      echo '<tr class="tab_bg_1">';
+      echo '<td>';
+      echo __('Severity', 'openvas');
+      echo '</td>';
+      echo '<td>';
+      echo $detail->fields['openvas_severity'];
+      echo '</td>';
+      echo '</tr>';
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>" . __("Date last scan", 'openvas') . "</td>";
+      echo "<td>";
+      echo Html::convDateTime($detail->fields['openvas_date_last_scan']);
+      echo "</td>";
+      echo '</tr>';
+
+      echo '</table>';
+   }
+
 
    /**
    * Update device informations in GLPi by directly requesting OpenVAS

@@ -39,12 +39,17 @@ function plugin_init_openvas() {
    if ($plugin->isActivated('openvas')) {
 
       Plugin::registerClass('PluginOpenvasItem',
-                            array('addtabon' => array('Computer', 'NetworkEquipment')));
+                            [ 'addtabon' => [ 'Computer', 'NetworkEquipment'] ] );
       Plugin::registerClass('PluginOpenvasVulnerability_Item',
-                             array('addtabon' => array('PluginOpenvasVulnerability')));
+                            [ 'addtabon' => ['PluginOpenvasVulnerability'] ]);
 
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
+
+      $PLUGIN_HOOKS['autoinventory_information']['openvas']
+         =  [ 'Computer'         =>  ['PluginOpenvasItem', 'showInfo'],
+              'NetworkEquipment' =>  ['PluginOpenvasItem', 'showInfo']
+            ];
 
       if (Session::haveRight('config', UPDATE)) {
          $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';
