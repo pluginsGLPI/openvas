@@ -172,14 +172,14 @@ class PluginOpenvasConfig extends CommonDBTM {
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
-         $tmp = array('id'                   => 1,
-                      'fusioninventory_url'  => 'localhost',
-                      'openvas_port'         => '9390',
-                      'openvas_console_port' => '9392',
-                      'openvas_username'     => 'admin',
-                      'openvas_password'     => '',
-                      'openvas_omp_path'     => '/usr/bin/omp',
-                      'retention_delay'      => 30);
+         $tmp = [ 'id'                   => 1,
+                  'fusioninventory_url'  => 'localhost',
+                  'openvas_port'         => '9390',
+                  'openvas_console_port' => '9392',
+                  'openvas_username'     => 'admin',
+                  'openvas_password'     => '',
+                  'openvas_omp_path'     => '/usr/bin/omp',
+                  'retention_delay'      => 30];
          $config->add($tmp);
       }
    }

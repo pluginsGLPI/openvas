@@ -60,12 +60,13 @@ function plugin_init_openvas() {
 function plugin_version_openvas() {
    global $LANG;
 
-   return array ('name'           => __("Openvas connector for GLPi", 'openvas'),
-                 'version'        => PLUGIN_OPENVAS_VERSION,
-                 'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
-                 'license'        => 'GPLv2+',
-                 'homepage'       => 'https://github.com/pluginsglpi/openvas',
-                 'minGlpiVersion' => "9.1");
+   return [ 'name'           => __("Openvas connector for GLPi", 'openvas'),
+            'version'        => PLUGIN_OPENVAS_VERSION,
+            'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
+            'license'        => 'GPLv2+',
+            'homepage'       => 'https://github.com/pluginsglpi/openvas',
+            'minGlpiVersion' => "9.1"
+          ];
 }
 
 function plugin_openvas_check_prerequisites() {
