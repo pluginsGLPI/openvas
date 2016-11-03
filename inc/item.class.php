@@ -5,7 +5,7 @@
 
   This file is part of the openvas plugin.
 
- Order plugin is free software; you can redistribute it and/or modify
+ OpenVAS plugin is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
@@ -36,7 +36,8 @@ if (!defined('GLPI_ROOT')){
 class PluginOpenvasItem extends CommonDBTM {
    public $dohistory       = true;
 
-   static $rightname = 'config';
+   static $rightname     = 'config';
+   static $host_matching = [];
 
    public static function getTypeName($nb = 0) {
       return __("Openvas", 'openvas');
@@ -85,7 +86,7 @@ class PluginOpenvasItem extends CommonDBTM {
 
       $iterator = $DB->request('glpi_plugin_openvas_items',
                                [ 'itemtype' => $itemtype, 'items_id' => $items_id,
-                                 'FIELDS' => ['id']
+                                 'FIELDS' => [ 'id' ]
                                ]);
       if ($result = $iterator->next()) {
          $this->getFromDB($result['id']);
@@ -207,7 +208,9 @@ class PluginOpenvasItem extends CommonDBTM {
       global $DB;
 
       $iterator = $DB->request('glpi_plugin_openvas_items',
-                               [ 'AND'   => [ 'itemtype' => $itemtype, 'items_id' => $items_id],
+                               [ 'AND'   => [ 'itemtype' => $itemtype,
+                                              'items_id' => $items_id
+                                            ],
                                  'LIMIT' => 1
                               ]);
       if (!$iterator->numrows()) {
@@ -269,27 +272,20 @@ class PluginOpenvasItem extends CommonDBTM {
 
       //Get the target
       $target = PluginOpenvasOmp::getOneTargetsDetail($item->fields['openvas_id']);
+
       //If no target, do not go further
       if (is_array($target) && !empty($target)) {
          //Sync target infos
-         $tmp = ['openvas_name'    => $target['name'],
-                 'openvas_host'    => $target['host'],
-                 'openvas_comment' => $target['comment']
+         $tmp = [ 'openvas_name'    => $target['name'],
+                  'openvas_host'    => $target['host'],
+                  'openvas_comment' => $target['comment']
                ];
 
-         //Get tasks for this target
-         $tasks = PluginOpenvasOmp::getTasksForATarget($item->fields['openvas_id']);
-         if (is_array($tasks) && !empty($tasks)) {
-            //Get the last task
-            $task                          = array_pop($tasks);
-            $tmp['openvas_severity']       = $task['severity'];
-            $tmp['openvas_date_last_scan'] = $task['date_last_scan'];
-            $tmp['id'] = $openvas_line_id;
-            $item->update($tmp);
-            return true;
-         }
+         self::updateTaskInfosForTarget($item->fields['openvas_id'], $openvas_line_id);
+         return true;
+      } else {
+         return false;
       }
-      return false;
    }
 
    public static function showTasksForATarget(CommonDBTM $item, PluginOpenvasItem $openvas_item) {
@@ -307,11 +303,32 @@ class PluginOpenvasItem extends CommonDBTM {
    public static function getItemByHost($host) {
       global $DB;
 
+      //If host is already in the cache
+      if (isset(self::$host_matching[$host])) {
+         return self::$host_matching[$host];
+      }
+
+      //First: check if the host provided is already associated with an asset
       $iterator = $DB->request('glpi_plugin_openvas_items',
-                               [ 'OR' => [ 'openvas_host' => $host, 'openvas_name' => $host] ]);
+                               [ 'FIELDS' => [ 'itemtype', 'items_id'],
+                                 'OR'     => [ 'openvas_host' => $host, 'openvas_name' => $host]
+                               ]);
       if ($iterator->numrows()) {
-         return $iterator->next();
+         $tmp = $iterator->next();
+         self::$host_matching[$host] = [ 'itemtype' => $tmp['itemtype'],
+                                         'items_id' => $tmp['items_id']
+                                       ];
+         return self::$host_matching[$host];
       } else {
+         //Second step: check if the host refers to an IP address
+         $iterator_ip = $DB->request('glpi_ipaddresses', [ 'name' => $host] );
+         if ($iterator_ip->numrows()) {
+            $tmp = $iterator_ip->next();
+            self::$host_matching[$host] = [ 'itemtype' => $tmp['mainitemtype'],
+                                            'items_id' => $tmp['mainitems_id']
+                                          ];
+            return self::$host_matching[$host];
+         }
          return false;
       }
    }
@@ -321,21 +338,106 @@ class PluginOpenvasItem extends CommonDBTM {
    * @since 1.0
    */
    static function cronOpenvasSynchronize($task) {
-      global $DB;
+      global $DB, $CFG_GLPI;
 
+      $item = new self();
       //Total of export lines
       $index = 0;
-      foreach ($DB->request('glpi_plugin_openvas_items',
-                            ['FIELDS' => ['openvas_id', 'id', 'openvas_host'] ]) as $target) {
-         //Update target first
-         if (PluginOpenvasItem::updateItemFromOpenvas($target['id'])) {
-            $index++;
+
+      $response = PluginOpenvasOmp::getTargets();
+      foreach ($response->target as $target) {
+         $tmp = array();
+
+         //Do not process target without host,
+         //or 127.0.0.1 or localhost (to large to match a specific asset)
+         if (!isset($target->hosts)
+            || $target->hosts->__toString() == '127.0.0.1'
+               || $target->hosts->__toString() == 'localhost') {
+            continue;
+         }
+
+         //Get openvas UUID
+         $openvas_id = $target->attributes()->id->__toString();
+
+         $tmp = [ 'openvas_host'    => $target->hosts->__toString(),
+                  'openvas_name'    => $target->name->__toString(),
+                  'openvas_id'      => $target->attributes()->id->__toString(),
+                  'openvas_comment' => $target->comment->__toString()
+                ];
+
+         //Check if the host is already linked to a GLPi asset
+         $iterator = $DB->request('glpi_plugin_openvas_items', ['openvas_id' => $openvas_id]);
+         if (!$iterator->numrows()) {
+            //Not linked: check if a link could be done
+            if ($asset = self::getItemByHost($tmp['host'])) {
+               //Link the host to the asset
+               $tmp['itemtype'] = $asset['itemtype'];
+               $tmp['items_id'] = $asset['items_id'];
+               if ($tmp['id'] = $item->add($tmp)) {
+                  $index++;
+               }
+            } else {
+               foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
+                  $table = getTableForItemtype($itemtype);
+                  if (FieldExists($table, 'domains_id')) {
+                     $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
+                     $left_join = "LEFT JOIN `glpi_domains`
+                                      ON `glpi_domains`.`id`=`$table`.`domains_id`";
+                  } else {
+                     $concat    = "`$table`.`name`";
+                     $left_join = "";
+                  }
+                  $query = "SELECT `$table`.`id`, $concat AS `fqdn`
+                            FROM `$table` $left_join
+                            HAVING `fqdn`='".$tmp['openvas_host']."'";
+                  $iterator_fqdn = $DB->request($query);
+                  if ($iterator_fqdn->numrows()) {
+                     $asset = $iterator_fqdn->next();
+                     $tmp['itemtype'] = $itemtype;
+                     $tmp['items_id'] = $asset['id'];
+                     if ($tmp['id'] = $item->add($tmp)) {
+                        $index++;
+                     }
+                     //Host found, exit loop
+                     if ($tmp['id']) {
+                        break;
+                     }
+                  }
+               }
+            }
+         } else {
+            //The host was already linked to an asset: update the line in DB
+            $current = $iterator->next();
+            $tmp['id'] = $current['id'];
+            if ($item->update($tmp)) {
+               $index++;
+            }
+         }
+
+         //If the host is linked to an asset: update last task infos
+         if (isset($tmp['id'])) {
+            self::updateTaskInfosForTarget($tmp['openvas_id'], $tmp['id']);
          }
       }
+
       $task->addVolume($index);
       return true;
    }
 
+   static function updateTaskInfosForTarget($openvas_id, $line_id) {
+      //Get tasks for this target
+      $ovtasks = PluginOpenvasOmp::getTasksForATarget($openvas_id);
+      if (is_array($ovtasks) && !empty($ovtasks)) {
+         $item = new self();
+         //Get the last task
+         $ovtask = array_pop($ovtasks);
+         $tmp    = [ 'openvas_severity'       => $ovtask['severity'],
+                     'openvas_date_last_scan' => $ovtask['date_last_scan'],
+                     'id'                     => $line_id
+                 ];
+         $item->update($tmp);
+      }
+   }
    /**
    * Clean informations that are too old, and not relevant anymore
    * @since 1.0
@@ -354,7 +456,6 @@ class PluginOpenvasItem extends CommonDBTM {
                 FROM `glpi_plugin_openvas_items`
                 WHERE `date_mod` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
-                                   Toolbox::logDebug($target);
          if ($item->delete($target, true)) {
             $index++;
          }
