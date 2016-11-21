@@ -105,6 +105,8 @@ class PluginOpenvasItem extends CommonDBTM {
          $id = 0;
       }
 
+      $alive = PluginOpenvasOmp::ping();
+
       $form_url = $openvas_item->getFormURL().'?id='.$id.'&itemtype='
                     .$item->getType().'&items_id='.$item->getID();
       $options = array('candel' => false,
@@ -115,7 +117,11 @@ class PluginOpenvasItem extends CommonDBTM {
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . __("OpenVAS Target", "openvas") . "</td>";
       echo "<td>";
-      PluginOpenvasOmp::dropdownTargets('openvas_id', $openvas_item->fields['openvas_id']);
+      if ($alive) {
+         PluginOpenvasOmp::dropdownTargets('openvas_id', $openvas_item->fields['openvas_id']);
+      } else {
+         echo __("Cannot contact OpenVAS", "openvas");
+      }
       if ($openvas_item->fields['openvas_id']) {
          $link = PluginOpenvasConfig::getConsoleURL();
          $link.= "?cmd=get_target&target_id=".$openvas_item->fields['openvas_id'];
@@ -123,7 +129,17 @@ class PluginOpenvasItem extends CommonDBTM {
          echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
             .__('View in OpenVAS', 'openvas')."\" title=\""
             .__('View in OpenVAS', 'openvas')."\" >";
-         echo "</a></td>";
+         echo "</a>";
+
+         if ($alive) {
+            echo "&nbsp;";
+            $form = self::getFormURL(true);
+            echo "<a href='$form?refresh=1'>"
+                   ."<img src='".$CFG_GLPI["root_doc"]."/pics/refresh.png'
+                         alt='".__('Refresh')."' title='".__('Refresh')."'></a>";
+         }
+         echo "</td>";
+
       }
 
       $openvas_item->showFormButtons($options);
@@ -137,6 +153,15 @@ class PluginOpenvasItem extends CommonDBTM {
          echo "<div class='spaced' id='tabsbody'>";
          echo "<table class='tab_cadre_fixe' id='taskformtable'>";
          echo "<th colspan='4'>".__('Target Infos', 'openvas')."</th></tr>";
+
+         echo "<tr class='tab_bg_1' align='center'>";
+         echo "<td>" . __("Name") . "</td>";
+         echo "<td>";
+         echo $openvas_item->fields['openvas_name'];
+         echo "</td>";
+         echo "<td>" . __("Comment") . "</td>";
+         echo "<td>".$openvas_item->fields['openvas_comment']."</td>";
+         echo "</tr>";
 
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<td>" . __("Severity", "openvas") . "</td>";
@@ -155,53 +180,82 @@ class PluginOpenvasItem extends CommonDBTM {
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<td>" . __("Target UUID", "openvas") . "</td>";
          echo "<td>";
-         echo $openvas_item->fields['openvas_id'];
-         echo "</td>";
-         echo "<td>";
-         if (PluginOpenvasOmp::ping()) {
-            echo Html::submit( __('Synchronize'),
-                              array('name'  => 'refresh',
-                                    'image' => $CFG_GLPI["root_doc"].'/pics/web.png'));
-         }
-         echo "</td>";
-         echo "</tr>";
-
-         echo "<tr class='tab_bg_1' align='center'>";
-         echo "<td>" . __("Name") . "</td>";
-         echo "<td>";
-         echo $openvas_item->fields['openvas_name'];
-         echo "</td>";
-         echo "<td>" . __("Comment") . "</td>";
-         echo "<td>".$openvas_item->fields['openvas_comment']."</td>";
+         $link = PluginOpenvasConfig::getConsoleURL();
+         $link.= "?cmd=get_target&target_id=".$openvas_item->fields['openvas_id'];
+         echo "<a href='$link' target='_blank'>".$openvas_item->fields['openvas_id']."</a></td>";
+         echo "<td></td>";
          echo "</tr>";
 
          echo "</table>";
 
-         $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
-         if (is_array($tasks) && !empty($tasks)) {
-            echo "<table class='tab_cadre_fixe' id='taskformtable'>";
-            echo "<tr class='tab_bg_1' align='center'>";
-            echo "<th colspan='4'>".__('OpenVAS tasks', 'openvas')."</th></tr>";
-            echo "<tr class='tab_bg_1' align='center'>";
-            echo "<th>".__('Name')."</th><th>"
-               .__('State')."</th><th>"
-               .__('Severity', 'openvas')."</th><th>"
-               .__("Date last scan", 'openvas')."</th></tr>";
-            foreach ($tasks as $task_id => $task) {
+         if ($alive) {
+            $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
+            if (is_array($tasks) && !empty($tasks)) {
+               echo "<table class='tab_cadre_fixe' id='taskformtable'>";
                echo "<tr class='tab_bg_1' align='center'>";
-               $link = PluginOpenvasConfig::getConsoleURL();
-               $link.= "?cmd=get_task&task_id=".$task_id;
-               echo "<td><a href='$link' target='_blank'>".$task['name']."</a></td>";
-               echo "<td>".$task['status']."</td>";
-               echo "<td>".$task['severity']."</td>";
-               echo "<td>".$task['date_last_scan']."</td>";
-               echo "</tr>";
+               echo "<th colspan='7'>".__('OpenVAS tasks', 'openvas')."</th></tr>";
+               echo "<tr class='tab_bg_1' align='center'>";
+               echo "<th>".__('Name')."</th><th>"
+                  .__('State')."</th><th>"
+                  .__('Severity', 'openvas')."</th><th>"
+                  .__('Configuration', 'openvas')."</th><th>"
+                  .__('Scanner', 'openvas')."</th><th>"
+                  .__("Date last scan", 'openvas')."</th>";
+               echo "<th>".__('Action', 'openvas')."</th></tr>";
+               foreach ($tasks as $task_id => $task) {
+                  echo "<tr class='tab_bg_1' align='center'>";
+                  $link = PluginOpenvasConfig::getConsoleURL();
+                  $link.= "?cmd=get_task&task_id=".$task_id;
+                  echo "<td><a href='$link' target='_blank'>".$task['name']."</a></td>";
+                  $status = $task['status'];
+                  if ($task['progress']) {
+                    $status .= " (".$task['progress']."%)";
+                  }
+                  echo "<td>$status</td>";
+                  echo "<td>".$task['severity']."</td>";
+                  echo "<td>".$task['scanner']."</td>";
+                  echo "<td>".$task['config']."</td>";
+                  echo "<td>".$task['date_last_scan']."</td>";
+                  echo "<td>".self::getTaskActionButton($task_id, $task['status'])."</td>";
+                  echo "</tr>";
+               }
+               echo "</table>";
             }
-            echo "</table>";
          }
          echo "</div>";
          Html::closeForm();
       }
+   }
+
+   static function getTaskActionButton($task_id, $status) {
+     global $CFG_GLPI;
+
+     $form = self::getFormURL(true);
+     $html = '';
+     switch ($status) {
+       case 'Done':
+       case 'New':
+       case 'Stopped':
+       $label = __('Start Requested', 'openvas');
+       $html = "<a href='$form?task_id=$task_id&action=".PluginOpenvasOmp::START_TASK."'>"
+           ."<img src='".$CFG_GLPI["root_doc"]."/plugins/openvas/pics/start.png'
+                  alt='$label' title='$label'></a>";
+           break;
+
+       case 'Running':
+       case 'Internal Error':
+       case 'Requested':
+       $label = __('Stop Requested', 'openvas');
+       $html = "<a href='$form?task_id=$task_id&action=".PluginOpenvasOmp::CANCEL_TASK."'>"
+           ."<img src='".$CFG_GLPI["root_doc"]."/plugins/openvas/pics/stop.png'
+                  alt='$label' title='$label'></a>";
+          break;
+
+       case 'Delete requested':
+       case 'Stop Requested':
+        break;
+     }
+     return $html;
    }
 
    function getFromDBByID($itemtype, $items_id) {
@@ -300,8 +354,8 @@ class PluginOpenvasItem extends CommonDBTM {
    * @param $host the host as provided by OpenVAS (in general an IP address)
    * @return an array representing a PluginOpenvasItem or false if none found
    */
-   public static function getItemByHost($host) {
-      global $DB;
+   public static function getItemByHost($host, $check_fqdn = false) {
+      global $DB, $CFG_GLPI;
 
       //If host is already in the cache
       if (isset(self::$host_matching[$host])) {
@@ -311,7 +365,8 @@ class PluginOpenvasItem extends CommonDBTM {
       //First: check if the host provided is already associated with an asset
       $iterator = $DB->request('glpi_plugin_openvas_items',
                                [ 'FIELDS' => [ 'itemtype', 'items_id'],
-                                 'OR'     => [ 'openvas_host' => $host, 'openvas_name' => $host]
+                                 'OR'     => [ 'openvas_host' => $host,
+                                               'openvas_name' => $host]
                                ]);
       if ($iterator->numrows()) {
          $tmp = $iterator->next();
@@ -328,9 +383,34 @@ class PluginOpenvasItem extends CommonDBTM {
                                             'items_id' => $tmp['mainitems_id']
                                           ];
             return self::$host_matching[$host];
+         } elseif ($check_fqdn) {
+
+            //Third step: try the FQDN
+            foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
+               $table = getTableForItemtype($itemtype);
+               if (FieldExists($table, 'domains_id')) {
+                  $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
+                  $left_join = "LEFT JOIN `glpi_domains`
+                                   ON `glpi_domains`.`id`=`$table`.`domains_id`";
+               } else {
+                  $concat    = "`$table`.`name`";
+                  $left_join = "";
+               }
+               $query = "SELECT `$table`.`id`, $concat AS `fqdn`
+                         FROM `$table` $left_join
+                         HAVING `fqdn`='".$host."'";
+               $iterator_fqdn = $DB->request($query);
+               if ($iterator_fqdn->numrows()) {
+                  $asset = $iterator_fqdn->next();
+                  self::$host_matching[$host] = [ 'itemtype' => $itemtype,
+                                                  'items_id' => $asset['id']
+                                                ];
+                  return self::$host_matching[$host];
+               }
+            }
          }
-         return false;
       }
+      return false;
    }
 
    /**
@@ -346,8 +426,6 @@ class PluginOpenvasItem extends CommonDBTM {
 
       $response = PluginOpenvasOmp::getTargets();
       foreach ($response->target as $target) {
-         $tmp = array();
-
          //Do not process target without host,
          //or 127.0.0.1 or localhost (to large to match a specific asset)
          if (!isset($target->hosts)
@@ -369,40 +447,12 @@ class PluginOpenvasItem extends CommonDBTM {
          $iterator = $DB->request('glpi_plugin_openvas_items', ['openvas_id' => $openvas_id]);
          if (!$iterator->numrows()) {
             //Not linked: check if a link could be done
-            if ($asset = self::getItemByHost($tmp['host'])) {
+            if ($asset = self::getItemByHost($tmp['openvas_host'], true)) {
                //Link the host to the asset
                $tmp['itemtype'] = $asset['itemtype'];
                $tmp['items_id'] = $asset['items_id'];
                if ($tmp['id'] = $item->add($tmp)) {
                   $index++;
-               }
-            } else {
-               foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
-                  $table = getTableForItemtype($itemtype);
-                  if (FieldExists($table, 'domains_id')) {
-                     $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
-                     $left_join = "LEFT JOIN `glpi_domains`
-                                      ON `glpi_domains`.`id`=`$table`.`domains_id`";
-                  } else {
-                     $concat    = "`$table`.`name`";
-                     $left_join = "";
-                  }
-                  $query = "SELECT `$table`.`id`, $concat AS `fqdn`
-                            FROM `$table` $left_join
-                            HAVING `fqdn`='".$tmp['openvas_host']."'";
-                  $iterator_fqdn = $DB->request($query);
-                  if ($iterator_fqdn->numrows()) {
-                     $asset = $iterator_fqdn->next();
-                     $tmp['itemtype'] = $itemtype;
-                     $tmp['items_id'] = $asset['id'];
-                     if ($tmp['id'] = $item->add($tmp)) {
-                        $index++;
-                     }
-                     //Host found, exit loop
-                     if ($tmp['id']) {
-                        break;
-                     }
-                  }
                }
             }
          } else {
@@ -416,12 +466,26 @@ class PluginOpenvasItem extends CommonDBTM {
 
          //If the host is linked to an asset: update last task infos
          if (isset($tmp['id'])) {
-            self::updateTaskInfosForTarget($tmp['openvas_id'], $tmp['id']);
+            self::updateTargetInfosByReport($tmp['openvas_host'], $tmp['id']);
+            //self::updateTaskInfosForTarget($tmp['openvas_id'], $tmp['id']);
          }
       }
 
       $task->addVolume($index);
       return true;
+   }
+
+   static function updateTargetInfosByReport($host, $line_id) {
+      $reports = PluginOpenvasOmp::getLastReportForAHost($host);
+      if (PluginOpenvasOmp::isCodeOK(intval($reports->attributes()->status))) {
+         $prog = PluginOpenvasOmp::getPrognosticForAHost($host);
+         if (PluginOpenvasOmp::isCodeOK(intval($prog->attributes()->status))) {
+            if ($prog->report->report->scan_end) {
+               $tmp['openvas_date_last_scan'] = $prog->report->report->scan_end->__toString();
+               Toolbox::logDebug($prog->report->report);
+            }
+         }
+      }
    }
 
    static function updateTaskInfosForTarget($openvas_id, $line_id) {
@@ -431,6 +495,7 @@ class PluginOpenvasItem extends CommonDBTM {
          $item = new self();
          //Get the last task
          $ovtask = array_pop($ovtasks);
+         Toolbox::logDebug($ovtask);
          $tmp    = [ 'openvas_severity'       => $ovtask['severity'],
                      'openvas_date_last_scan' => $ovtask['date_last_scan'],
                      'id'                     => $line_id

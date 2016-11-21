@@ -38,6 +38,20 @@ if (isset($_POST['update'])) {
 }
 if (isset($_REQUEST['refresh'])) {
    PluginOpenvasItem::updateItemFromOpenvas($_REQUEST['id']);
+} elseif (isset($_GET['action'])
+   && isset($_GET['task_id'])
+      && !empty($_GET['task_id'])) {
+        
+  switch ($_GET['action']) {
+    case PluginOpenvasOmp::START_TASK:
+      PluginOpenvasOmp::startTask($_GET['task_id']);
+      break;
+    case PluginOpenvasOmp::CANCEL_TASK:
+      PluginOpenvasOmp::stopTask($_GET['task_id']);
+      break;
+    default:
+      break;
+  }
 }
 if (isset($_POST['add'])) {
    if (isset($_REQUEST['id'])) {

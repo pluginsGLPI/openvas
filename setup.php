@@ -69,12 +69,12 @@ function plugin_version_openvas() {
             'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
             'license'        => 'GPLv2+',
             'homepage'       => 'https://github.com/pluginsglpi/openvas',
-            'minGlpiVersion' => "9.1"
+            'minGlpiVersion' => "9.1.1"
           ];
 }
 
 function plugin_openvas_check_prerequisites() {
-   if (version_compare(GLPI_VERSION, '9.1', 'lt')) {
+   if (version_compare(GLPI_VERSION, '9.1.1', 'lt')) {
       echo "This plugin requires GLPI 9.1 or higher";
       return false;
    }
