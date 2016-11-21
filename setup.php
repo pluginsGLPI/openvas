@@ -46,11 +46,6 @@ function plugin_init_openvas() {
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
 
-      foreach ($CFG_GLPI["networkport_types"] as $itemtype) {
-         $PLUGIN_HOOKS['autoinventory_information']['openvas'][$itemtype]
-            = ['PluginOpenvasItem', 'showInfo'];
-      }
-
       Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
                             [ 'rulecollections_types' => true]);
       Plugin::registerClass('PluginOpenvasRuleVulnerability');

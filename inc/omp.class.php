@@ -468,23 +468,32 @@ class PluginOpenvasOmp {
             $progress  = "";
             $severity  = 0;
             $scan_date = '';
+            $report_id = '';
 
             $name    = strval($response->name);
             $status  = strval($response->status);
-            if ($status != 'done') {
-               $progress      = strval($response->progress);
-               if (isset($response->last_report->report->severity)) {
-                  $severity = strval($response->last_report->report->severity);
-               } else {
-                  $severity = 0;
-               }
-               if (isset($response->last_report->report->scan_end)) {
-                  $tmp_scan_date = strval($response->last_report->report->scan_end);
-                  if (!empty($tmp_scan_date)) {
-                     $date_scan_end = new DateTime($tmp_scan_date);
-                     $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
-                  }
-               }
+            if ($status != 'Running') {
+              $node = 'last_report';
+            } else {
+              $node = 'current_report';
+            }
+             $progress      = strval($response->progress);
+             if (isset($response->$node->report->severity)) {
+                $severity = strval($response->$node->report->severity);
+             } else {
+                $severity = 0;
+             }
+
+             if (isset($response->$node->report->scan_end)) {
+                $tmp_scan_date = strval($response->$node->report->scan_end);
+                if (!empty($tmp_scan_date)) {
+                   $date_scan_end = new DateTime($tmp_scan_date);
+                   $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
+                }
+             }
+
+            if (isset($response->$node->report->attributes()->id)) {
+               $report_id = strval($response->$node->report->attributes()->id);
             }
 
             $config  = strval($response->config->name);
@@ -497,6 +506,7 @@ class PluginOpenvasOmp {
                                'progress'       => $progress,
                                'date_last_scan' => $scan_date,
                                'severity'       => $severity,
+                               'report'         => $report_id,
                                'id'             => $id
                             ];
          }
