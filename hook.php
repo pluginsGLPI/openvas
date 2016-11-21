@@ -32,57 +32,67 @@
  function plugin_openvas_getAddSearchOptions($itemtype) {
     global $CFG_GLPI;
 
-    $sopt = array();
+    $sopt = [];
     if (in_array($itemtype, $CFG_GLPI['networkport_types']) || $itemtype == 'AllAssets') {
-          $sopt[6100]['table']         = 'glpi_plugin_openvas_items';
-          $sopt[6100]['field']         = 'openvas_id';
-          $sopt[6100]['name']          = __('OpenVAS', 'openvas').'-'.__("OpenVAS Target UUID", "openvas");
-          $sopt[6100]['datatype']      = 'string';
-          $sopt[6100]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
-          $sopt[6100]['massiveaction'] = false;
+       $sopt[6100]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6100]['field']         = 'openvas_id';
+       $sopt[6100]['name']          = __('OpenVAS', 'openvas').'-'.__("Target", "openvas");
+       $sopt[6100]['datatype']      = 'string';
+       $sopt[6100]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6100]['massiveaction'] = false;
 
-          $sopt[6101]['table']         = 'glpi_plugin_openvas_items';
-          $sopt[6101]['field']         = 'openvas_severity';
-          $sopt[6101]['name']          = __('OpenVAS', 'openvas').'-'.__('Severity', 'openvas');
-          $sopt[6101]['datatype']      = 'float';
-          $sopt[6101]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
-          $sopt[6101]['massiveaction'] = false;
+       $sopt[6101]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6101]['field']         = 'openvas_severity';
+       $sopt[6101]['name']          = __('OpenVAS', 'openvas').'-'.__('Severity', 'openvas');
+       $sopt[6101]['datatype']      = 'float';
+       $sopt[6101]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6101]['massiveaction'] = false;
 
-         $sopt[6102]['table']         = 'glpi_plugin_openvas_items';
-         $sopt[6102]['field']         = 'openvas_date_last_scan';
-         $sopt[6102]['name']          = __('OpenVAS', 'openvas').'-'.
-                                          __('Date of last scan', 'openvas');
-         $sopt[6102]['datatype']      = 'datetime';
-         $sopt[6102]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
-         $sopt[6102]['massiveaction'] = false;
+       $sopt[6102]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6102]['field']         = 'openvas_date_last_scan';
+       $sopt[6102]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Last run');
+       $sopt[6102]['datatype']      = 'datetime';
+       $sopt[6102]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6102]['massiveaction'] = false;
 
-         $sopt[6103]['table']         = 'glpi_plugin_openvas_items';
-         $sopt[6103]['field']         = 'openvas_name';
-         $sopt[6103]['name']          = __('OpenVAS', 'openvas').'-'.
+       $sopt[6103]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6103]['field']         = 'openvas_name';
+       $sopt[6103]['name']          = __('OpenVAS', 'openvas').'-'.
                                           __('Target Name', 'openvas');
-         $sopt[6103]['datatype']      = 'string';
-         $sopt[6103]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
-         $sopt[6103]['massiveaction'] = false;
+       $sopt[6103]['datatype']      = 'string';
+       $sopt[6103]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6103]['massiveaction'] = false;
 
-         $sopt[6104]['table']         = 'glpi_plugin_openvas_items';
-         $sopt[6104]['field']         = 'comment';
-         $sopt[6104]['name']          = __('OpenVAS Host comment', 'openvas');
-         $sopt[6104]['datatype']      = 'text';
-         $sopt[6104]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
-         $sopt[6104]['massiveaction'] = false;
+       $sopt[6104]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6104]['field']         = 'comment';
+       $sopt[6104]['name']          = __('Host comment', 'openvas');
+       $sopt[6104]['datatype']      = 'text';
+       $sopt[6104]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6104]['massiveaction'] = false;
 
-         $sopt[6105]['table']         = 'glpi_plugin_openvas_items';
-         $sopt[6105]['field']         = 'openvas_host';
-         $sopt[6105]['name']          = __('OpenVAS', 'openvas').'-'.
-                                          __('Host', 'openvas');
-         $sopt[6105]['datatype']      = 'string';
-         $sopt[6105]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
-         $sopt[6105]['massiveaction'] = false;
-       }
+       $sopt[6105]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6105]['field']         = 'openvas_host';
+       $sopt[6105]['name']          = __('OpenVAS', 'openvas').'-'.
+                                          __('Host');
+       $sopt[6105]['datatype']      = 'string';
+       $sopt[6105]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6105]['massiveaction'] = false;
+  }
 
    return $sopt;
  }
 
+ function plugin_openvas_giveItem($type,$ID,$data,$num) {
+    $searchopt = &Search::getOptions($type);
+    $table = $searchopt[$ID]["table"];
+    $field = $searchopt[$ID]["field"];
+    switch ($table.'.'.$field) {
+       case "glpi_plugin_openvas_items.openvas_severity" :
+          return PluginOpenvasItem::displaySeverity($data[$num][0]['name']);
+    }
+    return "";
+ }
 /***************** Install / uninstall functions **************/
 
 function plugin_openvas_install() {
