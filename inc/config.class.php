@@ -115,18 +115,18 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<th colspan='4'>" . __("Color palette") . "</th></tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>" . __("High", "priority") . "</td>";
+      echo "<td>" . _x('priority', 'High') . "</td>";
       echo "<td>";
       Html::showColorField('severity_high_color', array('value' => $this->fields["severity_high_color"]));
       echo "</td>";
-      echo "<td>" . __("Medium") . "</td>";
+      echo "<td>" . _x('priority', 'Medium') . "</td>";
       echo "<td>";
       Html::showColorField('severity_medium_color', array('value' => $this->fields["severity_medium_color"]));
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>" . __("Low") . "</td>";
+      echo "<td>" . _x('priority', 'Low') . "</td>";
       echo "<td>";
       Html::showColorField('severity_low_color', array('value' => $this->fields["severity_low_color"]));
       echo "</td>";
