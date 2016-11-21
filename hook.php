@@ -83,6 +83,16 @@
    return $sopt;
  }
 
+ function plugin_openvas_giveItem($type,$ID,$data,$num) {
+    $searchopt = &Search::getOptions($type);
+    $table = $searchopt[$ID]["table"];
+    $field = $searchopt[$ID]["field"];
+    switch ($table.'.'.$field) {
+       case "glpi_plugin_openvas_items.openvas_severity" :
+          return PluginOpenvasItem::displaySeverity($data[$num][0]['name']);
+    }
+    return "";
+ }
 /***************** Install / uninstall functions **************/
 
 function plugin_openvas_install() {

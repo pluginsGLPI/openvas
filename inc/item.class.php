@@ -441,7 +441,6 @@ class PluginOpenvasItem extends CommonDBTM {
          if (PluginOpenvasOmp::isCodeOK(intval($prog->attributes()->status))) {
             if ($prog->report->report->scan_end) {
                $tmp['openvas_date_last_scan'] = $prog->report->report->scan_end->__toString();
-               Toolbox::logDebug($prog->report->report);
             }
          }
       }
@@ -454,7 +453,6 @@ class PluginOpenvasItem extends CommonDBTM {
          $item = new self();
          //Get the last task
          $ovtask = array_pop($ovtasks);
-         Toolbox::logDebug($ovtask);
          $tmp    = [ 'openvas_severity'       => $ovtask['severity'],
                      'openvas_date_last_scan' => $ovtask['date_last_scan'],
                      'id'                     => $line_id
@@ -490,9 +488,10 @@ class PluginOpenvasItem extends CommonDBTM {
        $text .= " ("._x('priority', 'Low').")";
      } else {
        $color = $config->fields['severity_none_color'];
+       $text = __('None');
      }
 
-     $out  = "<div class='center' style='background-color: #ffffff; width: 100%;
+     $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
                border: 0px solid #9BA563; position: relative;' >";
      $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
      $out .= "<div class='center' style='background-color: ".$color.";
