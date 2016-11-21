@@ -112,6 +112,31 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
+      echo "<th colspan='4'>" . __("Color palette") . "</th></tr>";
+
+      echo "<tr class='tab_bg_1' align='center'>";
+      echo "<td>" . __("High", "priority") . "</td>";
+      echo "<td>";
+      Html::showColorField('severity_high_color', array('value' => $this->fields["severity_high_color"]));
+      echo "</td>";
+      echo "<td>" . __("Medium") . "</td>";
+      echo "<td>";
+      Html::showColorField('severity_medium_color', array('value' => $this->fields["severity_medium_color"]));
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1' align='center'>";
+      echo "<td>" . __("Low") . "</td>";
+      echo "<td>";
+      Html::showColorField('severity_low_color', array('value' => $this->fields["severity_low_color"]));
+      echo "</td>";
+      echo "<td>" . __("None") . "</td>";
+      echo "<td>";
+      Html::showColorField('severity_zero_color', array('value' => $this->fields["severity_none_color"]));
+      echo "</tr>";
+      echo "</td>";
+
+      echo "<tr class='tab_bg_1' align='center'>";
       echo "<td colspan='4' align='center'>";
       echo "<input type='submit' name='update' value=\"" . _sx("button", "Post") . "\" class='submit' >";
       echo "&nbsp<input type='submit' name='test' value=\"" . _sx("button", "Test connexion") . "\" class='submit' >";
@@ -166,20 +191,29 @@ class PluginOpenvasConfig extends CommonDBTM {
                      `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `retention_delay` int(11) NOT NULL DEFAULT '0',
                      `openvas_results_last_sync` datetime DEFAULT NULL,
+                     `severity_medium_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `severity_low_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `severity_high_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+                     `severity_none_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      PRIMARY KEY  (`id`),
                      KEY `openvas_host` (`openvas_host`),
                      KEY `openvas_results_last_sync` (`openvas_results_last_sync`)
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
-         $tmp = [ 'id'                   => 1,
-                  'fusioninventory_url'  => 'localhost',
-                  'openvas_port'         => '9390',
-                  'openvas_console_port' => '9392',
-                  'openvas_username'     => 'admin',
-                  'openvas_password'     => '',
-                  'openvas_omp_path'     => '/usr/bin/omp',
-                  'retention_delay'      => 30];
+         $tmp = [ 'id'                    => 1,
+                  'fusioninventory_url'   => 'localhost',
+                  'openvas_port'          => '9390',
+                  'openvas_console_port'  => '9392',
+                  'openvas_username'      => 'admin',
+                  'openvas_password'      => '',
+                  'openvas_omp_path'      => '/usr/bin/omp',
+                  'retention_delay'       => 30,
+                  'severity_high_color'   => '#ff0000',
+                  'severity_medium_color' => '#ffb800',
+                  'severity_low_color'    => '#3c9fb4',
+                  'severity_none_color'   => '#000000'
+                ];
          $config->add($tmp);
       }
    }
