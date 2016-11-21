@@ -46,10 +46,14 @@ function plugin_init_openvas() {
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
 
-      $PLUGIN_HOOKS['autoinventory_information']['openvas']
-         =  [ 'Computer'         =>  ['PluginOpenvasItem', 'showInfo'],
-              'NetworkEquipment' =>  ['PluginOpenvasItem', 'showInfo']
-            ];
+      foreach ($CFG_GLPI["networkport_types"] as $itemtype) {
+         $PLUGIN_HOOKS['autoinventory_information']['openvas'][$itemtype]
+            = ['PluginOpenvasItem', 'showInfo'];
+      }
+
+      Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
+                            [ 'rulecollections_types' => true]);
+      Plugin::registerClass('PluginOpenvasRuleVulnerability');
 
       if (Session::haveRight('config', UPDATE)) {
          $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';
@@ -65,12 +69,12 @@ function plugin_version_openvas() {
             'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
             'license'        => 'GPLv2+',
             'homepage'       => 'https://github.com/pluginsglpi/openvas',
-            'minGlpiVersion' => "9.1"
+            'minGlpiVersion' => "9.1.1"
           ];
 }
 
 function plugin_openvas_check_prerequisites() {
-   if (version_compare(GLPI_VERSION, '9.1', 'lt')) {
+   if (version_compare(GLPI_VERSION, '9.1.1', 'lt')) {
       echo "This plugin requires GLPI 9.1 or higher";
       return false;
    }

@@ -30,9 +30,10 @@
  ---------------------------------------------------------------------- */
 
  function plugin_openvas_getAddSearchOptions($itemtype) {
+    global $CFG_GLPI;
 
     $sopt = array();
-    if ($itemtype == 'Computer' || $itemtype == 'NetworkEquipment') {
+    if (in_array($itemtype, $CFG_GLPI['networkport_types']) || $itemtype == 'AllAssets') {
           $sopt[6100]['table']         = 'glpi_plugin_openvas_items';
           $sopt[6100]['field']         = 'openvas_id';
           $sopt[6100]['name']          = __('OpenVAS', 'openvas').'-'.__("OpenVAS Target UUID", "openvas");

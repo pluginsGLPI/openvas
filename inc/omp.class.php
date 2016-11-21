@@ -54,6 +54,7 @@ class PluginOpenvasOmp {
 
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
+   const NO_FILTER  = 'ignore_filter'; //Do not add filter to XML command
 
    const DETAIL = 1; //Get details (for results)
    const NO_DETAIL    = 0; //Do not ask for details
@@ -67,18 +68,29 @@ class PluginOpenvasOmp {
    private static function getFilter($options = array ()) {
 
       $filter = '';
+      $params = [];
 
-      //Default params
-      $params = [ 'filter' => [ self::SORT_ASC  => 'name',
-                              'first'          => 1,
-                              'rows'           => -1,
-                             ]
-               ];
+      $must_filter = !isset($options[self::NO_FILTER]);
+      if ($must_filter) {
+        //Default params
+        $params = [ 'filter' => [ self::SORT_ASC  => 'name',
+                                'first'          => 1,
+                                'rows'           => -1,
+                               ]
+                 ];
+      } else {
+        unset($options[self::NO_FILTER]);
+      }
+
       foreach ($options as $key => $value) {
          if ($key == 'filter') {
             continue;
          }
          $filter.= $key."='$value' ";
+      }
+
+      if (!$must_filter) {
+        return $filter;
       }
 
       //Override filter params if needed
@@ -137,12 +149,25 @@ class PluginOpenvasOmp {
    * @since 1.0
    *
    * @param details bool display a result with it's details
-   * @params $extra_params extra params to add to the filter
+   * @param $extra_params extra params to add to the filter
    * @return an array of results, or false if an error occured
    */
    static function getResults($details = 0, $extra_params = false) {
       return self::executeCommand(self::RESULT, [ 'details' => $details,
                                                   'filter'  => [ 'extra' => $extra_params] ]);
+   }
+
+
+   /**
+   * Check if the command's status indicates a success
+   * @since 1.0
+   *
+   * @param the command return code
+   * @return true if success, false otherwise
+   */
+   static function isCodeOK($status) {
+      //A code 200 means success
+      return $status == '200';
    }
 
    /**
@@ -163,17 +188,42 @@ class PluginOpenvasOmp {
       return self::executeCommand(self::TASK, $options);
    }
 
+   static function getLastReportForAHost($host, $position = 1) {
+      $options = [ 'type' => 'assets', 'host' => $host, 'pos' => $position, 'filter' => [] ];
+      return self::executeCommand(self::REPORT, $options);
+   }
+
+   static function getPrognosticForAHost($host = false, $position = 1) {
+      $options = [ 'host' => $host, 'type' => 'prognostic', 'pos' => 1, 'host_first_result' => 1,
+                   'host_max_results' => 1, 'result_hosts_only' => 1, 'host_levels' => 'hmlgd',
+                   'filter' => [self::SORT_DESC => 'date'] ];
+      return self::executeCommand(self::REPORT, $options);
+   }
+
    /**
+   * Request starting a task
    * @since 1.0
    *
-   * Get one or all reports
-   * @param report_id the uuid of a report, or false to get all tasks
-   * @param host_id on host uuid
-   * @return an array of reports, or false if an error occured
+   * @param task_id the task to start
+   * @return true if task scan request is sucessful
    */
-   static function getReports($report_id = false, $host_id = false) {
-      $options = [ 'filter' => [ 'report_id' => $report_id, 'host_id' => $host_id] ];
-      return self::executeCommand(self::REPORT, $options);
+   static function startTask($task_id = 0) {
+      return self::executeCommand(self::START_TASK,
+                                  [ 'task_id' => $task_id,
+                                    self::NO_FILTER => 1 ]);
+   }
+
+   /**
+   * Request stopping a task
+   * @since 1.0
+   *
+   * @param task_id the task to start
+   * @return true if task scan request is sucessful
+   */
+   static function stopTask($task_id = 0) {
+      return self::executeCommand(self::CANCEL_TASK,
+                                  [ 'task_id' => $task_id,
+                                    self::NO_FILTER => 1 ]);
    }
 
    /**
