@@ -261,48 +261,25 @@ class PluginOpenvasOmp {
    private function sendCommand(PluginOpenvasConfig $config, $command = '',
                                 $xml = false) {
 
-
-      $ov_command = "<commands><authenticate><credentials><username>admin</username>";
-      $ov_command.= "<password>teclib</password></credentials></authenticate>\n$command</commands>";
-/*
-     $url    = "tls://".$config->fields['openvas_host'].":".$config->fields['openvas_port'];
-
-     if ($config->fields['openvas_verify_peer']) {
-        $verify_peer = true;
-     } else {
-        $verify_peer = false;
-     }
-     if ($config->fields['openvas_allow_self_signed']) {
-        $allow_self_signed = true;
-     } else {
-        $allow_self_signed = false;
-     }
-
-      use GuzzleHttp\Client;
-      $client = new Client([ 'base_uri' => 'http://httpbin.org',
-                             'timeout'  => 2.0,
-                             'ssl' => [ 'verify_peer'       => $verify_peer,
-                                        'allow_self_signed' => $allow_self_signed
-                                      ]
-                         ]);*/
-
-
-      if ($config->fields['verify_peer']) {
+      /*
+      if ($config->fields['openvas_verify_peer']) {
          $verify_peer = true;
       } else {
          $verify_peer = false;
       }
-      if ($config->fields['allow_self_signed']) {
+      if ($config->fields['openvas_allow_self_signed']) {
          $allow_self_signed = true;
       } else {
          $allow_self_signed = false;
       }
 
       //Set SSL options
-      $context = stream_context_create([ 'ssl' => [ 'verify_peer'       => $verify_peer,
-                                                    'allow_self_signed' => $allow_self_signed
-                                                  ]
-                                         ]);
+      $context = stream_context_create(array(
+          'ssl' => array(
+             'verify_peer' => $verify_peer,
+             'allow_self_signed' => $allow_self_signed
+          )
+      ));
 
       $response = null;
       $errno    = null;
@@ -311,14 +288,13 @@ class PluginOpenvasOmp {
 
       //Connect to OpenVAS using TLS
       $url    = "tls://".$config->fields['openvas_host'].":".$config->fields['openvas_port'];
-      $socket = @stream_socket_client($url, $errno, $errstr, 1,
-                                      STREAM_CLIENT_CONNECT, $context);
+      $socket = @stream_socket_client($url, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
       if ($errno) {
          return false;
       } else {
-         Toolbox::logDebug("Sending command", $ov_command);
+         Toolbox::logDebug("Sending command", $command);
         //Write command in the PHP socket
-        fwrite($socket, $ov_command);
+        fwrite($socket, $command);
         //Get the results
         $content = stream_get_contents($socket);
         if (!Toolbox::seems_utf8($content)) {
@@ -326,18 +302,8 @@ class PluginOpenvasOmp {
         }
         //Close the socket
         fclose($socket);
-     }
+     }*/
 
-     if (empty($content)) {
-        return false;
-     } else {
-        //if (!Toolbox::seems_utf8($content)) {
-        //   $content = Toolbox::encodeInUtf8($content);
-        //}
-        Toolbox::logDebug($content);
-        return $content;
-     }
-/*
      //Check if omp exists && is executable
      if (!file_exists($config->fields['openvas_omp_path'])
         || !is_executable($config->fields['openvas_omp_path'])
@@ -372,7 +338,7 @@ class PluginOpenvasOmp {
            $content = Toolbox::encodeInUtf8($content);
         }
         return $content;
-     }*/
+     }
    }
 
    /**

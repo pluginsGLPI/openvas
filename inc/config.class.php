@@ -200,8 +200,6 @@ class PluginOpenvasConfig extends CommonDBTM {
                      `severity_low_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `severity_high_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `severity_none_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `verify_peer` tinyint(1) NOT NULL DEFAULT '0',
-                     `allow_self_signed` tinyint(1) NOT NULL DEFAULT '0',
                      PRIMARY KEY  (`id`),
                      KEY `openvas_host` (`openvas_host`),
                      KEY `openvas_results_last_sync` (`openvas_results_last_sync`)
@@ -219,9 +217,7 @@ class PluginOpenvasConfig extends CommonDBTM {
                   'severity_high_color'   => '#ff0000',
                   'severity_medium_color' => '#ffb800',
                   'severity_low_color'    => '#3c9fb4',
-                  'severity_none_color'   => '#000000',
-                  'verify_peer'           => 0,
-                  'allow_self_signed'     => 0
+                  'severity_none_color'   => '#000000'
                 ];
          $config->add($tmp);
       }
