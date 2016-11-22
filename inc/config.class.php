@@ -53,6 +53,11 @@ class PluginOpenvasConfig extends CommonDBTM {
       return self::$_config;
    }
 
+   static function reloadConfiguration() {
+      self::$_config = null;
+      self::getInstance();
+   }
+
    public static function getTypeName($nb = 0) {
       return __("GLPi openvas Connector", 'openvas');
    }
@@ -132,7 +137,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</td>";
       echo "<td>" . __("None") . "</td>";
       echo "<td>";
-      Html::showColorField('severity_zero_color', array('value' => $this->fields["severity_none_color"]));
+      Html::showColorField('severity_none_color', array('value' => $this->fields["severity_none_color"]));
       echo "</tr>";
       echo "</td>";
 
