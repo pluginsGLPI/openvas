@@ -501,6 +501,23 @@ class PluginOpenvasItem extends CommonDBTM {
      return $out;
    }
 
+
+   /**
+   * Display severity for an asset
+   * @since 1.0
+   * @return the number of targets deleted
+   */
+    static function showSeverityForAnAsset($itemtype, $items_id) {
+      global $DB;
+
+      $item = new self();
+      if ($item->getFromDBByID($itemtype, $items_id)) {
+        return self::displaySeverity($item->fields['openvas_severity']);
+      } else {
+        return '';
+      }
+    }
+
    /**
    * Clean informations that are too old, and not relevant anymore
    * @since 1.0
