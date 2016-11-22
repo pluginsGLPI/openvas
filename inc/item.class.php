@@ -505,7 +505,9 @@ class PluginOpenvasItem extends CommonDBTM {
    /**
    * Display severity for an asset
    * @since 1.0
-   * @return the number of targets deleted
+   * @param itemtype
+   * @param items_id
+   * @return an HTML output to display an asset's severity
    */
     static function showSeverityForAnAsset($itemtype, $items_id) {
       global $DB;
