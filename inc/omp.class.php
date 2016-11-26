@@ -70,18 +70,6 @@ class PluginOpenvasOmp {
       $filter = '';
       $params = [];
 
-      $must_filter = !isset($options[self::NO_FILTER]);
-      if ($must_filter) {
-        //Default params
-        $params = [ 'filter' => [ self::SORT_ASC  => 'name',
-                                'first'          => 1,
-                                'rows'           => -1,
-                               ]
-                 ];
-      } else {
-        unset($options[self::NO_FILTER]);
-      }
-
       foreach ($options as $key => $value) {
          if ($key == 'filter') {
             continue;
@@ -89,17 +77,9 @@ class PluginOpenvasOmp {
          $filter.= $key."='$value' ";
       }
 
-      if (!$must_filter) {
-        return $filter;
-      }
-
       //Override filter params if needed
       if (isset($options['filter'])) {
          foreach ($options['filter'] as $key => $value) {
-            //If we override a sort filter, remove the default one
-            if ($key == self::SORT_ASC || $key == self::SORT_DESC) {
-               unset($params['filter'][self::SORT_ASC]);
-            }
             if ($key != 'extra') {
                $params['filter'][$key] = $value;
             }
@@ -111,9 +91,17 @@ class PluginOpenvasOmp {
       } else {
          $extra = " AND ".$options['filter']['extra'];
       }
-      if (!empty($params['filter'])) {
-         $filter.= " filter='".http_build_query($params['filter'], '', ' AND ')." $extra'";
-      }
+
+      if (!empty($params['filter']) || $extra != '') {
+        $filter .= " filter='";
+        if (!empty($params['filter'])) {
+           $filter.= http_build_query($params['filter'], '', ' AND ');
+        }
+        if ($extra != '') {
+          $filter.= ' '.$extra;
+        }
+        $filter.= "'";
+    }
 
       return $filter;
    }
@@ -139,8 +127,14 @@ class PluginOpenvasOmp {
    * @param tasks true si all tasks linked to the target must be collected
    * @return an array of targets, or false if an error occured
    */
-   static function getTargets($target_id = false, $tasks = false) {
-      $options = [ 'filter' => ['target_id' => $target_id, 'tasks' => $tasks ] ];
+   static function getTargets($target_id = false, $tasks = false, $extra_params = '') {
+     $options = [ 'filter' => ['extra' => $extra_params ] ];
+      if ($target_id) {
+        $options['target_id'] = $target_id;
+      }
+      if ($tasks) {
+        $options['tasks'] = 1;
+      }
       return self::executeCommand(self::TARGET, $options);
    }
 
@@ -155,6 +149,17 @@ class PluginOpenvasOmp {
    static function getResults($details = 0, $extra_params = false) {
       return self::executeCommand(self::RESULT, [ 'details' => $details,
                                                   'filter'  => [ 'extra' => $extra_params] ]);
+   }
+
+   /**
+   * Get reports
+   * @since 1.0
+   *
+   * @param $params params to add
+   * @return an array of reports, or false if an error occured
+   */
+   static function getReports($params = []) {
+      return self::executeCommand(self::REPORT, $params);
    }
 
 
@@ -178,24 +183,37 @@ class PluginOpenvasOmp {
    * @return an array of tasks, or false if an error occured
    */
    static function getTasks($task_id = false) {
-      $options = [ 'filter' => [ 'task_id' => $task_id ] ];
+      if ($task_id) {
+        $options = [ 'filter' => [ 'task_id' => $task_id ] ];
+      } else {
+        $options = [];
+      }
       return self::executeCommand(self::TASK, $options);
+   }
+
+   static function getHighestResultForAHost($host) {
+      $options = [ 'host'   => $host,
+                   'filter' => [ self::SORT_DESC => 'severity', 'rows' => 1] ];
+      return self::executeCommand(self::RESULT, $options);
    }
 
    static function getLastTaskForATarget($target_id) {
-      $options = [ 'filter' => [ 'target_id' => $target_id,
-                                'first' => 1, 'rows' => 1, self::SORT_DESC => 'name' ] ];
+      $options = [ 'target_id' => $target_id, 'pos' => 1 ];
       return self::executeCommand(self::TASK, $options);
    }
 
-   static function getLastReportForAHost($host, $position = 1) {
-      $options = [ 'type' => 'assets', 'host' => $host, 'pos' => $position, 'filter' => [] ];
+   static function getLastReportForAHost($host) {
+      $options = [ 'type' => 'assets', 'host' => $host, 'pos' => 1,
+                   'levels' => 'hml', 'first_result' => 1,
+                   'max_results' => 100 ];
       return self::executeCommand(self::REPORT, $options);
    }
 
    static function getPrognosticForAHost($host = false, $position = 1) {
-      $options = [ 'host' => $host, 'type' => 'prognostic', 'pos' => 1, 'host_first_result' => 1,
-                   'host_max_results' => 1, 'result_hosts_only' => 1, 'host_levels' => 'hmlgd',
+      $options = [ 'host' => $host, 'type' => 'prognostic', 'pos' => 1,
+                   'host_first_result' => 1,
+                   'host_max_results' => 1, 'result_hosts_only' => 1,
+                   'host_levels' => 'hmlgd',
                    'filter' => [self::SORT_DESC => 'date'] ];
       return self::executeCommand(self::REPORT, $options);
    }

@@ -34,7 +34,7 @@ include ("../../../inc/includes.php");
 $config = new PluginOpenvasConfig();
 
 if (isset($_POST["update"])) {
-   $config->update($_POST)) {
+   if ($config->update($_POST)) {
      PluginOpenvasConfig::reloadConfiguration();
    }
 
