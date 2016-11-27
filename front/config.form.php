@@ -49,7 +49,8 @@ if (isset($_POST["update"])) {
    Html::back();
 } else {
 
-Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'], "config", "openvas", "PluginOpenvasConfig");
+Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
+             "tools", "PluginOpenvasMenu", "PluginOpenvasConfig");
 
 Session::checkRight("config", UPDATE);
 $config->showForm();

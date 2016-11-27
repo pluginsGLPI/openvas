@@ -195,7 +195,7 @@ class PluginOpenvasItem extends CommonDBChild {
          echo "<td>" . __("Severity", "openvas") . "</td>";
          echo "<td>";
          if ($openvas_item->fields['openvas_severity'] >= 0) {
-            echo self::displaySeverity($openvas_item->fields['openvas_severity']);
+            echo self::displaySeverity(false, $openvas_item->fields['openvas_severity']);
          } else {
             echo __('Error');
          }
@@ -211,7 +211,6 @@ class PluginOpenvasItem extends CommonDBChild {
             $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
             if (is_array($tasks) && !empty($tasks)) {
                echo "<table class='tab_cadre_fixe' id='taskformtable'>";
-               echo "<tr class='tab_bg_1' align='center'>";
                echo "<tr class='tab_bg_1' align='center'>";
                echo "<th>"._n('Task', 'Tasks', 1)."</th><th>"
                   ._n("Status", "Statuses", 1)."</th><th>"
@@ -232,17 +231,22 @@ class PluginOpenvasItem extends CommonDBChild {
                   }
                   echo "<td>$status</td>";
                   echo "<td>".self::getTaskActionButton($task_id, $task['status'])."</td>";
-                  echo "<td>".self::displaySeverity($task['severity'])."</td>";
+                  echo "<td>".self::displaySeverity($task['status'], $task['severity'])."</td>";
                   echo "<td>".$task['scanner']."</td>";
                   echo "<td>".$task['config']."</td>";
                   echo "<td>".$task['date_last_scan']."</td>";
-                  $link = PluginOpenvasConfig::getConsoleURL();
-                  $link.= "?cmd=get_report&report_id=".$task['report'];
-                  echo "<td><a href='$link' target='_blank'>";
-                  echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
-                     .__('View in OpenVAS', 'openvas')."\" title=\""
-                     .__('View in OpenVAS', 'openvas')."\" >";
-                  echo "</a></td>";
+                  echo "<td>";
+                  if (!PluginOpenvasOmp::isTaskRunning($task['status'])) {
+                    $link = PluginOpenvasConfig::getConsoleURL();
+                    $link.= "?cmd=get_report&report_id=".$task['report'];
+                    echo "<a href='$link' target='_blank'>";
+                    echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
+                       .__('View in OpenVAS', 'openvas')."\" title=\""
+                       .__('View in OpenVAS', 'openvas')."\" >";
+                    echo "</a><";
+
+                  }
+                  echo "</td>";
                   echo "</tr>";
                }
                echo "</table>";
@@ -293,6 +297,64 @@ class PluginOpenvasItem extends CommonDBChild {
      return $html;
    }
 
+   static function showTasks() {
+     global $DB, $CFG_GLPI;
+
+     $alive = PluginOpenvasOmp::ping();
+     if ($alive) {
+
+       $tasks = PluginOpenvasOmp::getTasks();
+
+        echo "<table class='tab_cadre_fixe' id='taskformtable'>";
+        echo "<tr class='tab_bg_1' align='center'>";
+        echo "<th>"._n('Task', 'Tasks', 1)."</th><th>"
+           .__('Target', 'openvas')."</th><th>"
+           ._n("Status", "Statuses", 1)."</th><th>"
+           ."</th><th>"
+           .__('Severity', 'openvas')."</th><th>"
+           .__('Setup')."</th><th>"
+           .__('Scanner', 'openvas')."</th><th>"
+           .__("Last run")."</th><th>"
+           ._n("Report", "Reports", 1)."</th></tr>";
+
+
+        foreach ($tasks as $task) {
+          $result = PluginOpenvasOmp::getOneTaskInfos($task);
+          if (!is_array($result)) {
+            continue;
+          }
+          echo "<tr class='tab_bg_1' align='center'>";
+          $link = PluginOpenvasConfig::getConsoleURL();
+          $link.= "?cmd=get_task&task_id=".$task['id'];
+          echo "<td><a href='$link' target='_blank'>".$result['name']."</a></td>";
+
+          $link.= "?cmd=get_target&target_id=".$result['target'];
+          echo "<td><a href='$link' target='_blank'>".$result['target_name']."</a></td>";
+
+          $status = $result['status'];
+          if ($result['progress'] && $result['progress'] > 0) {
+            $status .= " (".$result['progress']."%)";
+          }
+          echo "<td>$status</td>";
+          echo "<td>".self::getTaskActionButton($result['id'], $result['status'])."</td>";
+          echo "<td>".self::displaySeverity($result['status'], $result['severity'])."</td>";
+          echo "<td>".$result['scanner']."</td>";
+          echo "<td>".$result['config']."</td>";
+          echo "<td>".$result['date_last_scan']."</td>";
+          echo "<td>";
+          if (!PluginOpenvasOmp::isTaskRunning($result['status'])) {
+            $link = PluginOpenvasConfig::getConsoleURL();
+            $link.= "?cmd=get_report&report_id=".$result['report'];
+            echo "<a href='$link' target='_blank'>";
+            echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
+               .__('View in OpenVAS', 'openvas')."\" title=\""
+               .__('View in OpenVAS', 'openvas')."\" >";
+            echo "</a>";
+          }
+            echo "</td></tr>";
+        }
+      }
+   }
    /**
    * Fill a PluginOpenvasItem by providing an itemtype and items_id
    *
@@ -607,12 +669,16 @@ class PluginOpenvasItem extends CommonDBChild {
    * @since 1.0
    * @return the number of targets deleted
    */
-   static function displaySeverity($severity) {
+   static function displaySeverity($task_status, $severity) {
 
      $config = PluginOpenvasConfig::getInstance();
      $out    = '';
      $color  = '';
      $text   = $severity;
+
+     if (PluginOpenvasOmp::isTaskRunning($task_status)) {
+       return NOT_AVAILABLE;
+     }
 
      if ($severity == '0.0') {
        $severity = 0;

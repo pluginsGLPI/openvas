@@ -142,13 +142,11 @@ class PluginOpenvasOmp {
    * Get one or all results
    * @since 1.0
    *
-   * @param details bool display a result with it's details
    * @param $extra_params extra params to add to the filter
    * @return an array of results, or false if an error occured
    */
-   static function getResults($details = 0, $extra_params = false) {
-      return self::executeCommand(self::RESULT, [ 'details' => $details,
-                                                  'filter'  => [ 'extra' => $extra_params] ]);
+   static function getResults($extra_params = false) {
+      return self::executeCommand(self::RESULT, [ 'filter'  => [ 'extra' => $extra_params] ]);
    }
 
    /**
@@ -184,21 +182,11 @@ class PluginOpenvasOmp {
    */
    static function getTasks($task_id = false) {
       if ($task_id) {
-        $options = [ 'filter' => [ 'task_id' => $task_id ] ];
+        $options = [ 'filter' => [ 'task_id' => $task_id ,
+                                   self::SORT_ASC => 'name'] ];
       } else {
         $options = [];
       }
-      return self::executeCommand(self::TASK, $options);
-   }
-
-   static function getHighestResultForAHost($host) {
-      $options = [ 'host'   => $host,
-                   'filter' => [ self::SORT_DESC => 'severity', 'rows' => 1] ];
-      return self::executeCommand(self::RESULT, $options);
-   }
-
-   static function getLastTaskForATarget($target_id) {
-      $options = [ 'target_id' => $target_id, 'pos' => 1 ];
       return self::executeCommand(self::TASK, $options);
    }
 
@@ -206,15 +194,6 @@ class PluginOpenvasOmp {
       $options = [ 'type' => 'assets', 'host' => $host, 'pos' => 1,
                    'levels' => 'hml', 'first_result' => 1,
                    'max_results' => 100 ];
-      return self::executeCommand(self::REPORT, $options);
-   }
-
-   static function getPrognosticForAHost($host = false, $position = 1) {
-      $options = [ 'host' => $host, 'type' => 'prognostic', 'pos' => 1,
-                   'host_first_result' => 1,
-                   'host_max_results' => 1, 'result_hosts_only' => 1,
-                   'host_levels' => 'hmlgd',
-                   'filter' => [self::SORT_DESC => 'date'] ];
       return self::executeCommand(self::REPORT, $options);
    }
 
@@ -466,84 +445,95 @@ class PluginOpenvasOmp {
 
       //Get all tasks
       $tasks_response = self::executeCommand(self::TASK,
-                                             [ 'filter' => [ self::SORT_DESC => 'last'] ]);
+                                             [ 'filter' => [ self::SORT_DESC => 'last', 'rows' => -1] ]);
 
       //Array to store the results
       $results        = array();
 
       foreach ($tasks_response->task as $response) {
-         //For each task, get the target id associated with
-         $tid = strval($response->target->attributes()->id);
-         //If there's no target, go to the next task
-         if (!isset($response->attributes()->id) ||!strval($response->attributes()->id)) {
-            continue;
-         }
 
-         //Check it the tasks
-         $id = strval($response->attributes()->id);
-         if ($tid == $target_id) {
-
-            $progress  = "";
-            $severity  = 0;
-            $scan_date = '';
-            $report_id = '';
-
-            $name    = strval($response->name);
-            $status  = strval($response->status);
-            if ($status != 'Running') {
-              $node = 'last_report';
-            } else {
-              $node = 'current_report';
-            }
-             $progress      = strval($response->progress);
-             if (isset($response->$node->report->severity)) {
-                $severity = strval($response->$node->report->severity);
-             } else {
-                $severity = 0;
-             }
-
-             if (isset($response->$node->report->scan_end)) {
-                $tmp_scan_date = strval($response->$node->report->scan_end);
-                if (!empty($tmp_scan_date)) {
-                   $date_scan_end = new DateTime($tmp_scan_date);
-                   $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
-                }
-             }
-
-            if (isset($response->$node->report->attributes()->id)) {
-               $report_id = strval($response->$node->report->attributes()->id);
-            }
-
-            $config  = strval($response->config->name);
-            $scanner = strval($response->scanner->name);
-
-            $results[$id] = [ 'name'           => $name,
-                               'config'         => $config,
-                               'scanner'        => $scanner,
-                               'status'         => $status,
-                               'progress'       => $progress,
-                               'date_last_scan' => $scan_date,
-                               'severity'       => $severity,
-                               'report'         => $report_id,
-                               'id'             => $id
-                            ];
-         }
+        $tid = strval($response->target->attributes()->id);
+        if ($tid == $target_id) {
+          $ret = self::getOneTaskInfos($response);
+          if (is_array($ret)) {
+            $results[$ret['id']] = $ret;
+          }
+        }
       }
       return $results;
 
    }
 
+   static function getOneTaskInfos($task) {
+     global $CFG_GLPI;
 
-   static function getReportsForATarget($target_id = false) {
-      $target_response = self::executeCommand(self::REPORT, ['target_id' => $target_id]);
-      $results         = array();
-      foreach ($target_response->reports as $response) {
-         $host         = $response->hosts->__toString();
-         $id           = $response->attributes()->id->__toString();
-         $results[$id] = $host;
+     //If there's no target, go to the next task
+     if (!isset($task->attributes()->id) ||!strval($task->attributes()->id)) {
+        return false;
+     }
+
+     //Check it the tasks
+    $id    = strval($task->attributes()->id);
+    $tid   = strval($task->target->attributes()->id);
+    $tname = strval($task->target->name);
+
+    $progress  = "";
+    $severity  = 0;
+    $scan_date = '';
+    $report_id = '';
+
+    $name    = strval($task->name);
+    $status  = strval($task->status);
+    if ($status != 'Running') {
+      $node = 'last_report';
+    } else {
+      $node = 'current_report';
+    }
+    $progress  = strval($task->progress);
+    if (isset($task->$node->report->severity)) {
+      $severity = strval($task->$node->report->severity);
+    } else {
+      $severity = 0;
+    }
+
+    if (isset($task->$node->report->scan_end)) {
+      $tmp_scan_date = strval($task->$node->report->scan_end);
+      if (!empty($tmp_scan_date)) {
+         $date_scan_end = new DateTime($tmp_scan_date);
+         $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
       }
+    }
 
-      return $results;
+    if (isset($task->$node->report)
+      && isset($task->$node->report->attributes()->id)) {
+       $report_id = strval($task->$node->report->attributes()->id);
+    }
 
+    $config  = strval($task->config->name);
+    $scanner = strval($task->scanner->name);
+
+    $results       = [ 'name'           => $name,
+                       'config'         => $config,
+                       'scanner'        => $scanner,
+                       'status'         => $status,
+                       'progress'       => $progress,
+                       'date_last_scan' => $scan_date,
+                       'severity'       => $severity,
+                       'report'         => $report_id,
+                       'id'             => $id,
+                       'target'         => $tid,
+                       'target_name'    => $tname
+                    ];
+    return $results;
    }
+
+  static function isTaskRunning($task_status) {
+    switch ($task_status) {
+      case 'Running':
+      case 'Internal Error':
+      case 'Requested':
+       return true;
+    }
+    return false;
+  }
 }

@@ -89,7 +89,7 @@
     $field = $searchopt[$ID]["field"];
     switch ($table.'.'.$field) {
        case "glpi_plugin_openvas_items.openvas_severity" :
-          return PluginOpenvasItem::displaySeverity($data[$num][0]['name']);
+          return PluginOpenvasItem::displaySeverity(false, $data[$num][0]['name']);
     }
     return "";
  }
