@@ -66,6 +66,7 @@ class PluginOpenvasMenu extends CommonGLPI {
          $menu['options']['PluginOpenvasTask']['page']  = PluginOpenvasTask::getSearchURL(false);
          $menu['options']['PluginOpenvasTask']['links']['search'] = PluginOpenvasTask::getSearchURL(false);
          $menu['options']['PluginOpenvasTask']['links'][$image_vuln]  = PluginOpenvasVulnerability::getSearchURL(false);
+         $menu['options']['PluginOpenvasTask']['links']['add'] = PluginOpenvasTask::getFormURL(false)."?add=1";
 
       }
       return $menu;

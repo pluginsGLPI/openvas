@@ -43,14 +43,18 @@ class PluginOpenvasOmp {
    //Actions to be processed through the API
 
    //Read actions
-   const TARGET = 'get_targets';
-   const RESULT = 'get_results';
-   const REPORT = 'get_reports';
-   const TASK   = 'get_tasks';
+   const TARGET   = 'get_targets';
+   const RESULT   = 'get_results';
+   const REPORT   = 'get_reports';
+   const TASK     = 'get_tasks';
+   const CONFIG   = 'get_configs';
+   const SCANNER  = 'get_scanners';
+   const SCHEDULE = 'get_schedules';
 
    //Execute actions
    const START_TASK  = 'start_task';
    const CANCEL_TASK = 'stop_task';
+   const ADD_TASK    = 'create_task';
 
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
@@ -229,14 +233,19 @@ class PluginOpenvasOmp {
    * Execute a command, and get it's result
    * @param $action the action to be performed
    * @param $options options passed to the command
+   * @param send raw command or it should be processed
    * @return the command's result, as a SimpleXMLObject
    */
-   private static function executeCommand($action, $options = array()) {
+   private static function executeCommand($action, $options = array(), $raw = false) {
       $config = PluginOpenvasConfig::getInstance();
       $omp    = new self();
 
       //Get the command in XML format
-      $command = self::getXMLForAction($action, $options);
+      if (!$raw) {
+        $command = self::getXMLForAction($action, $options);
+      } else {
+        $command = $options['command'];
+      }
       $content = $omp->sendCommand($config, $command);
       if ($content) {
          return simplexml_load_string($content);
@@ -435,6 +444,13 @@ class PluginOpenvasOmp {
       return $target;
    }
 
+   /**
+   * @since 1.0
+   *
+   * Get all tasks for a target
+   * @param target_id target ID
+   * @return tasks info as an array
+   */
    static function getTasksForATarget($target_id = false) {
       if (!$target_id) {
          return true;
@@ -535,5 +551,30 @@ class PluginOpenvasOmp {
        return true;
     }
     return false;
+  }
+
+
+  static function displayDropdown($action, $name, $empty = false) {
+    $response = self::executeCommand($action);
+    $returns = [];
+
+    foreach ($response->$name as $res) {
+      $id = strval($res->attributes()->id);
+      $returns[$id] = strval($res->name);
+    }
+    return Dropdown::showFromArray($name, $returns, ['display_emptychoice' => $empty]);
+  }
+
+  static function addTask($options = []) {
+    $command = "<create_task><name>".$options['name']."</name>";
+    $command.= "<comment>".$options['comment']."</comment>";
+    $command.= "<scanner id='".$options['scanner']."'/>";
+    $command.= "<config id='".$options['config']."'/>";
+    $command.= "<target id='".$options['target']."'/>";
+    $command.= "<schedule id='".$options['schedule']."'/>";
+    $command.= "</create_task>";
+
+    $response = self::executeCommand(self::ADD_TASK, ['command' => $command], true);
+    return ($response->status == '201');
   }
 }

@@ -104,4 +104,67 @@ class PluginOpenvasTask extends CommonDBTM {
         echo "</tr></table>";
       }
    }
+
+   static function showAddTaskForm() {
+
+     echo "<form name='addtask' method='post'
+            action='".PluginOpenvasTask::getFormURL(true)."'>";
+
+     echo "<tr class='tab_bg_1' align='center'>";
+     echo "<table class='tab_cadre_fixe' id='taskformtable'>";
+     echo "<tr class='tab_bg_1' align='center'>";
+     echo "<th colspan='2'>".__('New task')."</th></tr>";
+     if (!PluginOpenvasOmp::ping()) {
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
+       echo "</tr>";
+     } else {
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td>".__('Name')."</td>";
+       echo "<td><input type='text' name='name' value=''></td></tr>";
+
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td>".__('Comments')."</td>";
+       echo "<td><input type='text' name='comment' value=''></td>";
+       echo "</tr>";
+
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td>".__('Scanner', 'openvas')."</td>";
+       echo "<td>";
+       PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::SCANNER, 'scanner');
+       echo "</td>";
+       echo "</tr>";
+
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td>".__('Configs', 'openvas')."</td>";
+       echo "<td>";
+       PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::CONFIG, 'config');
+       echo "</td>";
+       echo "</tr>";
+
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td>".__('Targets', 'openvas')."</td>";
+       echo "<td>";
+       PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::TARGET, 'target');
+       echo "</td>";
+       echo "</tr>";
+
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td>".__('Schedules', 'openvas')."</td>";
+       echo "<td>";
+       PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::SCHEDULE, 'schedule', true);
+       echo "</td>";
+       echo "</tr>";
+
+       echo "<tr class='tab_bg_1' align='center'>";
+       echo "<td colspan='2'>";
+       echo "<input type='submit' class='submit' name='save' value='".__('Add')."'>";
+       echo "</td>";
+       echo "</tr>";
+
+     }
+     echo "</tr></table>";
+     Html::closeForm();
+
+   }
 }
