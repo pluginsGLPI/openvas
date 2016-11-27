@@ -73,6 +73,7 @@ class PluginOpenvasOmp {
 
       $filter = '';
       $params = [];
+      $extra  = '';
 
       foreach ($options as $key => $value) {
          if ($key == 'filter') {
@@ -90,10 +91,11 @@ class PluginOpenvasOmp {
          }
       }
 
-      if (!isset($options['filter']['extra']) || !$options['filter']['extra']) {
-         $extra = '';
-      } else {
-         $extra = " AND ".$options['filter']['extra'];
+      if (!empty($params['filter'])) {
+        $extra.= " AND ";
+      }
+      if (isset($options['filter']['extra'])) {
+         $extra .= $options['filter']['extra'];
       }
 
       if (!empty($params['filter']) || $extra != '') {
@@ -150,7 +152,7 @@ class PluginOpenvasOmp {
    * @return an array of results, or false if an error occured
    */
    static function getResults($extra_params = false) {
-      return self::executeCommand(self::RESULT, [ 'filter'  => [ 'extra' => $extra_params] ]);
+      return self::executeCommand(self::RESULT, [ 'filter'  => [ 'rows' => -1, 'extra' => $extra_params] ]);
    }
 
    /**
