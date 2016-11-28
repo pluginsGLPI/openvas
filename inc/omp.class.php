@@ -43,14 +43,18 @@ class PluginOpenvasOmp {
    //Actions to be processed through the API
 
    //Read actions
-   const TARGET = 'get_targets';
-   const RESULT = 'get_results';
-   const REPORT = 'get_reports';
-   const TASK   = 'get_tasks';
+   const TARGET   = 'get_targets';
+   const RESULT   = 'get_results';
+   const REPORT   = 'get_reports';
+   const TASK     = 'get_tasks';
+   const CONFIG   = 'get_configs';
+   const SCANNER  = 'get_scanners';
+   const SCHEDULE = 'get_schedules';
 
    //Execute actions
    const START_TASK  = 'start_task';
    const CANCEL_TASK = 'stop_task';
+   const ADD_TASK    = 'create_task';
 
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
@@ -69,18 +73,7 @@ class PluginOpenvasOmp {
 
       $filter = '';
       $params = [];
-
-      $must_filter = !isset($options[self::NO_FILTER]);
-      if ($must_filter) {
-        //Default params
-        $params = [ 'filter' => [ self::SORT_ASC  => 'name',
-                                'first'          => 1,
-                                'rows'           => -1,
-                               ]
-                 ];
-      } else {
-        unset($options[self::NO_FILTER]);
-      }
+      $extra  = '';
 
       foreach ($options as $key => $value) {
          if ($key == 'filter') {
@@ -89,31 +82,32 @@ class PluginOpenvasOmp {
          $filter.= $key."='$value' ";
       }
 
-      if (!$must_filter) {
-        return $filter;
-      }
-
       //Override filter params if needed
       if (isset($options['filter'])) {
          foreach ($options['filter'] as $key => $value) {
-            //If we override a sort filter, remove the default one
-            if ($key == self::SORT_ASC || $key == self::SORT_DESC) {
-               unset($params['filter'][self::SORT_ASC]);
-            }
             if ($key != 'extra') {
                $params['filter'][$key] = $value;
             }
          }
       }
 
-      if (!isset($options['filter']['extra']) || !$options['filter']['extra']) {
-         $extra = '';
-      } else {
-         $extra = " AND ".$options['filter']['extra'];
-      }
       if (!empty($params['filter'])) {
-         $filter.= " filter='".http_build_query($params['filter'], '', ' AND ')." $extra'";
+        $extra.= " AND ";
       }
+      if (isset($options['filter']['extra'])) {
+         $extra .= $options['filter']['extra'];
+      }
+
+      if (!empty($params['filter']) || $extra != '') {
+        $filter .= " filter='";
+        if (!empty($params['filter'])) {
+           $filter.= http_build_query($params['filter'], '', ' AND ');
+        }
+        if ($extra != '') {
+          $filter.= ' '.$extra;
+        }
+        $filter.= "'";
+    }
 
       return $filter;
    }
@@ -139,8 +133,14 @@ class PluginOpenvasOmp {
    * @param tasks true si all tasks linked to the target must be collected
    * @return an array of targets, or false if an error occured
    */
-   static function getTargets($target_id = false, $tasks = false) {
-      $options = [ 'filter' => ['target_id' => $target_id, 'tasks' => $tasks ] ];
+   static function getTargets($target_id = false, $tasks = false, $extra_params = '') {
+     $options = [ 'filter' => ['extra' => $extra_params ] ];
+      if ($target_id) {
+        $options['target_id'] = $target_id;
+      }
+      if ($tasks) {
+        $options['tasks'] = 1;
+      }
       return self::executeCommand(self::TARGET, $options);
    }
 
@@ -148,13 +148,25 @@ class PluginOpenvasOmp {
    * Get one or all results
    * @since 1.0
    *
-   * @param details bool display a result with it's details
    * @param $extra_params extra params to add to the filter
    * @return an array of results, or false if an error occured
    */
-   static function getResults($details = 0, $extra_params = false) {
-      return self::executeCommand(self::RESULT, [ 'details' => $details,
-                                                  'filter'  => [ 'extra' => $extra_params] ]);
+   static function getResults($extra_params = false) {
+      return self::executeCommand(self::RESULT,
+                                  [ 'filter'  => [ 'rows' => -1,
+                                                   self::SORT_DESC => 'creation_time',
+                                                   'extra' => $extra_params] ]);
+   }
+
+   /**
+   * Get reports
+   * @since 1.0
+   *
+   * @param $params params to add
+   * @return an array of reports, or false if an error occured
+   */
+   static function getReports($params = []) {
+      return self::executeCommand(self::REPORT, $params);
    }
 
 
@@ -178,25 +190,19 @@ class PluginOpenvasOmp {
    * @return an array of tasks, or false if an error occured
    */
    static function getTasks($task_id = false) {
-      $options = [ 'filter' => [ 'task_id' => $task_id ] ];
+      if ($task_id) {
+        $options = [ 'filter' => [ 'task_id' => $task_id ,
+                                   self::SORT_ASC => 'name'] ];
+      } else {
+        $options = [];
+      }
       return self::executeCommand(self::TASK, $options);
    }
 
-   static function getLastTaskForATarget($target_id) {
-      $options = [ 'filter' => [ 'target_id' => $target_id,
-                                'first' => 1, 'rows' => 1, self::SORT_DESC => 'name' ] ];
-      return self::executeCommand(self::TASK, $options);
-   }
-
-   static function getLastReportForAHost($host, $position = 1) {
-      $options = [ 'type' => 'assets', 'host' => $host, 'pos' => $position, 'filter' => [] ];
-      return self::executeCommand(self::REPORT, $options);
-   }
-
-   static function getPrognosticForAHost($host = false, $position = 1) {
-      $options = [ 'host' => $host, 'type' => 'prognostic', 'pos' => 1, 'host_first_result' => 1,
-                   'host_max_results' => 1, 'result_hosts_only' => 1, 'host_levels' => 'hmlgd',
-                   'filter' => [self::SORT_DESC => 'date'] ];
+   static function getLastReportForAHost($host) {
+      $options = [ 'type' => 'assets', 'host' => $host, 'pos' => 1,
+                   'levels' => 'hml', 'first_result' => 1,
+                   'max_results' => 100 ];
       return self::executeCommand(self::REPORT, $options);
    }
 
@@ -232,14 +238,19 @@ class PluginOpenvasOmp {
    * Execute a command, and get it's result
    * @param $action the action to be performed
    * @param $options options passed to the command
+   * @param send raw command or it should be processed
    * @return the command's result, as a SimpleXMLObject
    */
-   private static function executeCommand($action, $options = array()) {
+   private static function executeCommand($action, $options = array(), $raw = false) {
       $config = PluginOpenvasConfig::getInstance();
       $omp    = new self();
 
       //Get the command in XML format
-      $command = self::getXMLForAction($action, $options);
+      if (!$raw) {
+        $command = self::getXMLForAction($action, $options);
+      } else {
+        $command = $options['command'];
+      }
       $content = $omp->sendCommand($config, $command);
       if ($content) {
          return simplexml_load_string($content);
@@ -260,49 +271,6 @@ class PluginOpenvasOmp {
    */
    private function sendCommand(PluginOpenvasConfig $config, $command = '',
                                 $xml = false) {
-
-      /*
-      if ($config->fields['openvas_verify_peer']) {
-         $verify_peer = true;
-      } else {
-         $verify_peer = false;
-      }
-      if ($config->fields['openvas_allow_self_signed']) {
-         $allow_self_signed = true;
-      } else {
-         $allow_self_signed = false;
-      }
-
-      //Set SSL options
-      $context = stream_context_create(array(
-          'ssl' => array(
-             'verify_peer' => $verify_peer,
-             'allow_self_signed' => $allow_self_signed
-          )
-      ));
-
-      $response = null;
-      $errno    = null;
-      $errstr   = null;
-      $content  = '';
-
-      //Connect to OpenVAS using TLS
-      $url    = "tls://".$config->fields['openvas_host'].":".$config->fields['openvas_port'];
-      $socket = @stream_socket_client($url, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
-      if ($errno) {
-         return false;
-      } else {
-         Toolbox::logDebug("Sending command", $command);
-        //Write command in the PHP socket
-        fwrite($socket, $command);
-        //Get the results
-        $content = stream_get_contents($socket);
-        if (!Toolbox::seems_utf8($content)) {
-           $content = Toolbox::encodeInUtf8($content);
-        }
-        //Close the socket
-        fclose($socket);
-     }*/
 
      //Check if omp exists && is executable
      if (!file_exists($config->fields['openvas_omp_path'])
@@ -337,6 +305,8 @@ class PluginOpenvasOmp {
         if (!Toolbox::seems_utf8($content)) {
            $content = Toolbox::encodeInUtf8($content);
         }
+        Toolbox::logDebug("Command executed: ".$url);
+
         return $content;
      }
    }
@@ -438,6 +408,13 @@ class PluginOpenvasOmp {
       return $target;
    }
 
+   /**
+   * @since 1.0
+   *
+   * Get all tasks for a target
+   * @param target_id target ID
+   * @return tasks info as an array
+   */
    static function getTasksForATarget($target_id = false) {
       if (!$target_id) {
          return true;
@@ -448,84 +425,120 @@ class PluginOpenvasOmp {
 
       //Get all tasks
       $tasks_response = self::executeCommand(self::TASK,
-                                             [ 'filter' => [ self::SORT_DESC => 'last'] ]);
+                                             [ 'filter' => [ self::SORT_DESC => 'last', 'rows' => -1] ]);
 
       //Array to store the results
       $results        = array();
 
       foreach ($tasks_response->task as $response) {
-         //For each task, get the target id associated with
-         $tid = strval($response->target->attributes()->id);
-         //If there's no target, go to the next task
-         if (!isset($response->attributes()->id) ||!strval($response->attributes()->id)) {
-            continue;
-         }
 
-         //Check it the tasks
-         $id = strval($response->attributes()->id);
-         if ($tid == $target_id) {
-
-            $progress  = "";
-            $severity  = 0;
-            $scan_date = '';
-            $report_id = '';
-
-            $name    = strval($response->name);
-            $status  = strval($response->status);
-            if ($status != 'Running') {
-              $node = 'last_report';
-            } else {
-              $node = 'current_report';
-            }
-             $progress      = strval($response->progress);
-             if (isset($response->$node->report->severity)) {
-                $severity = strval($response->$node->report->severity);
-             } else {
-                $severity = 0;
-             }
-
-             if (isset($response->$node->report->scan_end)) {
-                $tmp_scan_date = strval($response->$node->report->scan_end);
-                if (!empty($tmp_scan_date)) {
-                   $date_scan_end = new DateTime($tmp_scan_date);
-                   $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
-                }
-             }
-
-            if (isset($response->$node->report->attributes()->id)) {
-               $report_id = strval($response->$node->report->attributes()->id);
-            }
-
-            $config  = strval($response->config->name);
-            $scanner = strval($response->scanner->name);
-
-            $results[$id] = [ 'name'           => $name,
-                               'config'         => $config,
-                               'scanner'        => $scanner,
-                               'status'         => $status,
-                               'progress'       => $progress,
-                               'date_last_scan' => $scan_date,
-                               'severity'       => $severity,
-                               'report'         => $report_id,
-                               'id'             => $id
-                            ];
-         }
+        $tid = strval($response->target->attributes()->id);
+        if ($tid == $target_id) {
+          $ret = self::getOneTaskInfos($response);
+          if (is_array($ret)) {
+            $results[$ret['id']] = $ret;
+          }
+        }
       }
       return $results;
 
    }
 
+   static function getOneTaskInfos($task) {
+     global $CFG_GLPI;
 
-   static function getReportsForATarget($target_id = false) {
-      $target_response = self::executeCommand(self::REPORT, ['target_id' => $target_id]);
-      $results         = array();
-      foreach ($target_response->reports as $response) {
-         $host         = $response->hosts->__toString();
-         $id           = $response->attributes()->id->__toString();
-         $results[$id] = $host;
+     //If there's no target, go to the next task
+     if (!isset($task->attributes()->id) ||!strval($task->attributes()->id)) {
+        return false;
+     }
+
+     //Check it the tasks
+    $id    = strval($task->attributes()->id);
+    $tid   = strval($task->target->attributes()->id);
+    $tname = strval($task->target->name);
+
+    $progress  = "";
+    $severity  = 0;
+    $scan_date = '';
+    $report_id = '';
+
+    $name    = strval($task->name);
+    $status  = strval($task->status);
+    if ($status != 'Running') {
+      $node = 'last_report';
+    } else {
+      $node = 'current_report';
+    }
+    $progress  = strval($task->progress);
+    if (isset($task->$node->report->severity)) {
+      $severity = strval($task->$node->report->severity);
+    } else {
+      $severity = 0;
+    }
+
+    if (isset($task->$node->report->scan_end)) {
+      $tmp_scan_date = strval($task->$node->report->scan_end);
+      if (!empty($tmp_scan_date)) {
+         $date_scan_end = new DateTime($tmp_scan_date);
+         $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
       }
+    }
 
-      return $results;
+    if (isset($task->$node->report)
+      && isset($task->$node->report->attributes()->id)) {
+       $report_id = strval($task->$node->report->attributes()->id);
+    }
 
+    $config  = strval($task->config->name);
+    $scanner = strval($task->scanner->name);
+
+    $results       = [ 'name'           => $name,
+                       'config'         => $config,
+                       'scanner'        => $scanner,
+                       'status'         => $status,
+                       'progress'       => $progress,
+                       'date_last_scan' => $scan_date,
+                       'severity'       => $severity,
+                       'report'         => $report_id,
+                       'id'             => $id,
+                       'target'         => $tid,
+                       'target_name'    => $tname
+                    ];
+    return $results;
    }
+
+  static function isTaskRunning($task_status) {
+    switch ($task_status) {
+      case 'Running':
+      case 'Internal Error':
+      case 'Requested':
+       return true;
+    }
+    return false;
+  }
+
+
+  static function displayDropdown($action, $name, $empty = false) {
+    $response = self::executeCommand($action);
+    $returns = [];
+
+    foreach ($response->$name as $res) {
+      $id = strval($res->attributes()->id);
+      $returns[$id] = strval($res->name);
+    }
+    return Dropdown::showFromArray($name, $returns, ['display_emptychoice' => $empty]);
+  }
+
+  static function addTask($options = []) {
+    $command = "<create_task><name>".$options['name']."</name>";
+    $command.= "<comment>".$options['comment']."</comment>";
+    $command.= "<scanner id='".$options['scanner']."'/>";
+    $command.= "<config id='".$options['config']."'/>";
+    $command.= "<target id='".$options['target']."'/>";
+    $command.= "<schedule id='".$options['schedule']."'/>";
+    $command.= "</create_task>";
+
+    $response = self::executeCommand(self::ADD_TASK, ['command' => $command], true);
+    return ($response->status == '201');
+  }
 }

@@ -31,39 +31,19 @@
 
 include ("../../../inc/includes.php");
 
-$item = new PluginOpenvasItem();
-if (isset($_REQUEST['_in_modal']) && $_REQUEST['_in_modal']) {
-  Html::nullHeader();
-  PluginOpenvasItem::showFormAddTask();
-  Html::nullFooter();
-} else {
-  if (isset($_POST['update'])) {
-     $item->update($_POST);
-     PluginOpenvasItem::updateItemFromOpenvas($_POST['id']);
-  }
-  if (isset($_REQUEST['refresh'])) {
-     PluginOpenvasItem::updateItemFromOpenvas($_REQUEST['id']);
-  } elseif (isset($_GET['action'])
-     && isset($_GET['task_id'])
-        && !empty($_GET['task_id'])) {
+Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
+             "tools", "PluginOpenvasMenu", "PluginOpenvasTask");
 
-    switch ($_GET['action']) {
-      case PluginOpenvasOmp::START_TASK:
-        PluginOpenvasOmp::startTask($_GET['task_id']);
-        break;
-      case PluginOpenvasOmp::CANCEL_TASK:
-        PluginOpenvasOmp::stopTask($_GET['task_id']);
-        break;
-      default:
-        break;
-    }
-  }
-  if (isset($_POST['add'])) {
-     if (isset($_REQUEST['id'])) {
-        unset($_REQUEST['id']);
-     }
-     $item->add($_REQUEST);
-  }
-  Html::back();
+Session::checkRight("config", UPDATE);
 
+if ($_SESSION['glpirefresh_ticket_list'] > 0) {
+   // Refresh automatique  sur tracking.php
+   echo "<script type=\"text/javascript\">\n";
+   echo "setInterval(\"window.location.reload()\",".
+         (60000 * $_SESSION['glpirefresh_ticket_list']).");\n";
+   echo "</script>\n";
 }
+
+PluginOpenvasTask::showTasks();
+
+Html::footer();

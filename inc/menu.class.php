@@ -41,15 +41,32 @@ class PluginOpenvasMenu extends CommonGLPI {
       $menu          = array();
       $menu['title'] = self::getTypeName(2);
       $menu['page']  = PluginOpenvasVulnerability::getSearchURL(false);
+      $menu['links']['search']  = PluginOpenvasTask::getSearchURL(false);
 
       if (PluginOpenvasVulnerability::canView()) {
-         $menu['options']['vulnerability']['title'] = PluginOpenvasVulnerability::getTypeName(2);
-         $menu['options']['vulnerability']['page']  = PluginOpenvasVulnerability::getSearchURL(false);
-         $menu['options']['vulnerability']['links']['search'] = PluginOpenvasVulnerability::getSearchURL(false);
+
+         $image_task  = "<img src='".$CFG_GLPI["root_doc"]."/pics/plan.png' title='";
+         $image_task .= PluginOpenvasTask::getTypeName();
+         $image_task .= "' alt='".PluginOpenvasTask::getTypeName()."'>";
+
+         $image_vuln  = "<img src='".$CFG_GLPI["root_doc"]."/pics/menu_show.png' title='";
+         $image_vuln .= PluginOpenvasVulnerability::getTypeName();
+         $image_vuln .= "' alt='".PluginOpenvasVulnerability::getTypeName()."'>";
+
+         $menu['options']['PluginOpenvasVulnerability']['title'] = PluginOpenvasVulnerability::getTypeName(2);
+         $menu['options']['PluginOpenvasVulnerability']['page']  = PluginOpenvasVulnerability::getSearchURL(false);
+         $menu['options']['PluginOpenvasVulnerability']['links']['search'] = PluginOpenvasVulnerability::getSearchURL(false);
+         $menu['options']['PluginOpenvasVulnerability']['links'][$image_task]  = PluginOpenvasTask::getSearchURL(false);
 
          $menu['rulevulnerability']['title'] = PluginOpenvasRuleVulnerabilityCollection::getTypeName(2);
          $menu['rulevulnerability']['page']  = PluginOpenvasRuleVulnerabilityCollection::getSearchURL(false);
          $menu['rulevulnerability']['links']['search'] = PluginOpenvasRuleVulnerabilityCollection::getSearchURL(false);
+
+         $menu['options']['PluginOpenvasTask']['title'] = _n('Task', 'Tasks', 2);
+         $menu['options']['PluginOpenvasTask']['page']  = PluginOpenvasTask::getSearchURL(false);
+         $menu['options']['PluginOpenvasTask']['links']['search'] = PluginOpenvasTask::getSearchURL(false);
+         $menu['options']['PluginOpenvasTask']['links'][$image_vuln]  = PluginOpenvasVulnerability::getSearchURL(false);
+         $menu['options']['PluginOpenvasTask']['links']['add'] = PluginOpenvasTask::getFormURL(false)."?add=1";
 
       }
       return $menu;
