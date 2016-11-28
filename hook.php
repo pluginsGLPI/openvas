@@ -78,6 +78,7 @@
        $sopt[6105]['datatype']      = 'string';
        $sopt[6105]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
        $sopt[6105]['massiveaction'] = false;
+
   }
 
    return $sopt;

@@ -152,7 +152,10 @@ class PluginOpenvasOmp {
    * @return an array of results, or false if an error occured
    */
    static function getResults($extra_params = false) {
-      return self::executeCommand(self::RESULT, [ 'filter'  => [ 'rows' => -1, 'extra' => $extra_params] ]);
+      return self::executeCommand(self::RESULT,
+                                  [ 'filter'  => [ 'rows' => -1,
+                                                   self::SORT_DESC => 'creation_time',
+                                                   'extra' => $extra_params] ]);
    }
 
    /**
@@ -269,49 +272,6 @@ class PluginOpenvasOmp {
    private function sendCommand(PluginOpenvasConfig $config, $command = '',
                                 $xml = false) {
 
-      /*
-      if ($config->fields['openvas_verify_peer']) {
-         $verify_peer = true;
-      } else {
-         $verify_peer = false;
-      }
-      if ($config->fields['openvas_allow_self_signed']) {
-         $allow_self_signed = true;
-      } else {
-         $allow_self_signed = false;
-      }
-
-      //Set SSL options
-      $context = stream_context_create(array(
-          'ssl' => array(
-             'verify_peer' => $verify_peer,
-             'allow_self_signed' => $allow_self_signed
-          )
-      ));
-
-      $response = null;
-      $errno    = null;
-      $errstr   = null;
-      $content  = '';
-
-      //Connect to OpenVAS using TLS
-      $url    = "tls://".$config->fields['openvas_host'].":".$config->fields['openvas_port'];
-      $socket = @stream_socket_client($url, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
-      if ($errno) {
-         return false;
-      } else {
-         Toolbox::logDebug("Sending command", $command);
-        //Write command in the PHP socket
-        fwrite($socket, $command);
-        //Get the results
-        $content = stream_get_contents($socket);
-        if (!Toolbox::seems_utf8($content)) {
-           $content = Toolbox::encodeInUtf8($content);
-        }
-        //Close the socket
-        fclose($socket);
-     }*/
-
      //Check if omp exists && is executable
      if (!file_exists($config->fields['openvas_omp_path'])
         || !is_executable($config->fields['openvas_omp_path'])
@@ -345,6 +305,8 @@ class PluginOpenvasOmp {
         if (!Toolbox::seems_utf8($content)) {
            $content = Toolbox::encodeInUtf8($content);
         }
+        Toolbox::logDebug("Command executed: ".$url);
+
         return $content;
      }
    }
