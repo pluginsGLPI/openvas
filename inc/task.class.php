@@ -55,7 +55,7 @@ class PluginOpenvasTask extends CommonDBTM {
            .__('Target', 'openvas')."</th><th>"
            ._n("Status", "Statuses", 1)."</th><th>"
            ."</th><th>"
-           .__('Severity', 'openvas')."</th><th>"
+           .__('Threat', 'openvas')."</th><th>"
            .__('Setup')."</th><th>"
            .__('Scanner', 'openvas')."</th><th>"
            .__("Last run")."</th><th>"
@@ -81,7 +81,9 @@ class PluginOpenvasTask extends CommonDBTM {
           }
           echo "<td>$status</td>";
           echo "<td>".PluginOpenvasItem::getTaskActionButton($result['id'], $result['status'])."</td>";
-          echo "<td>".PluginOpenvasItem::displaySeverity($result['status'], $result['severity'])."</td>";
+          echo "<td>".PluginOpenvasItem::displayThreat($result['status'],
+                                                       $result['threat'],
+                                                       $result['severity'])."</td>";
           echo "<td>".$result['scanner']."</td>";
           echo "<td>".$result['config']."</td>";
           echo "<td>".$result['date_last_scan']."</td>";

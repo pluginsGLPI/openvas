@@ -48,7 +48,9 @@ function plugin_init_openvas() {
 
       Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
                             [ 'rulecollections_types' => true]);
-      Plugin::registerClass('PluginOpenvasRuleVulnerability');
+      Plugin::registerClass('PluginOpenvasVulnerability',
+                            ['ticket_types' => true,
+                             'helpdesk_visible_types' => true]);
 
       if (Session::haveRight('config', UPDATE)) {
          $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';

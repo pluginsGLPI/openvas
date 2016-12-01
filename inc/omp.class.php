@@ -63,6 +63,16 @@ class PluginOpenvasOmp {
    const DETAIL = 1; //Get details (for results)
    const NO_DETAIL    = 0; //Do not ask for details
 
+   const THREAT_HIGH = 'High';
+   const THREAT_MEDIUM = 'Medium';
+   const THREAT_LOW = 'Low';
+   const THREAT_NONE = 'None';
+   const THREAT_ERROR = 'Error';
+   
+   //Cache to avoid multiple OpenVAS API queries
+   static $tasks_cache_response = null;
+   static $results_cache_response = null;
+
    /**
    * Get the X first or last item
    * @since 1.0
@@ -423,14 +433,16 @@ class PluginOpenvasOmp {
       //To get all tasks for a target, we first need to get all tasks, and check for each
       //task if it's linked to our target...
 
-      //Get all tasks
-      $tasks_response = self::executeCommand(self::TASK,
-                                             [ 'filter' => [ self::SORT_DESC => 'last', 'rows' => -1] ]);
+      //Get all tasks : if not yet filled:  fill the cache
+      if (self::$tasks_cache_response == null) {
+        self::$tasks_cache_response = self::executeCommand(self::TASK,
+                                                    [ 'filter' => [ self::SORT_DESC => 'last', 'rows' => -1] ]);
+      }
 
       //Array to store the results
       $results        = array();
 
-      foreach ($tasks_response->task as $response) {
+      foreach (self::$tasks_cache_response->task as $response) {
 
         $tid = strval($response->target->attributes()->id);
         if ($tid == $target_id) {
@@ -502,8 +514,9 @@ class PluginOpenvasOmp {
                        'report'         => $report_id,
                        'id'             => $id,
                        'target'         => $tid,
-                       'target_name'    => $tname
-                    ];
+                       'target_name'    => $tname,
+                       'threat'         => PluginOpenvasItem::getThreatForSeverity($severity, 0)
+                      ];
     return $results;
    }
 
@@ -526,7 +539,10 @@ class PluginOpenvasOmp {
       $id = strval($res->attributes()->id);
       $returns[$id] = strval($res->name);
     }
-    return Dropdown::showFromArray($name, $returns, ['display_emptychoice' => $empty]);
+    if ($empty) {
+      $returns[''] = Dropdown::EMPTY_VALUE;
+    }
+    return Dropdown::showFromArray($name, $returns);
   }
 
   static function addTask($options = []) {
@@ -535,7 +551,9 @@ class PluginOpenvasOmp {
     $command.= "<scanner id='".$options['scanner']."'/>";
     $command.= "<config id='".$options['config']."'/>";
     $command.= "<target id='".$options['target']."'/>";
-    $command.= "<schedule id='".$options['schedule']."'/>";
+    if ($options['schedule'] !='') {
+      $command.= "<schedule id='".$options['schedule']."'/>";
+    }
     $command.= "</create_task>";
 
     $response = self::executeCommand(self::ADD_TASK, ['command' => $command], true);

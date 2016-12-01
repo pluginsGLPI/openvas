@@ -113,7 +113,10 @@ class PluginOpenvasConfig extends CommonDBTM {
       Dropdown::showNumber("retention_delay", ['value' => $this->fields['retention_delay'],
                                                'unit' => _n('Day', 'Days', $this->fields['retention_delay'])]);
       echo "</td>";
-      echo "<td colspan='2'></td>";
+      echo "<td>"._n('Request type', 'Request types', 1)."</td>";
+      echo "<td>";
+      Dropdown::show('RequestType', [ 'name' => 'requesttypes_id',  'value' => $this->fields['requesttypes_id']]);
+      echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
@@ -179,6 +182,19 @@ class PluginOpenvasConfig extends CommonDBTM {
    public static function install(Migration $migration) {
       global $DB;
 
+      if (!countElementsInTable('glpi_requesttypes', "`name`='OpenVAS'")) {
+        $requesttype = new RequestType();
+        $requestypes_id = $requesttype->add(['name' => 'OpenVAS']);
+      } else {
+        $iterator = $DB->request('glpi_requesttypes', ['name' => 'OpenVAS']);
+        if ($iterator->numrows()) {
+          $data = $iterator->next();
+          $requesttypes_id = $data['id'];
+        } else {
+          $requesttypes_id = 0;
+        }
+      }
+
       //This class is available since version 1.3.0
       if (!TableExists("glpi_plugin_openvas_configs")) {
          $migration->displayMessage("Install glpi_plugin_openvas_configs");
@@ -191,6 +207,7 @@ class PluginOpenvasConfig extends CommonDBTM {
                      `openvas_host` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_port` int(11) NOT NULL DEFAULT '0',
                      `openvas_console_port` int(11) NOT NULL DEFAULT '0',
+                     `requesttypes_id` int(11) NOT NULL DEFAULT '0',
                      `openvas_username` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
@@ -217,7 +234,8 @@ class PluginOpenvasConfig extends CommonDBTM {
                   'severity_high_color'   => '#ff0000',
                   'severity_medium_color' => '#ffb800',
                   'severity_low_color'    => '#3c9fb4',
-                  'severity_none_color'   => '#000000'
+                  'severity_none_color'   => '#000000',
+                  'requesttypes_id'        => $requesttypes_id
                 ];
          $config->add($tmp);
       }
