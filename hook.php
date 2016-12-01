@@ -29,6 +29,16 @@
  @since     2016
  ---------------------------------------------------------------------- */
 
+ function plugin_openvas_purgeItems(CommonDBTM $obj) {
+   $item = new PluginOpenvasItem();
+   $item->deleteByCriteria(['itemtype' => get_class($obj),
+                            'items_id' => $obj->getID()]);
+   $item = new PluginOpenvasVulnerability_Item();
+   $item->deleteByCriteria(['itemtype' => get_class($obj),
+                            'items_id' => $obj->getID()]);
+
+ }
+
  function plugin_openvas_getAddSearchOptions($itemtype) {
     global $CFG_GLPI;
 

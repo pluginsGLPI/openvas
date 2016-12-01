@@ -113,10 +113,18 @@ class PluginOpenvasConfig extends CommonDBTM {
       Dropdown::showNumber("retention_delay", ['value' => $this->fields['retention_delay'],
                                                'unit' => _n('Day', 'Days', $this->fields['retention_delay'])]);
       echo "</td>";
+      echo "<td>" . __("Number of days for searches", "openvas") . "</td>";
+      echo "<td>";
+      Dropdown::showNumber("search_max_days", ['value' => $this->fields['search_max_days'],
+                                               'unit' => _n('Day', 'Days', $this->fields['search_max_days'])]);
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>"._n('Request type', 'Request types', 1)."</td>";
       echo "<td>";
       Dropdown::show('RequestType', [ 'name' => 'requesttypes_id',  'value' => $this->fields['requesttypes_id']]);
-      echo "</td>";
+      echo "</td><td colspan='2'></td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
@@ -212,6 +220,7 @@ class PluginOpenvasConfig extends CommonDBTM {
                      `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `retention_delay` int(11) NOT NULL DEFAULT '0',
+                     `search_max_days` int(11) NOT NULL DEFAULT '0',
                      `openvas_results_last_sync` datetime DEFAULT NULL,
                      `severity_medium_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `severity_low_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,

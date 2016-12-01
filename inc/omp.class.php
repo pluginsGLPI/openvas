@@ -68,10 +68,10 @@ class PluginOpenvasOmp {
    const THREAT_LOW = 'Low';
    const THREAT_NONE = 'None';
    const THREAT_ERROR = 'Error';
-   
+
    //Cache to avoid multiple OpenVAS API queries
    static $tasks_cache_response = null;
-   static $results_cache_response = null;
+   static $targets_cache_response = null;
 
    /**
    * Get the X first or last item
@@ -139,19 +139,13 @@ class PluginOpenvasOmp {
    * @since 1.0
    *
    * Get one or all targets
-   * @param target_id the target uuid in OpenVAS
-   * @param tasks true si all tasks linked to the target must be collected
    * @return an array of targets, or false if an error occured
    */
-   static function getTargets($target_id = false, $tasks = false, $extra_params = '') {
-     $options = [ 'filter' => ['extra' => $extra_params ] ];
-      if ($target_id) {
-        $options['target_id'] = $target_id;
+   static function getTargets() {
+      if (self::$targets_cache_response == null) {
+        self::$targets_cache_response = self::executeCommand(self::TARGET, []);
       }
-      if ($tasks) {
-        $options['tasks'] = 1;
-      }
-      return self::executeCommand(self::TARGET, $options);
+      return self::$targets_cache_response;
    }
 
    /**
@@ -315,7 +309,6 @@ class PluginOpenvasOmp {
         if (!Toolbox::seems_utf8($content)) {
            $content = Toolbox::encodeInUtf8($content);
         }
-        Toolbox::logDebug("Command executed: ".$url);
 
         return $content;
      }

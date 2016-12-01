@@ -511,11 +511,10 @@ class PluginOpenvasItem extends CommonDBChild {
       $index = 0;
 
       $config = PluginOpenvasConfig::getInstance();
-      $days   = $config->fields['retention_delay'];
+      $days   = $config->fields['search_max_days'];
       $hosts  = [];
 
       //First step : request targets
-      //$response = PluginOpenvasOmp::getTargets(false, false, 'creation_time<'.$days.'d');
       $response = PluginOpenvasOmp::getTargets();
       foreach ($response->target as $target) {
 
@@ -565,7 +564,7 @@ class PluginOpenvasItem extends CommonDBChild {
                                             'openvas_id'   => NOT_AVAILABLE],
                                           $host, $index);
            if ($id) {
-              self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
+              self::updateHostFromLastReport($item, $host, $id);
             }
          }
       }
@@ -790,7 +789,10 @@ class PluginOpenvasItem extends CommonDBChild {
                 FROM `glpi_plugin_openvas_items`
                 WHERE `date_last_seen` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
-         if ($item->delete($target, true)) {
+        $tmp = ['id'               => $target['id'],
+                'openvas_threat'   => NULL,
+                'openvas_severity' => NULL];
+        if ($item->update($tmp)) {
             $index++;
          }
       }
@@ -799,7 +801,7 @@ class PluginOpenvasItem extends CommonDBChild {
    }
 
    static function cronInfo($name) {
-      return array('description' => __("OpenVAS connector synchronization", "openvas"));
+      return array('description' => __("OpenVAS Sync", "openvas"));
    }
 
    //----------------- Install & uninstall -------------------//
