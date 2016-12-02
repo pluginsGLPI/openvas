@@ -29,6 +29,16 @@
  @since     2016
  ---------------------------------------------------------------------- */
 
+ function plugin_openvas_purgeItems(CommonDBTM $obj) {
+   $item = new PluginOpenvasItem();
+   $item->deleteByCriteria(['itemtype' => get_class($obj),
+                            'items_id' => $obj->getID()]);
+   $item = new PluginOpenvasVulnerability_Item();
+   $item->deleteByCriteria(['itemtype' => get_class($obj),
+                            'items_id' => $obj->getID()]);
+
+ }
+
  function plugin_openvas_getAddSearchOptions($itemtype) {
     global $CFG_GLPI;
 
@@ -42,9 +52,9 @@
        $sopt[6100]['massiveaction'] = false;
 
        $sopt[6101]['table']         = 'glpi_plugin_openvas_items';
-       $sopt[6101]['field']         = 'openvas_severity';
-       $sopt[6101]['name']          = __('OpenVAS', 'openvas').'-'.__('Severity', 'openvas');
-       $sopt[6101]['datatype']      = 'float';
+       $sopt[6101]['field']         = 'openvas_threat';
+       $sopt[6101]['name']          = __('OpenVAS', 'openvas').'-'.__('Threat', 'openvas');
+       //$sopt[6101]['datatype']      = 'float';
        $sopt[6101]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
        $sopt[6101]['massiveaction'] = false;
 
@@ -89,11 +99,12 @@
     $table = $searchopt[$ID]["table"];
     $field = $searchopt[$ID]["field"];
     switch ($table.'.'.$field) {
-       case "glpi_plugin_openvas_items.openvas_severity" :
-          return PluginOpenvasItem::displaySeverity(false, $data[$num][0]['name']);
+       case "glpi_plugin_openvas_items.openvas_threat" :
+          return PluginOpenvasItem::displayThreat(false, $data[$num][0]['name'], 0);
     }
     return "";
  }
+
 /***************** Install / uninstall functions **************/
 
 function plugin_openvas_install() {

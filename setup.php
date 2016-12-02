@@ -39,7 +39,7 @@ function plugin_init_openvas() {
    if ($plugin->isActivated('openvas')) {
 
       Plugin::registerClass('PluginOpenvasItem',
-                            [ 'addtabon' => [ 'Computer', 'NetworkEquipment'] ] );
+                            [ 'addtabon' => $CFG_GLPI['networkport_types'] ] );
       Plugin::registerClass('PluginOpenvasVulnerability_Item',
                             [ 'addtabon' => ['PluginOpenvasVulnerability'] ]);
 
@@ -48,7 +48,13 @@ function plugin_init_openvas() {
 
       Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
                             [ 'rulecollections_types' => true]);
-      Plugin::registerClass('PluginOpenvasRuleVulnerability');
+      Plugin::registerClass('PluginOpenvasVulnerability',
+                            ['ticket_types' => true,
+                             'helpdesk_visible_types' => true]);
+
+      foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
+          $PLUGIN_HOOKS['pre_item_purge']['openvas'][$itemtype] = 'plugin_openvas_purgeItems';
+      }
 
       if (Session::haveRight('config', UPDATE)) {
          $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';

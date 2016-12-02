@@ -43,6 +43,7 @@ class PluginOpenvasItem extends CommonDBChild {
 
    static $rightname     = 'config';
    static $host_matching = [];
+   static $tasks_response = null;
 
    public static function getTypeName($nb = 0) {
       return __("Openvas", 'openvas');
@@ -167,7 +168,6 @@ class PluginOpenvasItem extends CommonDBChild {
           foreach ($tasks as $task_id => $task) {
             $tmp['openvas_severity']       = $task['severity'];
             $tmp['openvas_date_last_scan'] = $task['date_last_scan'];
-            $tmp['date_last_seen']         = $_SESSION['glpi_currenttime'];
             $tmp['id'] = $id;
             $openvas_item->update($tmp);
             break;
@@ -194,11 +194,10 @@ class PluginOpenvasItem extends CommonDBChild {
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<td>" . __("Severity", "openvas") . "</td>";
          echo "<td>";
-         if ($openvas_item->fields['openvas_severity'] >= 0) {
-            echo self::displaySeverity(false, $openvas_item->fields['openvas_severity']);
-         } else {
-            echo __('Error');
-         }
+         echo self::displayThreat(false,
+                                  $openvas_item->fields['openvas_threat'],
+                                  $openvas_item->fields['openvas_severity']);
+         echo "</td>";
          echo "<td>" . __("Last run") . "</td>";
          echo "<td>";
          echo Html::convDateTime($openvas_item->fields['openvas_date_last_scan']);
@@ -231,7 +230,8 @@ class PluginOpenvasItem extends CommonDBChild {
                   }
                   echo "<td>$status</td>";
                   echo "<td>".self::getTaskActionButton($task_id, $task['status'])."</td>";
-                  echo "<td>".self::displaySeverity($task['status'], $task['severity'])."</td>";
+                  $threat = self::getThreatForSeverity($task['severity'], false);
+                  echo "<td>".self::displayThreat($task['status'], $threat, $task['severity'])."</td>";
                   echo "<td>".$task['scanner']."</td>";
                   echo "<td>".$task['config']."</td>";
                   echo "<td>".$task['date_last_scan']."</td>";
@@ -243,7 +243,7 @@ class PluginOpenvasItem extends CommonDBChild {
                     echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
                        .__('View in OpenVAS', 'openvas')."\" title=\""
                        .__('View in OpenVAS', 'openvas')."\" >";
-                    echo "</a><";
+                    echo "</a>";
 
                   }
                   echo "</td>";
@@ -254,7 +254,11 @@ class PluginOpenvasItem extends CommonDBChild {
          }
 
          echo "</div>";
+
          Html::closeForm();
+      }
+      if ($openvas_item->fields['openvas_host']) {
+        PluginOpenvasVulnerability_Item::showForItem($item);
       }
    }
 
@@ -337,7 +341,7 @@ class PluginOpenvasItem extends CommonDBChild {
           }
           echo "<td>$status</td>";
           echo "<td>".self::getTaskActionButton($result['id'], $result['status'])."</td>";
-          echo "<td>".self::displaySeverity($result['status'], $result['severity'])."</td>";
+          echo "<td>".self::displayThreat($result['status'], $result['threat'], $result['severity'])."</td>";
           echo "<td>".$result['scanner']."</td>";
           echo "<td>".$result['config']."</td>";
           echo "<td>".$result['date_last_scan']."</td>";
@@ -510,18 +514,26 @@ class PluginOpenvasItem extends CommonDBChild {
       $index = 0;
 
       $config = PluginOpenvasConfig::getInstance();
-      $days = $config->fields['retention_delay'];
+      $days   = $config->fields['search_max_days'];
+      $hosts  = [];
 
       //First step : request targets
-      //$response = PluginOpenvasOmp::getTargets(false, false, 'creation_time<'.$days.'d');
       $response = PluginOpenvasOmp::getTargets();
       foreach ($response->target as $target) {
+
          //Do not process target without host,
          //or 127.0.0.1 or localhost (to large to match a specific asset)
          if (!isset($target->hosts)
             || $target->hosts->__toString() == '127.0.0.1'
                || $target->hosts->__toString() == 'localhost') {
             continue;
+         }
+
+         //Check if the host has already been processed
+         if (!in_array($target->hosts->__toString(), $hosts)) {
+           $hosts[] = $target->hosts->__toString();
+         } else {
+           continue;
          }
 
          //Get openvas UUID
@@ -539,7 +551,7 @@ class PluginOpenvasItem extends CommonDBChild {
          //If the host is linked to an asset: update last task infos
          if ($id) {
             self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
-            //self::updateTargetInfosByReport($item, $tmp['openvas_host'], $id);
+            //self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
          }
       }
 
@@ -550,11 +562,12 @@ class PluginOpenvasItem extends CommonDBChild {
       if (isset($response->report->report->host)) {
         foreach ($response->report->report->host as $ovhost) {
            $host = $ovhost->ip->__toString();
-           $id   = $item->addOrUpdateItem(NOT_AVAILABLE, [ 'openvas_host' => $host,
-                                                           'openvas_id' => NOT_AVAILABLE],
+           $id   = $item->addOrUpdateItem(NOT_AVAILABLE,
+                                          [ 'openvas_host' => $host,
+                                            'openvas_id'   => NOT_AVAILABLE],
                                           $host, $index);
            if ($id) {
-              self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
+              self::updateHostFromLastReport($item, $host, $id);
             }
          }
       }
@@ -579,9 +592,8 @@ class PluginOpenvasItem extends CommonDBChild {
         //Not linked: check if a link could be done
         if ($asset = self::getItemByHost($host, true)) {
            //Link the host to the asset
-           $params['itemtype'] = $asset['itemtype'];
-           $params['items_id'] = $asset['items_id'];
-           $params['date_last_seen'] = $_SESSION['glpi_currenttime'];
+           $params['itemtype']       = $asset['itemtype'];
+           $params['items_id']       = $asset['items_id'];
            $params = Toolbox::addslashes_deep($params);
            if ($id = $this->add($params)) {
               $index++;
@@ -591,7 +603,6 @@ class PluginOpenvasItem extends CommonDBChild {
         //The host was already linked to an asset: update the line in DB
         $current = $iterator->next();
         $params['id'] = $id = $current['id'];
-        $params['date_last_seen'] = $_SESSION['glpi_currenttime'];
         $params = Toolbox::addslashes_deep($params);
         if ($this->update($params)) {
            $index++;
@@ -600,12 +611,13 @@ class PluginOpenvasItem extends CommonDBChild {
      return $id;
    }
 
+
    static function updateHostFromLastReport(PluginOpenvasItem $item, $host, $line_id) {
      $report = PluginOpenvasOmp::getLastReportForAHost($host);
      if (PluginOpenvasOmp::isCodeOK(intval($report->attributes()->status))) {
        if (isset($report->report->host->end)) {
+         Toolbox::logDebug($report->report);
           $tmp['openvas_date_last_scan'] = $report->report->host->end->__toString();
-          $tmp['date_last_seen']         = $_SESSION['glpi_currenttime'];
 
           //Update severity : a little bit of processing is needed
           //First : get all vulnerabilities
@@ -624,29 +636,17 @@ class PluginOpenvasItem extends CommonDBChild {
             }
           }
           if ($severity) {
+            if ($severity < 0) {
+              $severity = 0;
+            }
             $tmp['openvas_severity'] = $severity;
+            $tmp['openvas_threat']   = self::getThreatForSeverity($severity, false);
           }
           $tmp['id'] = $line_id;
-          Toolbox::logDebug($tmp);
           $item->update($tmp);
 
        }
      }
-   }
-
-   static function updateTargetInfosByReport(PluginOpenvasItem $item, $host, $line_id) {
-      $reports = PluginOpenvasOmp::getLastReportForAHost($host);
-      if (PluginOpenvasOmp::isCodeOK(intval($reports->attributes()->status))) {
-         $prog = PluginOpenvasOmp::getPrognosticForAHost($host);
-         if (PluginOpenvasOmp::isCodeOK(intval($prog->attributes()->status))) {
-            if ($prog->report->report->scan_end) {
-               $tmp['openvas_date_last_scan'] = $prog->report->report->scan_end->__toString();
-               $tmp['id'] = $line_id;
-               $item->update($tmp);
-
-            }
-         }
-      }
    }
 
    static function updateTaskInfosForTarget($openvas_id, $line_id) {
@@ -655,8 +655,9 @@ class PluginOpenvasItem extends CommonDBChild {
       if (is_array($ovtasks) && !empty($ovtasks)) {
          $item = new self();
          //Get the last task
-         $ovtask = array_pop($ovtasks);
+         $ovtask = array_shift($ovtasks);
          $tmp    = [ 'openvas_severity'       => $ovtask['severity'],
+                     'openvas_threat'         => self::getThreatForSeverity($ovtask['severity'], false),
                      'openvas_date_last_scan' => $ovtask['date_last_scan'],
                      'id'                     => $line_id
                  ];
@@ -664,45 +665,89 @@ class PluginOpenvasItem extends CommonDBChild {
       }
    }
 
+   static function getThreatForSeverity($severity, $label = true) {
+     if ($severity > 6.9) {
+       $threat = PluginOpenvasOmp::THREAT_HIGH;
+     } elseif ($severity > 3.9) {
+       $threat = PluginOpenvasOmp::THREAT_MEDIUM;
+     } elseif ($severity > 0) {
+       $threat = PluginOpenvasOmp::THREAT_LOW;
+     } elseif ($severity == 0) {
+       $threat = PluginOpenvasOmp::THREAT_NONE;
+     } elseif ($severity < -1) {
+       $threat = PluginOpenvasOmp::THREAT_ERROR;
+     }
+     if ($label) {
+       return self::getThreat($threat);
+     } else {
+       return $threat;
+     }
+   }
+
+   static function getThreat($threat) {
+     $threats = [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
+                 PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
+                 PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
+                 PluginOpenvasOmp::THREAT_NONE   => __('None'),
+                 PluginOpenvasOmp::THREAT_ERROR  => __('Error')
+                ];
+
+     if (isset($threats[$threat])) {
+       return $threats[$threat];
+     } else {
+       return '';
+     }
+   }
+
+   static function dropdownThreat($threat) {
+     return  Dropdown::showFromArray('threat', self::getThreat(),
+                                     [ 'value' => $threat]);
+   }
+
    /**
    * Clean informations that are too old, and not relevant anymore
    * @since 1.0
    * @return the number of targets deleted
    */
-   static function displaySeverity($task_status, $severity) {
+   static function displayThreat($task_status, $threat, $severity) {
 
      $config = PluginOpenvasConfig::getInstance();
      $out    = '';
      $color  = '';
-     $text   = $severity;
 
-     if (PluginOpenvasOmp::isTaskRunning($task_status)) {
+     if ($task_status && PluginOpenvasOmp::isTaskRunning($task_status)) {
        return NOT_AVAILABLE;
      }
 
-     if ($severity == '0.0') {
-       $severity = 0;
+     $text = self::getThreat($threat);
+     if ($severity > 0 ) {
+       $text.= " ($severity)";
      }
 
-     if ($severity > 6.9) {
-       $color = $config->fields['severity_high_color'];
-       $text .= " ("._x('priority', 'High').")";
-     } elseif ($severity > 3.9) {
-       $color = $config->fields['severity_medium_color'];
-       $text .= " ("._x('priority', 'High').")";
-     } elseif ($severity > 0) {
-       $color = $config->fields['severity_low_color'];
-       $text .= " ("._x('priority', 'Low').")";
-     } else {
-       $color = $config->fields['severity_none_color'];
-       $text = __('None');
+     if ($severity == 0) {
+       return $text;
+     }
+
+     switch ($threat) {
+       case PluginOpenvasOmp::THREAT_HIGH:
+          $color = $config->fields['severity_high_color'];
+          break;
+       case PluginOpenvasOmp::THREAT_MEDIUM:
+          $color = $config->fields['severity_medium_color'];
+          break;
+       case PluginOpenvasOmp::THREAT_LOW:
+          $color = $config->fields['severity_low_color'];
+          break;
+       case PluginOpenvasOmp::THREAT_ERROR:
+          $color = $config->fields['severity_none_color'];
+          break;
      }
 
      $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
                border: 0px solid #9BA563; position: relative;' >";
      $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
      $out .= "<div class='center' style='background-color: ".$color.";
-               width: ".$text."; height: 12px' ></div>";
+               width: 90px; height: 30px' ></div>";
      $out .= "</div>";
 
      return $out;
@@ -719,7 +764,8 @@ class PluginOpenvasItem extends CommonDBChild {
 
       $item = new self();
       if ($item->getFromDBByID($itemtype, $items_id)) {
-        return self::displaySeverity($item->fields['openvas_severity']);
+        return self::displayThreat(false, $item->fields['openvas_threat'],
+                                   $item->fields['openvas_severity']);
       } else {
         return '';
       }
@@ -741,18 +787,31 @@ class PluginOpenvasItem extends CommonDBChild {
       //TODO to replace by a non SQL query when dbiterator will be able to handle the query
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_items`
-                WHERE `date_last_seen` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+                WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
-         if ($item->delete($target, true)) {
+        $tmp = ['id'               => $target['id'],
+                'openvas_threat'   => NULL,
+                'openvas_severity' => NULL];
+        if ($item->update($tmp)) {
             $index++;
          }
+      }
+
+      $vuln_item = new PluginOpenvasVulnerability_Item();
+      $ids = [];
+      $query = "SELECT `id`
+                FROM `glpi_plugin_openvas_vulnerabilities_items`
+                WHERE `creation_time` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+      foreach ($DB->request($query, '', true) as $target) {
+        $vuln_item->delete($target);
+        $index++;
       }
       $task->addVolume($index);
       return true;
    }
 
    static function cronInfo($name) {
-      return array('description' => __("OpenVAS connector synchronization", "openvas"));
+      return array('description' => __("OpenVAS Sync", "openvas"));
    }
 
    //----------------- Install & uninstall -------------------//
@@ -775,11 +834,11 @@ class PluginOpenvasItem extends CommonDBChild {
                      `openvas_name` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_host` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_comment` text COLLATE utf8_unicode_ci,
-                     `openvas_severity` float(11) NOT NULL DEFAULT '0',
+                     `openvas_severity` float(11) NOT NULL DEFAULT '-1',
+                     `openvas_threat` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `openvas_date_last_scan` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `date_creation` datetime DEFAULT NULL,
                      `date_mod` datetime DEFAULT NULL,
-                     `date_last_seen` datetime DEFAULT NULL,
                      PRIMARY KEY  (`id`),
                      KEY `name` (`name`),
                      KEY `item` (`itemtype`,`items_id`),
@@ -787,9 +846,9 @@ class PluginOpenvasItem extends CommonDBChild {
                      KEY `openvas_name` (`openvas_name`),
                      KEY `openvas_host` (`openvas_host`),
                      KEY `openvas_severity` (`openvas_severity`),
+                     KEY `openvas_threat` (`openvas_threat`),
                      KEY `openvas_date_last_scan` (`openvas_date_last_scan`),
                      KEY `date_creation` (`date_creation`),
-                     KEY `date_last_seen` (`date_last_seen`),
                      KEY `date_mod` (`date_mod`)
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
