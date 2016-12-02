@@ -168,7 +168,6 @@ class PluginOpenvasItem extends CommonDBChild {
           foreach ($tasks as $task_id => $task) {
             $tmp['openvas_severity']       = $task['severity'];
             $tmp['openvas_date_last_scan'] = $task['date_last_scan'];
-            $tmp['date_last_seen']         = $_SESSION['glpi_currenttime'];
             $tmp['id'] = $id;
             $openvas_item->update($tmp);
             break;
@@ -244,7 +243,7 @@ class PluginOpenvasItem extends CommonDBChild {
                     echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
                        .__('View in OpenVAS', 'openvas')."\" title=\""
                        .__('View in OpenVAS', 'openvas')."\" >";
-                    echo "</a><";
+                    echo "</a>";
 
                   }
                   echo "</td>";
@@ -255,7 +254,11 @@ class PluginOpenvasItem extends CommonDBChild {
          }
 
          echo "</div>";
+
          Html::closeForm();
+      }
+      if ($openvas_item->fields['openvas_host']) {
+        PluginOpenvasVulnerability_Item::showForItem($item);
       }
    }
 
@@ -591,7 +594,6 @@ class PluginOpenvasItem extends CommonDBChild {
            //Link the host to the asset
            $params['itemtype']       = $asset['itemtype'];
            $params['items_id']       = $asset['items_id'];
-           $params['date_last_seen'] = $_SESSION['glpi_currenttime'];
            $params = Toolbox::addslashes_deep($params);
            if ($id = $this->add($params)) {
               $index++;
@@ -601,7 +603,6 @@ class PluginOpenvasItem extends CommonDBChild {
         //The host was already linked to an asset: update the line in DB
         $current = $iterator->next();
         $params['id'] = $id = $current['id'];
-        $params['date_last_seen'] = $_SESSION['glpi_currenttime'];
         $params = Toolbox::addslashes_deep($params);
         if ($this->update($params)) {
            $index++;
@@ -617,7 +618,6 @@ class PluginOpenvasItem extends CommonDBChild {
        if (isset($report->report->host->end)) {
          Toolbox::logDebug($report->report);
           $tmp['openvas_date_last_scan'] = $report->report->host->end->__toString();
-          $tmp['date_last_seen']         = $_SESSION['glpi_currenttime'];
 
           //Update severity : a little bit of processing is needed
           //First : get all vulnerabilities
@@ -699,9 +699,9 @@ class PluginOpenvasItem extends CommonDBChild {
      }
    }
 
-   static function dropdownSecurityLevel($severity) {
-     return  Dropdown::showFromArray('severity', self::getThreat,
-                                     [ 'value' => $severity]);
+   static function dropdownThreat($threat) {
+     return  Dropdown::showFromArray('threat', self::getThreat(),
+                                     [ 'value' => $threat]);
    }
 
    /**
@@ -787,7 +787,7 @@ class PluginOpenvasItem extends CommonDBChild {
       //TODO to replace by a non SQL query when dbiterator will be able to handle the query
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_items`
-                WHERE `date_last_seen` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+                WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
         $tmp = ['id'               => $target['id'],
                 'openvas_threat'   => NULL,
@@ -795,6 +795,16 @@ class PluginOpenvasItem extends CommonDBChild {
         if ($item->update($tmp)) {
             $index++;
          }
+      }
+
+      $vuln_item = new PluginOpenvasVulnerability_Item();
+      $ids = [];
+      $query = "SELECT `id`
+                FROM `glpi_plugin_openvas_vulnerabilities_items`
+                WHERE `creation_time` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+      foreach ($DB->request($query, '', true) as $target) {
+        $vuln_item->delete($target);
+        $index++;
       }
       $task->addVolume($index);
       return true;
@@ -829,7 +839,6 @@ class PluginOpenvasItem extends CommonDBChild {
                      `openvas_date_last_scan` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
                      `date_creation` datetime DEFAULT NULL,
                      `date_mod` datetime DEFAULT NULL,
-                     `date_last_seen` datetime DEFAULT NULL,
                      PRIMARY KEY  (`id`),
                      KEY `name` (`name`),
                      KEY `item` (`itemtype`,`items_id`),
@@ -840,7 +849,6 @@ class PluginOpenvasItem extends CommonDBChild {
                      KEY `openvas_threat` (`openvas_threat`),
                      KEY `openvas_date_last_scan` (`openvas_date_last_scan`),
                      KEY `date_creation` (`date_creation`),
-                     KEY `date_last_seen` (`date_last_seen`),
                      KEY `date_mod` (`date_mod`)
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
