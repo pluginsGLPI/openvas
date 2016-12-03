@@ -78,11 +78,10 @@ class PluginOpenvasItem extends CommonDBChild {
     * @param $withtemplate    (default 0)
     */
    static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
-      $openvas_item = new self();
-      $openvas_item->getFromDBForItem($item->getType(), $item->getID());
+      $ovitem = new self();
+      $ovitem->getFromDBForItem($item->getType(), $item->getID());
 
-      self::showForItem($item, $openvas_item);
-      self::showTasksForATarget($item, $openvas_item);
+      self::showForItem($item, $ovitem);
       return true;
    }
 
@@ -102,6 +101,14 @@ class PluginOpenvasItem extends CommonDBChild {
       }
    }
 
+   /**
+   * Show OpenVAS infos for an asset
+   *
+   * @since 1.0
+   * @param $item the asset's object
+   * @param $openvas_item the OpenVAs item linked to the asset
+   * @return nothing
+   */
    public static function showForItem(CommonDBTM $item, PluginOpenvasItem $openvas_item) {
       global $CFG_GLPI;
       if (isset($openvas_item->fields['id'])) {
@@ -263,12 +270,12 @@ class PluginOpenvasItem extends CommonDBChild {
    }
 
    /**
-   * Fill a PluginOpenvasItem by providing an itemtype and items_id
+   * Return HTML code of a button to start or stop a task
    *
    * @since 1.0
-   * @param itemtype the item type
-   * @param items_id the asset ID
-   * @return true if successfully loaded
+   * @param $task the task ID
+   * @param $status the task current status
+   * @return the HTML code to be displayed
    */
    static function getTaskActionButton($task_id, $status) {
      global $CFG_GLPI;
@@ -301,6 +308,12 @@ class PluginOpenvasItem extends CommonDBChild {
      return $html;
    }
 
+   /**
+   * Display all tasks
+   *
+   * @since 1.0
+   * @return nothing
+   */
    static function showTasks() {
      global $DB, $CFG_GLPI;
 
@@ -359,6 +372,7 @@ class PluginOpenvasItem extends CommonDBChild {
         }
       }
    }
+
    /**
    * Fill a PluginOpenvasItem by providing an itemtype and items_id
    *
@@ -412,12 +426,6 @@ class PluginOpenvasItem extends CommonDBChild {
          return true;
       } else {
          return false;
-      }
-   }
-
-   public static function showTasksForATarget(CommonDBTM $item, PluginOpenvasItem $openvas_item) {
-      if (isset($openvas_item->fields['id'])) {
-         $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
       }
    }
 
@@ -504,7 +512,10 @@ class PluginOpenvasItem extends CommonDBChild {
 
    /**
    * Import or update data coming from OpenVAS
+   *
    * @since 1.0
+   * @param $task the automatic task object
+   * @return nothing
    */
    static function cronOpenvasSynchronize($task) {
       global $DB, $CFG_GLPI;
@@ -551,7 +562,6 @@ class PluginOpenvasItem extends CommonDBChild {
          //If the host is linked to an asset: update last task infos
          if ($id) {
             self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
-            //self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
          }
       }
 
@@ -576,6 +586,14 @@ class PluginOpenvasItem extends CommonDBChild {
       return true;
    }
 
+   /**
+   * Add or update an OpenVAS item linked to an asset
+   *
+   * @since 1.0
+   * @param $item the asset's object
+   * @param $openvas_item the OpenVAs item linked to the asset
+   * @return nothing
+   */
    function addOrUpdateItem($openvas_id, $params = [], $host, &$index) {
      global $DB;
 
@@ -592,8 +610,8 @@ class PluginOpenvasItem extends CommonDBChild {
         //Not linked: check if a link could be done
         if ($asset = self::getItemByHost($host, true)) {
            //Link the host to the asset
-           $params['itemtype']       = $asset['itemtype'];
-           $params['items_id']       = $asset['items_id'];
+           $params['itemtype'] = $asset['itemtype'];
+           $params['items_id'] = $asset['items_id'];
            $params = Toolbox::addslashes_deep($params);
            if ($id = $this->add($params)) {
               $index++;
@@ -601,15 +619,16 @@ class PluginOpenvasItem extends CommonDBChild {
         }
      } else {
         //The host was already linked to an asset: update the line in DB
-        $current = $iterator->next();
+        $current      = $iterator->next();
         $params['id'] = $id = $current['id'];
-        $params = Toolbox::addslashes_deep($params);
+        $params       = Toolbox::addslashes_deep($params);
         if ($this->update($params)) {
            $index++;
         }
      }
      return $id;
    }
+
 
 
    static function updateHostFromLastReport(PluginOpenvasItem $item, $host, $line_id) {
