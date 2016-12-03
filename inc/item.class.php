@@ -41,8 +41,8 @@ class PluginOpenvasItem extends CommonDBChild {
 
   static public $checkParentRights    = CommonDBConnexity::DONT_CHECK_ITEM_RIGHTS;
 
-   static $rightname     = 'config';
-   static $host_matching = [];
+   static $rightname      = 'plugin_openvas_item';
+   static $host_matching  = [];
    static $tasks_response = null;
 
    public static function getTypeName($nb = 0) {
@@ -134,7 +134,7 @@ class PluginOpenvasItem extends CommonDBChild {
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . __("Target", "openvas") . "</td>";
       echo "<td>";
-      if ($alive) {
+      if ($alive && $item->canUpdate()) {
          PluginOpenvasOmp::dropdownTargets('openvas_id', $openvas_item->fields['openvas_id']);
       } else {
          echo __("Cannot contact OpenVAS", "openvas");
@@ -148,7 +148,7 @@ class PluginOpenvasItem extends CommonDBChild {
             .__('View in OpenVAS', 'openvas')."\" >";
          echo "</a>";
 
-         if ($alive) {
+         if ($alive && self::canUpdate()) {
             echo "&nbsp;";
             $form = self::getFormURL(true);
             echo "<a href='$form?id=$id&refresh=1'>"
@@ -213,7 +213,9 @@ class PluginOpenvasItem extends CommonDBChild {
 
          echo "</table>";
 
-         if ($alive && $openvas_item->fields['openvas_id'] != NOT_AVAILABLE) {
+         if ($alive
+            && Session::haveRight('plugin_openvas_task', READ)
+              && $openvas_item->fields['openvas_id'] != NOT_AVAILABLE) {
             $tasks = PluginOpenvasOmp::getTasksForATarget($openvas_item->fields['openvas_id']);
             if (is_array($tasks) && !empty($tasks)) {
                echo "<table class='tab_cadre_fixe' id='taskformtable'>";
@@ -236,7 +238,11 @@ class PluginOpenvasItem extends CommonDBChild {
                     $status .= " (".$task['progress']."%)";
                   }
                   echo "<td>$status</td>";
-                  echo "<td>".self::getTaskActionButton($task_id, $task['status'])."</td>";
+                  if (Session::haveRight('plugin_openvas_task', UPDATE)) {
+                    echo "<td>".self::getTaskActionButton($task_id, $task['status'])."</td>";
+                  } else {
+                    echo "<td></td>";
+                  }
                   $threat = self::getThreatForSeverity($task['severity'], false);
                   echo "<td>".self::displayThreat($task['status'], $threat, $task['severity'])."</td>";
                   echo "<td>".$task['scanner']."</td>";
@@ -264,7 +270,8 @@ class PluginOpenvasItem extends CommonDBChild {
 
          Html::closeForm();
       }
-      if ($openvas_item->fields['openvas_host']) {
+      if ($openvas_item->fields['openvas_host']
+        && Session::haveRight('plugin_openvas_vulnerability', READ)) {
         PluginOpenvasVulnerability_Item::showForItem($item);
       }
    }

@@ -34,7 +34,7 @@ include ("../../../inc/includes.php");
 Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
              "tools", "PluginOpenvasMenu", "PluginOpenvasTask");
 
-Session::checkRight("config", UPDATE);
+Session::checkRight("plugin_openvas_task", READ);
 
 if ($_SESSION['glpirefresh_ticket_list'] > 0) {
    // Refresh automatique  sur tracking.php

@@ -240,6 +240,7 @@ class PluginOpenvasConfig extends CommonDBTM {
                   'openvas_password'      => '',
                   'openvas_omp_path'      => '/usr/bin/omp',
                   'retention_delay'       => 30,
+                  'search_max_days'       => 10,
                   'severity_high_color'   => '#ff0000',
                   'severity_medium_color' => '#ffb800',
                   'severity_low_color'    => '#3c9fb4',

@@ -38,16 +38,25 @@ function plugin_init_openvas() {
    $plugin = new Plugin();
    if ($plugin->isActivated('openvas')) {
 
-      Plugin::registerClass('PluginOpenvasItem',
-                            [ 'addtabon' => $CFG_GLPI['networkport_types'] ] );
-      Plugin::registerClass('PluginOpenvasVulnerability_Item',
-                            [ 'addtabon' => ['PluginOpenvasVulnerability'] ]);
+     Plugin::registerClass('PluginOpenvasProfile',
+                          array('addtabon' => array('Profile')));
+
+      if (Session::haveRight('plugin_openvas_item', READ)) {
+        Plugin::registerClass('PluginOpenvasItem',
+                              [ 'addtabon' => $CFG_GLPI['networkport_types'] ] );
+      }
+      if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
+        Plugin::registerClass('PluginOpenvasVulnerability_Item',
+                              [ 'addtabon' => ['PluginOpenvasVulnerability'] ]);
+      }
 
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
 
-      Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
-                            [ 'rulecollections_types' => true]);
+      if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
+        Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
+                              [ 'rulecollections_types' => true]);
+      }
       Plugin::registerClass('PluginOpenvasVulnerability',
                             ['ticket_types' => true,
                              'helpdesk_visible_types' => true]);
@@ -56,9 +65,7 @@ function plugin_init_openvas() {
           $PLUGIN_HOOKS['pre_item_purge']['openvas'][$itemtype] = 'plugin_openvas_purgeItems';
       }
 
-      if (Session::haveRight('config', UPDATE)) {
-         $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';
-      }
+      $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';
    }
 }
 

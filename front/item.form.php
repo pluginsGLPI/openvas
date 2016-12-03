@@ -31,6 +31,8 @@
 
 include ("../../../inc/includes.php");
 
+Session::checkRight('plugin_openvas_item', READ);
+
 $item = new PluginOpenvasItem();
 if (isset($_REQUEST['_in_modal']) && $_REQUEST['_in_modal']) {
   Html::nullHeader();

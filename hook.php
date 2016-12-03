@@ -43,7 +43,8 @@
     global $CFG_GLPI;
 
     $sopt = [];
-    if (in_array($itemtype, $CFG_GLPI['networkport_types']) || $itemtype == 'AllAssets') {
+    if (Session::haveRight('plugin_openvas_item', READ)
+      && in_array($itemtype, $CFG_GLPI['networkport_types']) || $itemtype == 'AllAssets') {
        $sopt[6100]['table']         = 'glpi_plugin_openvas_items';
        $sopt[6100]['field']         = 'openvas_id';
        $sopt[6100]['name']          = __('OpenVAS', 'openvas').'-'.__("Target", "openvas");
