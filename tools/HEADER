@@ -1,5 +1,3 @@
-<?php
-/*
 /*
  * @version $Id$
  LICENSE
@@ -29,23 +27,3 @@
  @link      http://www.teclib-edition.com/
  @since     2016
  ---------------------------------------------------------------------- */
- ---------------------------------------------------------------------- */
-
-include ('../../../inc/includes.php');
-
-Session::checkSeveralRightsOr(["plugin_openvas_task" => READ,
-                               "plugin_openvas_vulnerability" => READ]);
-
-Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
-             'tools', 'PluginOpenvasMenu', 'PluginOpenvasVulnerability');
-
-if ($_SESSION['glpirefresh_ticket_list'] > 0) {
-   echo "<script type=\"text/javascript\">\n";
-   echo "setInterval(\"window.location.reload()\",".
-        (60000 * $_SESSION['glpirefresh_ticket_list']).");\n";
-   echo "</script>\n";
-}
-
-Search::show('PluginOpenvasVulnerability');
-
-Html::footer();

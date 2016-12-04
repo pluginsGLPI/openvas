@@ -1,13 +1,14 @@
 <?php
 /*
+/*
  * @version $Id$
  LICENSE
 
   This file is part of the openvas plugin.
 
- Order plugin is free software; you can redistribute it and/or modify
+ OpenVAS plugin is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
+ the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version.
 
  openvas plugin is distributed in the hope that it will be useful,
@@ -21,12 +22,13 @@
  @package   openvas
  @author    Teclib'
  @copyright Copyright (c) 2016 Teclib'
- @license   GPLv2+
+ @license   GPLv3
             http://www.gnu.org/licenses/gpl.txt
- @link      https://github.com/pluginsglpi/openvas
+ @link      https://github.com/pluginsGLPI/openvas
  @link      http://www.glpi-project.org/
  @link      http://www.teclib-edition.com/
  @since     2016
+ ---------------------------------------------------------------------- */
  ---------------------------------------------------------------------- */
 
  function plugin_openvas_purgeItems(CommonDBTM $obj) {
