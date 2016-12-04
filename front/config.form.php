@@ -42,9 +42,9 @@ if (isset($_POST["update"])) {
 } elseif (isset($_POST["test"])) {
    $result = PluginOpenvasOmp::ping();
    if (!$result) {
-      Session::addMessageAfterRedirect(__("Cannot connect to Openvas", "openvas", false, ERROR));
+      Session::addMessageAfterRedirect(__("Connection failed"), false, ERROR);
    } else {
-      Session::addMessageAfterRedirect(__("Connection to Openvas successful", "openvas", true, INFO));
+      Session::addMessageAfterRedirect(__("Test successful"), true, INFO);
    }
    Html::back();
 } else {

@@ -151,21 +151,21 @@ class PluginOpenvasTask extends CommonDBTM {
        echo "</tr>";
 
        echo "<tr class='tab_bg_1' align='center'>";
-       echo "<td>".__('Configs', 'openvas')."</td>";
+       echo "<td>".__('Config', 'openvas')."</td>";
        echo "<td>";
        PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::CONFIG, 'config');
        echo "</td>";
        echo "</tr>";
 
        echo "<tr class='tab_bg_1' align='center'>";
-       echo "<td>".__('Targets', 'openvas')."</td>";
+       echo "<td>".__('Target', 'openvas')."</td>";
        echo "<td>";
        PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::TARGET, 'target');
        echo "</td>";
        echo "</tr>";
 
        echo "<tr class='tab_bg_1' align='center'>";
-       echo "<td>".__('Schedules', 'openvas')."</td>";
+       echo "<td>".__('Schedule', 'openvas')."</td>";
        echo "<td>";
        PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::SCHEDULE, 'schedule', true);
        echo "</td>";

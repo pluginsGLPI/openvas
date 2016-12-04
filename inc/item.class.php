@@ -46,7 +46,7 @@ class PluginOpenvasItem extends CommonDBChild {
    static $tasks_response = null;
 
    public static function getTypeName($nb = 0) {
-      return __("Openvas", 'openvas');
+      return __("Openvas Item", 'openvas');
    }
 
    function post_updateItem($history = 1) {
@@ -469,8 +469,8 @@ class PluginOpenvasItem extends CommonDBChild {
       }
 
       //Second step : try to get assets from reports
-      $response = PluginOpenvasOmp::getReports([ 'type' => 'assets',
-                                                 'pos' => 1,
+      $response = PluginOpenvasOmp::getReports([ 'type'   => 'assets',
+                                                 'pos'    => 1,
                                                  'filter' => [ 'extra' => 'modification_time<'.$days.'d' ]]);
       if (isset($response->report->report->host)) {
         foreach ($response->report->report->host as $ovhost) {
@@ -533,7 +533,15 @@ class PluginOpenvasItem extends CommonDBChild {
    }
 
 
-
+   /**
+   * Update last scan date, severity & threat from a task's last report
+   *
+   * @since 1.0
+   * @param $item the asset's object
+   * @param $host the OpenVAS host ID
+   * @param $line_id the glpi_plugin_openvas_items line identifier
+   * @return nothing
+   */
    static function updateHostFromLastReport(PluginOpenvasItem $item, $host, $line_id) {
      $report = PluginOpenvasOmp::getLastReportForAHost($host);
      if (PluginOpenvasOmp::isCodeOK(intval($report->attributes()->status))) {
@@ -571,6 +579,15 @@ class PluginOpenvasItem extends CommonDBChild {
      }
    }
 
+   /**
+   * Update last scan date, severity & threat from a task's last report
+   *
+   * @since 1.0
+   * @param $item the asset's object
+   * @param $host the OpenVAS host ID
+   * @param $line_id the glpi_plugin_openvas_items line identifier
+   * @return nothing
+   */
    static function updateTaskInfosForTarget($openvas_id, $line_id) {
       //Get tasks for this target
       $ovtasks = PluginOpenvasOmp::getTasksForATarget($openvas_id);
@@ -620,7 +637,8 @@ class PluginOpenvasItem extends CommonDBChild {
       //TODO to replace by a non SQL query when dbiterator will be able to handle the query
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_items`
-                WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+                WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(),
+                   INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
         $tmp = ['id'               => $target['id'],
                 'openvas_threat'   => NULL,
@@ -634,7 +652,8 @@ class PluginOpenvasItem extends CommonDBChild {
       $ids = [];
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_vulnerabilities_items`
-                WHERE `creation_time` < DATE_ADD(CURDATE(), INTERVAL -".$config->fields['retention_delay']." DAY)";
+                WHERE `creation_time` < DATE_ADD(CURDATE(),
+                  INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query, '', true) as $target) {
         $vuln_item->delete($target);
         $index++;
@@ -644,7 +663,11 @@ class PluginOpenvasItem extends CommonDBChild {
    }
 
    static function cronInfo($name) {
-      return array('description' => __("OpenVAS Sync", "openvas"));
+      if ($name == 'openvasSynchronize') {
+        return ['description' => __("Synchronize OpenVAS hosts", "openvas")];
+      } else {
+        return ['description' => __("Clean OpenVAS infos", "openvas")];
+      }
    }
 
    //----------------- Install & uninstall -------------------//

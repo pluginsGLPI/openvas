@@ -72,14 +72,14 @@ class PluginOpenvasConfig extends CommonDBTM {
 
       echo "<table class='tab_cadre_fixe'>";
 
-      echo "<tr><th colspan='4'>" . __("Plugin configuration", "openvas") . "</th></tr>";
+      echo "<tr><th colspan='4'>" . __("Configuration") . "</th></tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . __("Host", "openvas") . "</td>";
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_host");
       echo "</td>";
-      echo "<td>" . __("OpenVAS Manager port", "openvas") . "</td>";
+      echo "<td>" . __("Manager port", "openvas") . "</td>";
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_port");
       echo "</td>";
@@ -90,7 +90,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_omp_path");
       echo "</td>";
-      echo "<td>" . __("OpenVAS Console port", "openvas") . "</td>";
+      echo "<td>" . __("Console port", "openvas") . "</td>";
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_console_port");
       echo "</td>";
@@ -98,7 +98,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>" . _n("User", "Users", 1) . "</td>";
+      echo "<td>" . User::getTypeName(1) . "</td>";
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_username");
       echo "</td>";
@@ -121,7 +121,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<td>"._n('Request type', 'Request types', 1)."</td>";
+      echo "<td>".RequestType::getTypeName(1)."</td>";
       echo "<td>";
       Dropdown::show('RequestType', [ 'name' => 'requesttypes_id',  'value' => $this->fields['requesttypes_id']]);
       echo "</td><td colspan='2'></td>";
@@ -154,8 +154,8 @@ class PluginOpenvasConfig extends CommonDBTM {
 
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td colspan='4' align='center'>";
-      echo "<input type='submit' name='update' value=\"" . _sx("button", "Post") . "\" class='submit' >";
-      echo "&nbsp<input type='submit' name='test' value=\"" . _sx("button", "Test connexion") . "\" class='submit' >";
+      echo "<input type='submit' name='update' value=\"" . __("Update") . "\" class='submit' >";
+      echo "&nbsp<input type='submit' name='test' value=\"" . _sx("button", "Test") . "\" class='submit' >";
       echo"</td>";
       echo "</tr>";
 

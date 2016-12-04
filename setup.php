@@ -72,7 +72,7 @@ function plugin_init_openvas() {
 function plugin_version_openvas() {
    global $LANG;
 
-   return [ 'name'           => __("Openvas connector for GLPi", 'openvas'),
+   return [ 'name'           => __("GLPi openvas Connector", 'openvas'),
             'version'        => PLUGIN_OPENVAS_VERSION,
             'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
             'license'        => 'GPLv2+',
