@@ -201,9 +201,7 @@ class PluginOpenvasItem extends CommonDBChild {
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<td>" . __("Severity", "openvas") . "</td>";
          echo "<td>";
-         echo PluginOpenvasToolbox::displayThreat(false,
-                                  $openvas_item->fields['openvas_threat'],
-                                  $openvas_item->fields['openvas_severity']);
+         echo PluginOpenvasToolbox::displayThreat($openvas_item->fields['openvas_threat']);
          echo "</td>";
          echo "<td>" . __("Last run") . "</td>";
          echo "<td>";
@@ -244,7 +242,7 @@ class PluginOpenvasItem extends CommonDBChild {
                     echo "<td></td>";
                   }
                   $threat = PluginOpenvasToolbox::getThreatForSeverity($task['severity'], false);
-                  echo "<td>".PluginOpenvasToolbox::displayThreat($task['status'], $threat, $task['severity'])."</td>";
+                  echo "<td>".PluginOpenvasToolbox::displayThreat($threat)."</td>";
                   echo "<td>".$task['scanner']."</td>";
                   echo "<td>".$task['config']."</td>";
                   echo "<td>".$task['date_last_scan']."</td>";
@@ -614,8 +612,7 @@ class PluginOpenvasItem extends CommonDBChild {
 
       $item = new self();
       if ($item->getFromDBByID($itemtype, $items_id)) {
-        return PluginOpenvasToolbox::displayThreat(false, $item->fields['openvas_threat'],
-                                   $item->fields['openvas_severity']);
+        return PluginOpenvasToolbox::displayThreat($item->fields['openvas_threat']);
       } else {
         return '';
       }

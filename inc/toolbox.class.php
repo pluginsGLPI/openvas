@@ -74,7 +74,8 @@ class PluginOpenvasToolbox {
                  PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
                  PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
                  PluginOpenvasOmp::THREAT_NONE   => __('None'),
-                 PluginOpenvasOmp::THREAT_ERROR  => __('Error')
+                 PluginOpenvasOmp::THREAT_ERROR  => __('Error'),
+                 PluginOpenvasOmp::THREAT_LOG    => __('Log')
                 ];
 
      if (isset($threats[$threat])) {
@@ -84,39 +85,18 @@ class PluginOpenvasToolbox {
      }
    }
 
-   static function dropdownThreat($threat) {
-     return  Dropdown::showFromArray('threat', self::getThreat(),
-                                     [ 'value' => $threat]);
-   }
-
    /**
-   * Clean informations that are too old, and not relevant anymore
+   * Get the color associated with a threat
+   * as defined in the plugin's configuration
    * @since 1.0
    *
-   * @param $task_status the task status
-   * @param $threat the threat status
-   * @param $severity the severity value
-   * @return the HTML display of the threat
+   * @param $threat the threat level
+   * @return the threat color
    */
-   static function displayThreat($task_status, $threat, $severity) {
-
+   static function getThreatColor($threat) {
      $config = PluginOpenvasConfig::getInstance();
-     $out    = '';
-     $color  = '';
 
-     if ($task_status && PluginOpenvasOmp::isTaskRunning($task_status)) {
-       return NOT_AVAILABLE;
-     }
-
-     $text = self::getThreat($threat);
-     if ($severity > 0 ) {
-       $text.= " ($severity)";
-     }
-
-     if ($severity == 0) {
-       return $text;
-     }
-
+     $color = false;
      switch ($threat) {
        case PluginOpenvasOmp::THREAT_HIGH:
           $color = $config->fields['severity_high_color'];
@@ -128,15 +108,38 @@ class PluginOpenvasToolbox {
           $color = $config->fields['severity_low_color'];
           break;
        case PluginOpenvasOmp::THREAT_ERROR:
+       case PluginOpenvasOmp::THREAT_LOG:
           $color = $config->fields['severity_none_color'];
           break;
      }
+     return $color;
+   }
 
+   /**
+   * Clean informations that are too old, and not relevant anymore
+   * @since 1.0
+   *
+   * @param $task_status the task status
+   * @param $threat the threat status
+   * @param $severity the severity value
+   * @return the HTML display of the threat
+   */
+   static function displayThreat($threat) {
+
+     $config = PluginOpenvasConfig::getInstance();
+     $out    = '';
+     $color  = '';
+
+     $text  = self::getThreat($threat);
+     $color = self::getThreatColor($threat);
+     if (!$color) {
+       return $text;
+     }
      $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
                border: 0px solid #9BA563; position: relative;' >";
      $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
      $out .= "<div class='center' style='background-color: ".$color.";
-               width: 90px; height: 30px' ></div>";
+                height: 20px' ></div>";
      $out .= "</div>";
 
      return $out;

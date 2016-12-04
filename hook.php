@@ -109,7 +109,7 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
     $field = $searchopt[$ID]["field"];
     switch ($table.'.'.$field) {
        case "glpi_plugin_openvas_items.openvas_threat" :
-          return PluginOpenvasToolbox::displayThreat(false, $data[$num][0]['name'], 0);
+          return PluginOpenvasToolbox::displayThreat($data[$num][0]['name']);
     }
     return "";
  }

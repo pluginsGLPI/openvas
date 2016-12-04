@@ -67,6 +67,7 @@ class PluginOpenvasOmp {
    const THREAT_LOW    = 'Low';
    const THREAT_NONE   = 'None';
    const THREAT_ERROR  = 'Error';
+   const THREAT_LOG    = 'Log';
 
    //Cache to avoid multiple OpenVAS API queries
    static $tasks_cache_response   = null;
