@@ -58,23 +58,23 @@ class PluginOpenvasOmp {
 
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
-   const NO_FILTER  = 'ignore_filter'; //Do not add filter to XML command
 
-   const DETAIL = 1; //Get details (for results)
-   const NO_DETAIL    = 0; //Do not ask for details
+   const DETAIL    = 1; //Get details (for results)
+   const NO_DETAIL = 0; //Do not ask for details
 
-   const THREAT_HIGH = 'High';
+   const THREAT_HIGH   = 'High';
    const THREAT_MEDIUM = 'Medium';
-   const THREAT_LOW = 'Low';
-   const THREAT_NONE = 'None';
-   const THREAT_ERROR = 'Error';
+   const THREAT_LOW    = 'Low';
+   const THREAT_NONE   = 'None';
+   const THREAT_ERROR  = 'Error';
 
    //Cache to avoid multiple OpenVAS API queries
-   static $tasks_cache_response = null;
+   static $tasks_cache_response   = null;
    static $targets_cache_response = null;
 
    /**
    * Get the X first or last item
+   *
    * @since 1.0
    * @param $options options as an array
    * @return a string representing the filter to be applied during query
@@ -187,9 +187,9 @@ class PluginOpenvasOmp {
    }
 
    /**
+   * Get one or all tasks
    * @since 1.0
    *
-   * Get one or all tasks
    * @param task_id the uuid of a task, or false to get all tasks
    * @return an array of tasks, or false if an error occured
    */
@@ -219,8 +219,7 @@ class PluginOpenvasOmp {
    */
    static function startTask($task_id = 0) {
       return self::executeCommand(self::START_TASK,
-                                  [ 'task_id' => $task_id,
-                                    self::NO_FILTER => 1 ]);
+                                  [ 'task_id' => $task_id ]);
    }
 
    /**
@@ -232,8 +231,7 @@ class PluginOpenvasOmp {
    */
    static function stopTask($task_id = 0) {
       return self::executeCommand(self::CANCEL_TASK,
-                                  [ 'task_id' => $task_id,
-                                    self::NO_FILTER => 1 ]);
+                                  [ 'task_id' => $task_id ]);
    }
 
    /**
@@ -325,7 +323,8 @@ class PluginOpenvasOmp {
       $config  = PluginOpenvasConfig::getInstance();
       $errCode = $errStr = '';
       $result  = false;
-      $fp = @fsockopen($config->fields['openvas_host'], $config->fields['openvas_port'],
+      $fp = @fsockopen($config->fields['openvas_host'],
+                       $config->fields['openvas_port'],
                        $errCode, $errStr, 1);
       if ($errCode == 0) {
          $result = true;
@@ -394,9 +393,9 @@ class PluginOpenvasOmp {
          return false;
       }
 
-      $options = [ 'filter'     => [ 'first'         => 1,
-                                    self::SORT_DESC => 'name',
-                                    'rows'          => 1, ],
+      $options = [ 'filter' => [ 'first'         => 1,
+                                 self::SORT_DESC => 'name',
+                                 'rows'          => 1, ],
                    'target_id' => $target_id
                  ];
       $target_response = self::executeCommand(self::TARGET, $options);
@@ -412,9 +411,9 @@ class PluginOpenvasOmp {
    }
 
    /**
+   * Get all tasks for a target
    * @since 1.0
    *
-   * Get all tasks for a target
    * @param target_id target ID
    * @return tasks info as an array
    */
@@ -428,8 +427,12 @@ class PluginOpenvasOmp {
 
       //Get all tasks : if not yet filled:  fill the cache
       if (self::$tasks_cache_response == null) {
-        self::$tasks_cache_response = self::executeCommand(self::TASK,
-                                                    [ 'filter' => [ self::SORT_DESC => 'last', 'rows' => -1] ]);
+        self::$tasks_cache_response
+          = self::executeCommand(self::TASK,
+                                 [ 'filter' => [ self::SORT_DESC => 'last',
+                                                 'rows' => -1
+                                               ]
+                                 ]);
       }
 
       //Array to store the results
@@ -449,6 +452,13 @@ class PluginOpenvasOmp {
 
    }
 
+   /**
+   * Get infos for a task as an arry
+   * @since 1.0
+   *
+   * @param task task ID
+   * @return task infos as an array
+   */
    static function getOneTaskInfos($task) {
      global $CFG_GLPI;
 
@@ -513,6 +523,13 @@ class PluginOpenvasOmp {
     return $results;
    }
 
+   /**
+   * Indicates in an OpenVAS task is currently running
+   * @since 1.0
+   *
+   * @param task_status the current status or a task
+   * @return true is the task is running, false if it's not running
+   */
   static function isTaskRunning($task_status) {
     switch ($task_status) {
       case 'Running':
@@ -524,9 +541,18 @@ class PluginOpenvasOmp {
   }
 
 
+  /**
+  * Display a dropdown with a list of values coming from OpenVAS
+  * @since 1.0
+  *
+  * @param $action the adction to do (get task, target, etc)
+  * @param $name the dropdown name
+  * @param $empty display an empty value in the dropdown
+  * @return the rand value of the dropdown
+  */
   static function displayDropdown($action, $name, $empty = false) {
     $response = self::executeCommand($action);
-    $returns = [];
+    $returns  = [];
 
     foreach ($response->$name as $res) {
       $id = strval($res->attributes()->id);
@@ -538,6 +564,13 @@ class PluginOpenvasOmp {
     return Dropdown::showFromArray($name, $returns);
   }
 
+  /**
+  * Add a task
+  * @since 1.0
+  *
+  * @param $options the task parameters
+  * @return true if the task was correctly added
+  */
   static function addTask($options = []) {
     $command = "<create_task><name>".$options['name']."</name>";
     $command.= "<comment>".$options['comment']."</comment>";
@@ -549,7 +582,8 @@ class PluginOpenvasOmp {
     }
     $command.= "</create_task>";
 
-    $response = self::executeCommand(self::ADD_TASK, ['command' => $command], true);
+    $response = self::executeCommand(self::ADD_TASK,
+                                     ['command' => $command], true);
     return ($response->status == '201');
   }
 }

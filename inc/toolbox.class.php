@@ -35,6 +35,14 @@ if (!defined('GLPI_ROOT')){
 
 class PluginOpenvasToolbox {
 
+  /**
+  * Get a threat based on a severity value
+  *
+  * @since 1.0
+  * @param $severity the value
+  * @param label get the threat label (true) or value (false)
+  * @return the threat label or value
+  */
    static function getThreatForSeverity($severity, $label = true) {
      if ($severity > 6.9) {
        $threat = PluginOpenvasOmp::THREAT_HIGH;
@@ -54,6 +62,13 @@ class PluginOpenvasToolbox {
      }
    }
 
+   /**
+   * Get a threat label
+   *
+   * @since 1.0
+   * @param $threat the threat value
+   * @return the threat label
+   */
    static function getThreat($threat) {
      $threats = [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
                  PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
@@ -77,7 +92,11 @@ class PluginOpenvasToolbox {
    /**
    * Clean informations that are too old, and not relevant anymore
    * @since 1.0
-   * @return the number of targets deleted
+   *
+   * @param $task_status the task status
+   * @param $threat the threat status
+   * @param $severity the severity value
+   * @return the HTML display of the threat
    */
    static function displayThreat($task_status, $threat, $severity) {
 

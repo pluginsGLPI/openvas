@@ -41,6 +41,13 @@ class PluginOpenvasTask extends CommonDBTM {
       return _n("Task", 'Tasks', $nb);
    }
 
+
+   /**
+   * Display the list of OpenVAS tasks
+   * @since 1.0
+   *
+   * @return nothing
+   */
    static function showTasks() {
      global $DB, $CFG_GLPI;
 
@@ -107,6 +114,12 @@ class PluginOpenvasTask extends CommonDBTM {
       }
    }
 
+   /**
+   * Display a form to add a task
+   * @since 1.0
+   *
+   * @return nothing
+   */
    static function showAddTaskForm() {
 
      echo "<form name='addtask' method='post'
