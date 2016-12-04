@@ -55,7 +55,6 @@
        $sopt[6101]['table']         = 'glpi_plugin_openvas_items';
        $sopt[6101]['field']         = 'openvas_threat';
        $sopt[6101]['name']          = __('OpenVAS', 'openvas').'-'.__('Threat', 'openvas');
-       //$sopt[6101]['datatype']      = 'float';
        $sopt[6101]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
        $sopt[6101]['massiveaction'] = false;
 
@@ -90,6 +89,12 @@
        $sopt[6105]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
        $sopt[6105]['massiveaction'] = false;
 
+       $sopt[6106]['table']         = 'glpi_plugin_openvas_items';
+       $sopt[6106]['field']         = 'openvas_severity';
+       $sopt[6106]['name']          = __('OpenVAS', 'openvas').'-'.__('Severity', 'openvas');
+       $sopt[6106]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6106]['massiveaction'] = false;
+
   }
 
    return $sopt;
@@ -101,7 +106,7 @@
     $field = $searchopt[$ID]["field"];
     switch ($table.'.'.$field) {
        case "glpi_plugin_openvas_items.openvas_threat" :
-          return PluginOpenvasItem::displayThreat(false, $data[$num][0]['name'], 0);
+          return PluginOpenvasToolbox::displayThreat(false, $data[$num][0]['name'], 0);
     }
     return "";
  }

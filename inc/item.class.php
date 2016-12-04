@@ -201,7 +201,7 @@ class PluginOpenvasItem extends CommonDBChild {
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<td>" . __("Severity", "openvas") . "</td>";
          echo "<td>";
-         echo self::displayThreat(false,
+         echo PluginOpenvasToolbox::displayThreat(false,
                                   $openvas_item->fields['openvas_threat'],
                                   $openvas_item->fields['openvas_severity']);
          echo "</td>";
@@ -239,12 +239,12 @@ class PluginOpenvasItem extends CommonDBChild {
                   }
                   echo "<td>$status</td>";
                   if (Session::haveRight('plugin_openvas_task', UPDATE)) {
-                    echo "<td>".self::getTaskActionButton($task_id, $task['status'])."</td>";
+                    echo "<td>".PluginOpenvasTask::getTaskActionButton(self::getFormURL(true), $task_id, $task['status'])."</td>";
                   } else {
                     echo "<td></td>";
                   }
-                  $threat = self::getThreatForSeverity($task['severity'], false);
-                  echo "<td>".self::displayThreat($task['status'], $threat, $task['severity'])."</td>";
+                  $threat = PluginOpenvasToolbox::getThreatForSeverity($task['severity'], false);
+                  echo "<td>".PluginOpenvasToolbox::displayThreat($task['status'], $threat, $task['severity'])."</td>";
                   echo "<td>".$task['scanner']."</td>";
                   echo "<td>".$task['config']."</td>";
                   echo "<td>".$task['date_last_scan']."</td>";
@@ -273,110 +273,6 @@ class PluginOpenvasItem extends CommonDBChild {
       if ($openvas_item->fields['openvas_host']
         && Session::haveRight('plugin_openvas_vulnerability', READ)) {
         PluginOpenvasVulnerability_Item::showForItem($item);
-      }
-   }
-
-   /**
-   * Return HTML code of a button to start or stop a task
-   *
-   * @since 1.0
-   * @param $task the task ID
-   * @param $status the task current status
-   * @return the HTML code to be displayed
-   */
-   static function getTaskActionButton($task_id, $status) {
-     global $CFG_GLPI;
-
-     $form = self::getFormURL(true);
-     $html = '';
-     switch ($status) {
-       case 'Done':
-       case 'New':
-       case 'Stopped':
-       $label = __('Start Requested', 'openvas');
-       $html = "<a href='$form?task_id=$task_id&action=".PluginOpenvasOmp::START_TASK."'>"
-           ."<img src='".$CFG_GLPI["root_doc"]."/plugins/openvas/pics/start.png'
-                  alt='$label' title='$label'></a>";
-           break;
-
-       case 'Running':
-       case 'Internal Error':
-       case 'Requested':
-       $label = __('Stop Requested', 'openvas');
-       $html = "<a href='$form?task_id=$task_id&action=".PluginOpenvasOmp::CANCEL_TASK."'>"
-           ."<img src='".$CFG_GLPI["root_doc"]."/plugins/openvas/pics/stop.png'
-                  alt='$label' title='$label'></a>";
-          break;
-
-       case 'Delete requested':
-       case 'Stop Requested':
-        break;
-     }
-     return $html;
-   }
-
-   /**
-   * Display all tasks
-   *
-   * @since 1.0
-   * @return nothing
-   */
-   static function showTasks() {
-     global $DB, $CFG_GLPI;
-
-     $alive = PluginOpenvasOmp::ping();
-     if ($alive) {
-
-       $tasks = PluginOpenvasOmp::getTasks();
-
-        echo "<table class='tab_cadre_fixe' id='taskformtable'>";
-        echo "<tr class='tab_bg_1' align='center'>";
-        echo "<th>"._n('Task', 'Tasks', 1)."</th><th>"
-           .__('Target', 'openvas')."</th><th>"
-           ._n("Status", "Statuses", 1)."</th><th>"
-           ."</th><th>"
-           .__('Severity', 'openvas')."</th><th>"
-           .__('Setup')."</th><th>"
-           .__('Scanner', 'openvas')."</th><th>"
-           .__("Last run")."</th><th>"
-           ._n("Report", "Reports", 1)."</th></tr>";
-
-
-        foreach ($tasks as $task) {
-          $result = PluginOpenvasOmp::getOneTaskInfos($task);
-          if (!is_array($result)) {
-            continue;
-          }
-          echo "<tr class='tab_bg_1' align='center'>";
-          $link = PluginOpenvasConfig::getConsoleURL();
-          $link.= "?cmd=get_task&task_id=".$task['id'];
-          echo "<td><a href='$link' target='_blank'>".$result['name']."</a></td>";
-
-          $link.= "?cmd=get_target&target_id=".$result['target'];
-          echo "<td><a href='$link' target='_blank'>".$result['target_name']."</a></td>";
-
-          $status = $result['status'];
-          if ($result['progress'] && $result['progress'] > 0) {
-            $status .= " (".$result['progress']."%)";
-          }
-          echo "<td>$status</td>";
-          echo "<td>".self::getTaskActionButton($result['id'], $result['status'])."</td>";
-          echo "<td>".self::displayThreat($result['status'], $result['threat'], $result['severity'])."</td>";
-          echo "<td>".$result['scanner']."</td>";
-          echo "<td>".$result['config']."</td>";
-          echo "<td>".$result['date_last_scan']."</td>";
-          echo "<td>";
-          if (!PluginOpenvasOmp::isTaskRunning($result['status'])) {
-            $link = PluginOpenvasConfig::getConsoleURL();
-            $link.= "?cmd=get_report&report_id=".$result['report'];
-            echo "<a href='$link' target='_blank'>";
-            echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
-               .__('View in OpenVAS', 'openvas')."\" title=\""
-               .__('View in OpenVAS', 'openvas')."\" >";
-            echo "</a>";
-          }
-            echo "</td></tr>";
-        }
       }
    }
 
@@ -666,7 +562,7 @@ class PluginOpenvasItem extends CommonDBChild {
               $severity = 0;
             }
             $tmp['openvas_severity'] = $severity;
-            $tmp['openvas_threat']   = self::getThreatForSeverity($severity, false);
+            $tmp['openvas_threat']   = PluginOpenvasToolbox::getThreatForSeverity($severity, false);
           }
           $tmp['id'] = $line_id;
           $item->update($tmp);
@@ -683,102 +579,13 @@ class PluginOpenvasItem extends CommonDBChild {
          //Get the last task
          $ovtask = array_shift($ovtasks);
          $tmp    = [ 'openvas_severity'       => $ovtask['severity'],
-                     'openvas_threat'         => self::getThreatForSeverity($ovtask['severity'], false),
+                     'openvas_threat'         => PluginOpenvasToolbox::getThreatForSeverity($ovtask['severity'], false),
                      'openvas_date_last_scan' => $ovtask['date_last_scan'],
                      'id'                     => $line_id
                  ];
          $item->update($tmp);
       }
    }
-
-   static function getThreatForSeverity($severity, $label = true) {
-     if ($severity > 6.9) {
-       $threat = PluginOpenvasOmp::THREAT_HIGH;
-     } elseif ($severity > 3.9) {
-       $threat = PluginOpenvasOmp::THREAT_MEDIUM;
-     } elseif ($severity > 0) {
-       $threat = PluginOpenvasOmp::THREAT_LOW;
-     } elseif ($severity == 0) {
-       $threat = PluginOpenvasOmp::THREAT_NONE;
-     } elseif ($severity < -1) {
-       $threat = PluginOpenvasOmp::THREAT_ERROR;
-     }
-     if ($label) {
-       return self::getThreat($threat);
-     } else {
-       return $threat;
-     }
-   }
-
-   static function getThreat($threat) {
-     $threats = [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
-                 PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
-                 PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
-                 PluginOpenvasOmp::THREAT_NONE   => __('None'),
-                 PluginOpenvasOmp::THREAT_ERROR  => __('Error')
-                ];
-
-     if (isset($threats[$threat])) {
-       return $threats[$threat];
-     } else {
-       return '';
-     }
-   }
-
-   static function dropdownThreat($threat) {
-     return  Dropdown::showFromArray('threat', self::getThreat(),
-                                     [ 'value' => $threat]);
-   }
-
-   /**
-   * Clean informations that are too old, and not relevant anymore
-   * @since 1.0
-   * @return the number of targets deleted
-   */
-   static function displayThreat($task_status, $threat, $severity) {
-
-     $config = PluginOpenvasConfig::getInstance();
-     $out    = '';
-     $color  = '';
-
-     if ($task_status && PluginOpenvasOmp::isTaskRunning($task_status)) {
-       return NOT_AVAILABLE;
-     }
-
-     $text = self::getThreat($threat);
-     if ($severity > 0 ) {
-       $text.= " ($severity)";
-     }
-
-     if ($severity == 0) {
-       return $text;
-     }
-
-     switch ($threat) {
-       case PluginOpenvasOmp::THREAT_HIGH:
-          $color = $config->fields['severity_high_color'];
-          break;
-       case PluginOpenvasOmp::THREAT_MEDIUM:
-          $color = $config->fields['severity_medium_color'];
-          break;
-       case PluginOpenvasOmp::THREAT_LOW:
-          $color = $config->fields['severity_low_color'];
-          break;
-       case PluginOpenvasOmp::THREAT_ERROR:
-          $color = $config->fields['severity_none_color'];
-          break;
-     }
-
-     $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
-               border: 0px solid #9BA563; position: relative;' >";
-     $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
-     $out .= "<div class='center' style='background-color: ".$color.";
-               width: 90px; height: 30px' ></div>";
-     $out .= "</div>";
-
-     return $out;
-   }
-
 
    /**
    * Display severity for an asset
@@ -790,7 +597,7 @@ class PluginOpenvasItem extends CommonDBChild {
 
       $item = new self();
       if ($item->getFromDBByID($itemtype, $items_id)) {
-        return self::displayThreat(false, $item->fields['openvas_threat'],
+        return PluginOpenvasToolbox::displayThreat(false, $item->fields['openvas_threat'],
                                    $item->fields['openvas_severity']);
       } else {
         return '';

@@ -80,8 +80,8 @@ class PluginOpenvasTask extends CommonDBTM {
             $status .= " (".$result['progress']."%)";
           }
           echo "<td>$status</td>";
-          echo "<td>".PluginOpenvasItem::getTaskActionButton($result['id'], $result['status'])."</td>";
-          echo "<td>".PluginOpenvasItem::displayThreat($result['status'],
+          echo "<td>".self::getTaskActionButton($result['id'], $result['status'])."</td>";
+          echo "<td>".PluginOpenvasToolbox::displayThreat($result['status'],
                                                        $result['threat'],
                                                        $result['severity'])."</td>";
           echo "<td>".$result['scanner']."</td>";
@@ -169,4 +169,43 @@ class PluginOpenvasTask extends CommonDBTM {
      Html::closeForm();
 
    }
+
+   /**
+   * Return HTML code of a button to start or stop a task
+   *
+   * @since 1.0
+   * @param $task the task ID
+   * @param $status the task current status
+   * @return the HTML code to be displayed
+   */
+   static function getTaskActionButton($url, $task_id, $status) {
+     global $CFG_GLPI;
+
+     $html = '';
+     switch ($status) {
+       case 'Done':
+       case 'New':
+       case 'Stopped':
+       $label = __('Start Requested', 'openvas');
+       $html = "<a href='$url?task_id=$task_id&action=".PluginOpenvasOmp::START_TASK."'>"
+           ."<img src='".$CFG_GLPI["root_doc"]."/plugins/openvas/pics/start.png'
+                  alt='$label' title='$label'></a>";
+           break;
+
+       case 'Running':
+       case 'Internal Error':
+       case 'Requested':
+       $label = __('Stop Requested', 'openvas');
+       $html = "<a href='$url?task_id=$task_id&action=".PluginOpenvasOmp::CANCEL_TASK."'>"
+           ."<img src='".$CFG_GLPI["root_doc"]."/plugins/openvas/pics/stop.png'
+                  alt='$label' title='$label'></a>";
+          break;
+
+       case 'Delete requested':
+       case 'Stop Requested':
+        break;
+     }
+     return $html;
+   }
+
 }

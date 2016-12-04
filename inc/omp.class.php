@@ -508,7 +508,7 @@ class PluginOpenvasOmp {
                        'id'             => $id,
                        'target'         => $tid,
                        'target_name'    => $tname,
-                       'threat'         => PluginOpenvasItem::getThreatForSeverity($severity, 0)
+                       'threat'         => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
                       ];
     return $results;
    }
