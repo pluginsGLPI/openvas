@@ -462,7 +462,8 @@ class PluginOpenvasItem extends CommonDBChild {
 
          //If the host is linked to an asset: update last task infos
          if ($id) {
-            self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
+            //self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
+            self::updateTaskInfosForTarget($tmm['openvas_id'], $id);
          }
       }
 
@@ -478,7 +479,8 @@ class PluginOpenvasItem extends CommonDBChild {
                                             'openvas_id'   => NOT_AVAILABLE],
                                           $host, $index);
            if ($id) {
-              self::updateHostFromLastReport($item, $host, $id);
+//              self::updateHostFromLastReport($item, $host, $id);
+              self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
             }
          }
       }

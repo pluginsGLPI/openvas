@@ -87,10 +87,10 @@ class PluginOpenvasTask extends CommonDBTM {
             $status .= " (".$result['progress']."%)";
           }
           echo "<td>$status</td>";
-          echo "<td>".self::getTaskActionButton($result['id'], $result['status'])."</td>";
-          echo "<td>".PluginOpenvasToolbox::displayThreat($result['status'],
-                                                       $result['threat'],
-                                                       $result['severity'])."</td>";
+          echo "<td>".self::getTaskActionButton(self::getFormURL(true),
+                                                $result['id'],
+                                                $result['status'])."</td>";
+          echo "<td>".PluginOpenvasToolbox::displayThreat($result['threat'])."</td>";
           echo "<td>".$result['scanner']."</td>";
           echo "<td>".$result['config']."</td>";
           echo "<td>".$result['date_last_scan']."</td>";

@@ -139,7 +139,7 @@ class PluginOpenvasToolbox {
                border: 0px solid #9BA563; position: relative;' >";
      $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
      $out .= "<div class='center' style='background-color: ".$color.";
-                height: 20px' ></div>";
+                width: 70px;height: 20px' ></div>";
      $out .= "</div>";
 
      return $out;
