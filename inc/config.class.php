@@ -191,16 +191,16 @@ class PluginOpenvasConfig extends CommonDBTM {
       global $DB;
 
       if (!countElementsInTable('glpi_requesttypes', "`name`='OpenVAS'")) {
-        $requesttype = new RequestType();
-        $requestypes_id = $requesttype->add(['name' => 'OpenVAS']);
+         $requesttype = new RequestType();
+         $requestypes_id = $requesttype->add(['name' => 'OpenVAS']);
       } else {
-        $iterator = $DB->request('glpi_requesttypes', ['name' => 'OpenVAS']);
-        if ($iterator->numrows()) {
-          $data = $iterator->next();
-          $requesttypes_id = $data['id'];
-        } else {
-          $requesttypes_id = 0;
-        }
+         $iterator = $DB->request('glpi_requesttypes', ['name' => 'OpenVAS']);
+         if ($iterator->numrows()) {
+            $data = $iterator->next();
+            $requesttypes_id = $data['id'];
+         } else {
+            $requesttypes_id = 0;
+         }
       }
 
       //This class is available since version 1.3.0

@@ -35,31 +35,31 @@ if (!defined('GLPI_ROOT')){
 
 class PluginOpenvasToolbox {
 
-  /**
-  * Get a threat based on a severity value
-  *
-  * @since 1.0
-  * @param $severity the value
-  * @param label get the threat label (true) or value (false)
-  * @return the threat label or value
-  */
+   /**
+    * Get a threat based on a severity value
+    *
+    * @since 1.0
+    * @param $severity the value
+    * @param label get the threat label (true) or value (false)
+    * @return the threat label or value
+    */
    static function getThreatForSeverity($severity, $label = true) {
-     if ($severity > 6.9) {
-       $threat = PluginOpenvasOmp::THREAT_HIGH;
-     } elseif ($severity > 3.9) {
-       $threat = PluginOpenvasOmp::THREAT_MEDIUM;
-     } elseif ($severity > 0) {
-       $threat = PluginOpenvasOmp::THREAT_LOW;
-     } elseif ($severity == 0) {
-       $threat = PluginOpenvasOmp::THREAT_NONE;
-     } elseif ($severity < -1) {
-       $threat = PluginOpenvasOmp::THREAT_ERROR;
-     }
-     if ($label) {
-       return self::getThreat($threat);
-     } else {
-       return $threat;
-     }
+      if ($severity > 6.9) {
+         $threat = PluginOpenvasOmp::THREAT_HIGH;
+      } else if ($severity > 3.9) {
+         $threat = PluginOpenvasOmp::THREAT_MEDIUM;
+      } else if ($severity > 0) {
+         $threat = PluginOpenvasOmp::THREAT_LOW;
+      } else if ($severity == 0) {
+         $threat = PluginOpenvasOmp::THREAT_NONE;
+      } else if ($severity < -1) {
+         $threat = PluginOpenvasOmp::THREAT_ERROR;
+      }
+      if ($label) {
+         return self::getThreat($threat);
+      } else {
+         return $threat;
+      }
    }
 
    /**
@@ -88,11 +88,11 @@ class PluginOpenvasToolbox {
    static function getThreat($threat) {
      $threats = self::getThreatLevels();
 
-     if (isset($threats[$threat])) {
-       return $threats[$threat];
-     } else {
-       return '';
-     }
+      if (isset($threats[$threat])) {
+         return $threats[$threat];
+      } else {
+         return '';
+      }
    }
 
    /**
@@ -118,25 +118,25 @@ class PluginOpenvasToolbox {
    * @return the threat color
    */
    static function getThreatColor($threat) {
-     $config = PluginOpenvasConfig::getInstance();
+      $config = PluginOpenvasConfig::getInstance();
 
-     $color = false;
-     switch ($threat) {
-       case PluginOpenvasOmp::THREAT_HIGH:
-          $color = $config->fields['severity_high_color'];
-          break;
-       case PluginOpenvasOmp::THREAT_MEDIUM:
-          $color = $config->fields['severity_medium_color'];
-          break;
-       case PluginOpenvasOmp::THREAT_LOW:
-          $color = $config->fields['severity_low_color'];
-          break;
-       case PluginOpenvasOmp::THREAT_ERROR:
-       case PluginOpenvasOmp::THREAT_LOG:
-          $color = $config->fields['severity_none_color'];
-          break;
-     }
-     return $color;
+      $color = false;
+      switch ($threat) {
+         case PluginOpenvasOmp::THREAT_HIGH:
+            $color = $config->fields['severity_high_color'];
+            break;
+         case PluginOpenvasOmp::THREAT_MEDIUM:
+            $color = $config->fields['severity_medium_color'];
+            break;
+         case PluginOpenvasOmp::THREAT_LOW:
+            $color = $config->fields['severity_low_color'];
+            break;
+         case PluginOpenvasOmp::THREAT_ERROR:
+         case PluginOpenvasOmp::THREAT_LOG:
+            $color = $config->fields['severity_none_color'];
+            break;
+      }
+      return $color;
    }
 
    /**
@@ -150,24 +150,23 @@ class PluginOpenvasToolbox {
    */
    static function displayThreat($threat) {
 
-     $config = PluginOpenvasConfig::getInstance();
-     $out    = '';
-     $color  = '';
+      $config = PluginOpenvasConfig::getInstance();
+      $out    = '';
+      $color  = '';
 
-     $text  = self::getThreat($threat);
-     $color = self::getThreatColor($threat);
-     if (!$color) {
-       return $text;
-     }
-     $out  = "<div class='center' style='color: white;
-               background-color: #ffffff; width: 100%;
-               border: 0px solid #9BA563; position: relative;' >";
-     $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
-     $out .= "<div class='center' style='background-color: ".$color.";
-                width: 70px;height: 20px' ></div>";
-     $out .= "</div>";
+      $text  = self::getThreat($threat);
+      $color = self::getThreatColor($threat);
+      if (!$color) {
+         return $text;
+      }
+      $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
+                border: 0px solid #9BA563; position: relative;' >";
+      $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
+      $out .= "<div class='center' style='background-color: ".$color.";
+                 width: 70px;height: 20px' ></div>";
+      $out .= "</div>";
 
-     return $out;
+      return $out;
    }
 
 
