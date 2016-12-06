@@ -39,8 +39,8 @@ class PluginOpenvasMenu extends CommonGLPI {
       global $CFG_GLPI;
 
       if (!Session::haveRight('plugin_openvas_task', READ)
-        && !Session::haveRight('plugin_openvas_vulnerability', READ)) {
-        return [];
+         && !Session::haveRight('plugin_openvas_vulnerability', READ)) {
+         return [];
       }
       $menu          = [];
       $menu['title'] = self::getTypeName(2);
@@ -58,7 +58,7 @@ class PluginOpenvasMenu extends CommonGLPI {
          $menu['options']['PluginOpenvasVulnerability']['links']['search'] = PluginOpenvasVulnerability::getSearchURL(false);
 
          if (Session::haveRight('plugin_openvas_task', READ)) {
-           $menu['options']['PluginOpenvasVulnerability']['links'][$image_task]  = PluginOpenvasTask::getSearchURL(false);
+            $menu['options']['PluginOpenvasVulnerability']['links'][$image_task]  = PluginOpenvasTask::getSearchURL(false);
          }
 
          $menu['rulevulnerability']['title'] = PluginOpenvasRuleVulnerabilityCollection::getTypeName(2);
@@ -68,19 +68,19 @@ class PluginOpenvasMenu extends CommonGLPI {
       }
 
       if (Session::haveRight('plugin_openvas_task', READ)) {
-        $image_vuln  = "<img src='".$CFG_GLPI["root_doc"]."/pics/menu_show.png' title='";
-        $image_vuln .= PluginOpenvasVulnerability::getTypeName();
-        $image_vuln .= "' alt='".PluginOpenvasVulnerability::getTypeName()."'>";
+         $image_vuln  = "<img src='".$CFG_GLPI["root_doc"]."/pics/menu_show.png' title='";
+         $image_vuln .= PluginOpenvasVulnerability::getTypeName();
+         $image_vuln .= "' alt='".PluginOpenvasVulnerability::getTypeName()."'>";
 
-        $menu['options']['PluginOpenvasTask']['title'] = _n('Task', 'Tasks', 2);
-        $menu['options']['PluginOpenvasTask']['page']  = PluginOpenvasTask::getSearchURL(false);
-        $menu['options']['PluginOpenvasTask']['links']['search'] = PluginOpenvasTask::getSearchURL(false);
-        if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
-          $menu['options']['PluginOpenvasTask']['links'][$image_vuln]  = PluginOpenvasVulnerability::getSearchURL(false);
-        }
-        if (Session::haveRight('plugin_openvas_task', CREATE)) {
-          $menu['options']['PluginOpenvasTask']['links']['add'] = PluginOpenvasTask::getFormURL(false)."?add=1";
-        }
+         $menu['options']['PluginOpenvasTask']['title'] = _n('Task', 'Tasks', 2);
+         $menu['options']['PluginOpenvasTask']['page']  = PluginOpenvasTask::getSearchURL(false);
+         $menu['options']['PluginOpenvasTask']['links']['search'] = PluginOpenvasTask::getSearchURL(false);
+         if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
+            $menu['options']['PluginOpenvasTask']['links'][$image_vuln]  = PluginOpenvasVulnerability::getSearchURL(false);
+         }
+         if (Session::haveRight('plugin_openvas_task', CREATE)) {
+            $menu['options']['PluginOpenvasTask']['links']['add'] = PluginOpenvasTask::getFormURL(false)."?add=1";
+         }
       }
       return $menu;
    }
