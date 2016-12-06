@@ -63,6 +63,22 @@ class PluginOpenvasToolbox {
    }
 
    /**
+   * Get available threat levels
+   *
+   * @since 1.0
+   * @return threat levels as an array
+   */
+   static function getThreatLevels() {
+     return [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
+             PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
+             PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
+             PluginOpenvasOmp::THREAT_NONE   => __('None'),
+             PluginOpenvasOmp::THREAT_ERROR  => __('Error'),
+             PluginOpenvasOmp::THREAT_LOG    => __('Log')
+            ];
+   }
+
+   /**
    * Get a threat label
    *
    * @since 1.0
@@ -70,19 +86,27 @@ class PluginOpenvasToolbox {
    * @return the threat label
    */
    static function getThreat($threat) {
-     $threats = [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
-                 PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
-                 PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
-                 PluginOpenvasOmp::THREAT_NONE   => __('None'),
-                 PluginOpenvasOmp::THREAT_ERROR  => __('Error'),
-                 PluginOpenvasOmp::THREAT_LOG    => __('Log')
-                ];
+     $threats = self::getThreatLevels();
 
      if (isset($threats[$threat])) {
        return $threats[$threat];
      } else {
        return '';
      }
+   }
+
+   /**
+   * Display a dropdown of threat levels
+   * @since 1.0
+   *
+   * @param $name the dropdown name
+   * @param $value the dropdown value to be selected
+   * @return the dropdown rand
+   */
+   static function dropdownThreats($name, $value) {
+      $threats = self::getThreatLevels();
+      return Dropdown::showFromArray($name, $threats,
+                                     ['value' => $value]);
    }
 
    /**
@@ -135,7 +159,8 @@ class PluginOpenvasToolbox {
      if (!$color) {
        return $text;
      }
-     $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
+     $out  = "<div class='center' style='color: white;
+               background-color: #ffffff; width: 100%;
                border: 0px solid #9BA563; position: relative;' >";
      $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
      $out .= "<div class='center' style='background-color: ".$color.";
@@ -144,4 +169,54 @@ class PluginOpenvasToolbox {
 
      return $out;
    }
+
+
+
+   /**
+    * Get ITIL object priority Name
+    *
+    * @param $value priority ID
+   **/
+   static function getPriorityName($value) {
+
+      switch ($value) {
+         case PluginOpenvasOmp::THREAT_HIGH :
+            return _x('priority', 'High');
+
+         case PluginOpenvasOmp::THREAT_MEDIUM :
+            return _x('priority', 'Medium');
+
+         case PluginOpenvasOmp::THREAT_LOW :
+            return _x('priority', 'Low');
+
+         case PluginOpenvasOmp::THREAT_NONE :
+            return __('None');
+
+         case PluginOpenvasOmp::THREAT_LOG :
+               return __('Log');
+
+         case PluginOpenvasOmp::THREAT_ERROR :
+               return __('Error');
+
+         // No standard one :
+         case 0 :
+            return _x('priority', 'All');
+         case -1 :
+            return _x('priority', 'At least very low');
+         case -2 :
+            return _x('priority', 'At least low');
+         case -3 :
+            return _x('priority', 'At least medium');
+         case -4 :
+            return _x('priority', 'At least high');
+         case -5 :
+            return _x('priority', 'At least very high');
+
+         default :
+            // Return $value if not define
+            return $value;
+
+      }
+   }
+
 }

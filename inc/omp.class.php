@@ -102,10 +102,10 @@ class PluginOpenvasOmp {
          }
       }
 
-      if (!empty($params['filter'])) {
-        $extra.= " AND ";
-      }
       if (isset($options['filter']['extra'])) {
+        if (!empty($params['filter'])) {
+          $extra.= " AND ";
+        }
          $extra .= $options['filter']['extra'];
       }
 

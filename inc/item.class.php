@@ -463,7 +463,7 @@ class PluginOpenvasItem extends CommonDBChild {
          //If the host is linked to an asset: update last task infos
          if ($id) {
             //self::updateHostFromLastReport($item, $tmp['openvas_host'], $id);
-            self::updateTaskInfosForTarget($tmm['openvas_id'], $id);
+            self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
          }
       }
 
@@ -656,6 +656,16 @@ class PluginOpenvasItem extends CommonDBChild {
       foreach ($DB->request($query, '', true) as $target) {
         $vuln_item->delete($target);
         $index++;
+      }
+
+      $vuln = new PluginOpenvasVulnerability();
+      $query = "SELECT `id`
+                FROM `glpi_plugin_openvas_vulnerabilities`
+                WHERE `id` NOT IN (SELECT DISTINCT `plugin_openvas_vulnerabilities_id`
+                                   FROM `glpi_plugin_openvas_vulnerabilities_items`)";
+      foreach ($DB->request($query, '', true) as $target) {
+         $vuln->delete($target);
+         $index++;
       }
       $task->addVolume($index);
       return true;
