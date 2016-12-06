@@ -1,33 +1,40 @@
 <?php
-/* @version $Id$
---------------------------------------------------------------------------
-LICENSE
+/*
+ -------------------------------------------------------------------------
+ OpenVAS plugin for GLPI
+ Copyright (C) 2016 by the OpenVAS Development Team.
 
- This file is part of the openvas plugin.
+ https://github.com/pluginsGLPI/openvas
+ -------------------------------------------------------------------------
 
-OpenVAS plugin is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+ LICENSE
 
-openvas plugin is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This file is part of OpenVAS.
 
-You should have received a copy of the GNU General Public License
-along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
---------------------------------------------------------------------------
-@package   openvas
-@author    Teclib'
-@copyright Copyright (c) 2016 Teclib'
-@license   GPLv3
-           http://www.gnu.org/licenses/gpl.txt
-@link      https://github.com/pluginsGLPI/openvas
-@link      http://www.glpi-project.org/
-@link      http://www.teclib-edition.com/
-@since     2016
-----------------------------------------------------------------------*/
+ OpenVAS plugin is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ OpenVAS is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with OpenVAS. If not, see <http://www.gnu.org/licenses/>.
+ --------------------------------------------------------------------------
+ @package   openvas
+ @author    Teclib'
+ @copyright Copyright (c) 2016 Teclib'
+ @license   GPLv3
+            http://www.gnu.org/licenses/gpl.txt
+ @link      https://github.com/pluginsGLPI/openvas
+ @link      http://www.glpi-project.org/
+ @link      http://www.teclib-edition.com/
+ @since     2016
+ ----------------------------------------------------------------------
+ */
 
  function plugin_openvas_purgeItems(CommonDBTM $obj) {
    $item = new PluginOpenvasItem();
@@ -116,6 +123,11 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 
 /***************** Install / uninstall functions **************/
 
+/**
+ * Plugin install process
+ *
+ * @return boolean
+ */
 function plugin_openvas_install() {
    $migration = new Migration(PLUGIN_OPENVAS_VERSION);
    include (GLPI_ROOT."/plugins/openvas/inc/config.class.php");
@@ -129,6 +141,11 @@ function plugin_openvas_install() {
    return true;
 }
 
+/**
+ * Plugin uninstall process
+ *
+ * @return boolean
+ */
 function plugin_openvas_uninstall() {
    $migration = new Migration(PLUGIN_OPENVAS_VERSION);
    include (GLPI_ROOT."/plugins/openvas/inc/config.class.php");
