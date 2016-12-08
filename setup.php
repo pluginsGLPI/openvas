@@ -72,7 +72,8 @@ function plugin_init_openvas() {
       }
       Plugin::registerClass('PluginOpenvasVulnerability',
                             ['ticket_types' => true,
-                             'helpdesk_visible_types' => true]);
+                             'helpdesk_visible_types' => true,
+                             'kb_types' => true]);
 
       foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
           $PLUGIN_HOOKS['pre_item_purge']['openvas'][$itemtype] = 'plugin_openvas_purgeItems';
