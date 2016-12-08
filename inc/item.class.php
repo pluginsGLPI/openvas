@@ -269,8 +269,7 @@ class PluginOpenvasItem extends CommonDBChild {
 
          Html::closeForm();
       }
-      if ($openvas_item->fields['openvas_host']
-        && Session::haveRight('plugin_openvas_vulnerability', READ)) {
+      if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
         PluginOpenvasVulnerability_Item::showForItem($item);
       }
    }

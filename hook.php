@@ -105,6 +105,17 @@
        $sopt[6106]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
        $sopt[6106]['massiveaction'] = false;
 
+       $sopt[6107]['table']         = 'glpi_plugin_openvas_vulnerabilities_items';
+       $sopt[6107]['field']         = 'name';
+       $sopt[6107]['name']          = __('OpenVAS', 'openvas').'-'.
+                                        _x('quantity', 'Number of vulnerabilities');
+       $sopt[6107]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
+       $sopt[6107]['forcegroupby']  = true;
+       $sopt[6107]['massiveaction'] = false;
+       $sopt[6107]['usehaving']     = true;
+       $sopt[6107]['datatype']      = 'count';
+
+
   }
 
    return $sopt;
