@@ -116,9 +116,59 @@
     $field = $searchopt[$ID]["field"];
     switch ($table.'.'.$field) {
        case "glpi_plugin_openvas_items.openvas_threat" :
+       case "glpi_plugin_openvas_vulnerabilities.threat" :
           return PluginOpenvasToolbox::displayThreat($data[$num][0]['name']);
     }
     return "";
+ }
+
+ function plugin_openvas_addOrderBy($type,$ID,$order,$key=0) {
+    $searchopt = &Search::getOptions($type);
+    $table     = $searchopt[$ID]["table"];
+    $field     = $searchopt[$ID]["field"];
+
+    //Do not sort on threat. As Threat is related to severity
+    //and Severity is a float, sort on Severity
+    switch ($table.".".$field) {
+       case "glpi_plugin_openvas_items.openvas_threat" :
+          return " ORDER BY $table.openvas_severity $order ";
+       case "glpi_plugin_openvas_vulnerabilities.threat" :
+          return " ORDER BY $table.severity $order ";
+    }
+    return "";
+ }
+
+ /**
+  * Manage search options values
+  *
+  * @global object $DB
+  * @param object $item
+  * @return boolean
+  */
+ function plugin_openvas_searchOptionsValues($item) {
+    global $DB;
+
+    if ($item['searchoption']['table'] == 'glpi_plugin_openvas_vulnerabilities'
+            AND $item['searchoption']['field'] == 'threat') {
+       PluginOpenvasToolbox::dropdownThreats($item['name'], $item['value']);
+       return TRUE;
+    }
+ }
+
+ // Check to add to status page
+ function plugin_openvas_Status($param) {
+    // Do checks (no check for example)
+    $ok = PluginOpenvasOmp::ping();
+    echo "OPENVAS_MANAGER";
+    if ($ok) {
+       echo "_OK";
+    } else {
+       echo "_PROBLEM";
+       // Only set ok to false if trouble (global status)
+       $param['ok'] = false;
+    }
+    echo "\n";
+    return $param;
  }
 
 /***************** Install / uninstall functions **************/

@@ -148,13 +148,16 @@ class PluginOpenvasToolbox {
    * @param $severity the severity value
    * @return the HTML display of the threat
    */
-   static function displayThreat($threat) {
+   static function displayThreat($threat, $severity = false) {
 
       $config = PluginOpenvasConfig::getInstance();
       $out    = '';
       $color  = '';
 
       $text  = self::getThreat($threat);
+      if ($severity) {
+        $text.= " ($severity)";
+      }
       $color = self::getThreatColor($threat);
       if (!$color) {
          return $text;
@@ -163,7 +166,7 @@ class PluginOpenvasToolbox {
                 border: 0px solid #9BA563; position: relative;' >";
       $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
       $out .= "<div class='center' style='background-color: ".$color.";
-                 width: 70px;height: 20px' ></div>";
+                 width: 90px;height: 20px' ></div>";
       $out .= "</div>";
 
       return $out;
