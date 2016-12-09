@@ -72,7 +72,7 @@ You must start by launching openvasSynchronize, then openvasSynchronizeVulnerabi
 Vulnerabities can be found at  _Tools > OpenVAS_ menu.
 A small green icon allows user to switch from vulnerabities view to tasks view.
 
-![vulnerabity display](https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/vulnerabity.png)
+![vulnerabity display](https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/vulnerability.png)
 
 A vulnerabity can be linked to several hosts.
 If a host is linked to an asset in GLPi, you can access the host directly from the vulnerabity.
