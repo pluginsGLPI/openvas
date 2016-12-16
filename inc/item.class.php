@@ -717,6 +717,9 @@ class PluginOpenvasItem extends CommonDBChild {
                      KEY `date_mod` (`date_mod`)
                   ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
+
+         //New installation : add default profile
+         PluginOpenvasProfile::createFirstAccess($_SESSION['glpiactiveprofile']['id']);
       }
 
       $cron = new CronTask;
