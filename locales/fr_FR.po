@@ -1,0 +1,171 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-04 11:59+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Walid Nouh <wnouh@teclib.com>, 2016\n"
+"Language-Team: French (France) (https://www.transifex.com/teclib/teams/28042/fr_FR/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: hook.php:50 hook.php:58 hook.php:65 hook.php:73 hook.php:81 hook.php:89
+#: hook.php:97 inc/profile.class.php:67 inc/menu.class.php:35
+#: inc/item.class.php:128 inc/vulnerability.class.php:48
+#: front/config.form.php:52 front/vulnerability.form.php:36
+#: front/vulnerability.php:37 front/task.form.php:34 front/task.php:34
+msgid "OpenVAS"
+msgstr "OpenVAS"
+
+#: hook.php:51
+msgid "Target ID"
+msgstr "Identifiant de la cible"
+
+#: hook.php:59 inc/vulnerability.class.php:70 inc/vulnerability.class.php:373
+#: inc/task.class.php:65 inc/rulevulnerability.class.php:76
+msgid "Threat"
+msgstr "Menace"
+
+#: hook.php:74 inc/item.class.php:135 inc/task.class.php:62
+#: inc/task.class.php:161
+msgid "Target"
+msgstr "Cible"
+
+#: hook.php:97 inc/item.class.php:202 inc/item.class.php:226
+#: inc/vulnerability.class.php:64 inc/vulnerability.class.php:239
+#: inc/vulnerability.class.php:372 inc/rulevulnerability.class.php:77
+msgid "Severity"
+msgstr "Sévérité"
+
+#: inc/profile.class.php:45 inc/vulnerability_item.class.php:175
+msgid "Vulnerability"
+msgstr "Vulnérabilité"
+
+#: inc/config.class.php:62 setup.php:75
+msgid "GLPi openvas Connector"
+msgstr "Connecteur OpenVAS pour GLPi"
+
+#: inc/config.class.php:78
+msgid "Host"
+msgstr "Hôte"
+
+#: inc/config.class.php:82
+msgid "Manager port"
+msgstr "Port du Manager"
+
+#: inc/config.class.php:89
+msgid "Path to omp"
+msgstr "Chemin vers l'exécutable omp"
+
+#: inc/config.class.php:93
+msgid "Console port"
+msgstr "Port de la console web"
+
+#: inc/config.class.php:111
+msgid "Target retention delay"
+msgstr "Temps de rétention des données"
+
+#: inc/config.class.php:116
+msgid "Number of days for searches"
+msgstr "Nombre de jours maximum pour les recherches"
+
+#: inc/item.class.php:49
+msgid "Openvas Item"
+msgstr "Élément OpenVAS"
+
+#: inc/item.class.php:140 inc/task.class.php:112 inc/task.class.php:134
+msgid "Cannot contact OpenVAS"
+msgstr "Impossible de contacter OpenVAS"
+
+#: inc/item.class.php:147 inc/item.class.php:148 inc/item.class.php:257
+#: inc/item.class.php:258 inc/task.class.php:103 inc/task.class.php:104
+msgid "View in OpenVAS"
+msgstr "Voir dans la console OpenVAS"
+
+#: inc/item.class.php:228 inc/task.class.php:67 inc/task.class.php:147
+msgid "Scanner"
+msgstr "Scanneur"
+
+#: inc/item.class.php:667
+msgid "Synchronize OpenVAS hosts"
+msgstr "Synchroniser les hôtes OpenVAS"
+
+#: inc/item.class.php:669
+msgid "Clean OpenVAS infos"
+msgstr "Nettoyer les données d'OpenVAS"
+
+#: inc/vulnerability.class.php:42
+msgid "OpenVAS Vulnerability"
+msgid_plural "OpenVAS Vulnerabilities"
+msgstr[0] "Vulnérabilité"
+msgstr[1] "Vulnérabilités"
+
+#: inc/vulnerability.class.php:80
+msgid "Vulnerability ID"
+msgstr "Identifiant de la vulnérabilité"
+
+#: inc/vulnerability.class.php:88
+msgid "Task ID"
+msgstr "Identifiant de la tâche"
+
+#: inc/vulnerability.class.php:96
+msgid "OpenVAS Last update"
+msgstr "Date de dernière mise à jour dans OpenVAS"
+
+#: inc/vulnerability.class.php:105
+msgid "OpenVAS Creation date"
+msgstr "Date de création dans OpenVAS"
+
+#: inc/vulnerability.class.php:226
+msgid "Name"
+msgstr ""
+
+#: inc/vulnerability.class.php:230
+msgid "Port"
+msgstr ""
+
+#: inc/vulnerability.class.php:450
+msgid "Synchronize OpenVAS vulnerabilities"
+msgstr "Synchronisation des vulnérabilités OpenVAS"
+
+#: inc/rulevulnerabilitycollection.class.php:62
+#: inc/rulevulnerability.class.php:47
+msgid "Rules for OpenVAS vulnerabilities"
+msgstr "Règles pour les vulnérabilités OpenVAS"
+
+#: inc/task.class.php:154
+msgid "Config"
+msgstr "Config"
+
+#: inc/task.class.php:168
+msgid "Schedule"
+msgstr "Planification"
+
+#: inc/task.class.php:202
+msgid "Start Requested"
+msgstr "Démarrage demandé"
+
+#: inc/task.class.php:211
+msgid "Stop Requested"
+msgstr ""
+
+#: inc/rulevulnerability.class.php:92
+msgid "Create a new ticket using a template"
+msgstr "Créer un nouveau ticket à partir du gabarit"
+
+#: inc/vulnerability_item.class.php:108
+msgid "Result ID"
+msgstr "Identifiant du résultat"
+
+#: front/task.form.php:41
+msgid "Task created"
+msgstr "Tâche créée"
