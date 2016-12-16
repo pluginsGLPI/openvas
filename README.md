@@ -18,7 +18,7 @@ The plugin has only been tested on Linux.
 
 You need the followings components:
 - GLPI (at least 9.1.1 version)
-- OpenVAS manager up and running
+- OpenVAS manager 8 up and running
 - PHP >= 5.5
 - openvas-cli package installed to provide omp executable
 
@@ -94,8 +94,16 @@ It has 2 actions :
 * ignore vulnerabity import
 * create a ticket based on a template
 
-### Ticket creation from a vulnerabity
+To use threat as a criteria, here are the possible values:
 
+* Error
+* Log
+* Low
+* Medium
+* High
+
+To match vulnerabilities having a threat at least equals to Low, you must use a regex:
+_Threat regex checks /Low|Medium|High/_
 
 ## Contributing
 
