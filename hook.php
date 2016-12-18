@@ -121,6 +121,10 @@
    return $sopt;
  }
 
+ function plugin_openvas_getDropdown() {
+    return array('PluginOpenvasVulnerabilityCategory' => __('Vulnerability category', 'openvas'));
+ }
+
  function plugin_openvas_giveItem($type,$ID,$data,$num) {
     $searchopt = &Search::getOptions($type);
     $table = $searchopt[$ID]["table"];
@@ -195,10 +199,12 @@ function plugin_openvas_install() {
    include (GLPI_ROOT."/plugins/openvas/inc/vulnerability.class.php");
    include (GLPI_ROOT."/plugins/openvas/inc/vulnerability_item.class.php");
    include (GLPI_ROOT."/plugins/openvas/inc/item.class.php");
+   include (GLPI_ROOT."/plugins/openvas/inc/vulnerabilitycategory.class.php");
    PluginopenvasConfig::install($migration);
    PluginOpenvasVulnerability::install($migration);
    PluginOpenvasVulnerability_Item::install($migration);
    PluginOpenvasItem::install($migration);
+   PluginOpenvasVulnerabilityCategory::install($migration);
    return true;
 }
 
@@ -213,9 +219,11 @@ function plugin_openvas_uninstall() {
    include (GLPI_ROOT."/plugins/openvas/inc/vulnerability.class.php");
    include (GLPI_ROOT."/plugins/openvas/inc/vulnerability_item.class.php");
    include (GLPI_ROOT."/plugins/openvas/inc/item.class.php");
+   include (GLPI_ROOT."/plugins/openvas/inc/vulnerabilitycategory.class.php");
    PluginopenvasConfig::uninstall($migration);
    PluginOpenvasVulnerability::uninstall($migration);
    PluginOpenvasVulnerability_Item::uninstall($migration);
    PluginOpenvasItem::uninstall($migration);
+   PluginOpenvasVulnerabilityCategory::uninstall($migration);
    return true;
 }
