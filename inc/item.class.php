@@ -361,10 +361,10 @@ class PluginOpenvasItem extends CommonDBChild {
          //Second step: check if the host refers to an IP address
          $iterator_ip = $DB->request('glpi_ipaddresses', [ 'name' => $host]);
          if ($iterator_ip->numrows()) {
-               $tmp = $iterator_ip->next();
-               self::$host_matching[$host] = [ 'itemtype' => $tmp['mainitemtype'],
-               'items_id' => $tmp['mainitems_id']
-            ];
+            $tmp = $iterator_ip->next();
+            self::$host_matching[$host] = [ 'itemtype' => $tmp['mainitemtype'],
+                                            'items_id' => $tmp['mainitems_id']
+                                          ];
             return self::$host_matching[$host];
          } else if ($check_fqdn) {
 
