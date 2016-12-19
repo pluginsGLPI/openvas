@@ -290,7 +290,8 @@ class PluginOpenvasOmp {
       .$config->fields['openvas_username']." -w "
       .$config->fields['openvas_password']." -X \"$command\"";
 
-      Toolbox::logDebug("Execute command : ".$url);
+      //Enable to display command sent to OpenVAS Manager
+      //Toolbox::logDebug("Execute command : ".$url);
 
       $content    = '';
 
