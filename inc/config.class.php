@@ -111,12 +111,12 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<td>" . __("Target retention delay", "openvas") . "</td>";
       echo "<td>";
       Dropdown::showNumber("retention_delay", ['value' => $this->fields['retention_delay'],
-                                               'unit' => _n('Day', 'Days', $this->fields['retention_delay'])]);
+      'unit' => _n('Day', 'Days', $this->fields['retention_delay'])]);
       echo "</td>";
       echo "<td>" . __("Number of days for searches", "openvas") . "</td>";
       echo "<td>";
       Dropdown::showNumber("search_max_days", ['value' => $this->fields['search_max_days'],
-                                               'unit' => _n('Day', 'Days', $this->fields['search_max_days'])]);
+      'unit' => _n('Day', 'Days', $this->fields['search_max_days'])]);
       echo "</td>";
       echo "</tr>";
 
@@ -174,7 +174,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       $config = new self();
       $config->getFromDB(1);
       return 'https://'.$config->fields['openvas_host'].':'
-             .$config->fields['openvas_console_port'].'/omp';
+      .$config->fields['openvas_console_port'].'/omp';
    }
 
    /**
@@ -193,8 +193,8 @@ class PluginOpenvasConfig extends CommonDBTM {
       if (!countElementsInTable('glpi_requesttypes', "`name`='OpenVAS'")) {
          $requesttype = new RequestType();
          $requesttypes_id = $requesttype->add(['name'         => 'OpenVAS',
-                                               'entities_id'  => 0,
-                                               'is_recursive' => 1]);
+         'entities_id'  => 0,
+         'is_recursive' => 1]);
       } else {
          $iterator = $DB->request('glpi_requesttypes', ['name' => 'OpenVAS']);
          if ($iterator->numrows()) {
@@ -213,48 +213,48 @@ class PluginOpenvasConfig extends CommonDBTM {
 
          //Install
          $query = "CREATE TABLE `glpi_plugin_openvas_configs` (
-                     `id` int(11) NOT NULL auto_increment,
-                     `openvas_host` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `openvas_port` int(11) NOT NULL DEFAULT '0',
-                     `openvas_console_port` int(11) NOT NULL DEFAULT '0',
-                     `requesttypes_id` int(11) NOT NULL DEFAULT '0',
-                     `openvas_username` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `retention_delay` int(11) NOT NULL DEFAULT '0',
-                     `search_max_days` int(11) NOT NULL DEFAULT '0',
-                     `openvas_results_last_sync` datetime DEFAULT NULL,
-                     `severity_medium_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `severity_low_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `severity_high_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     `severity_none_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
-                     PRIMARY KEY  (`id`),
-                     KEY `openvas_host` (`openvas_host`),
-                     KEY `openvas_results_last_sync` (`openvas_results_last_sync`)
-                  ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+            `id` int(11) NOT NULL auto_increment,
+            `openvas_host` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `openvas_port` int(11) NOT NULL DEFAULT '0',
+            `openvas_console_port` int(11) NOT NULL DEFAULT '0',
+            `requesttypes_id` int(11) NOT NULL DEFAULT '0',
+            `openvas_username` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `retention_delay` int(11) NOT NULL DEFAULT '0',
+            `search_max_days` int(11) NOT NULL DEFAULT '0',
+            `openvas_results_last_sync` datetime DEFAULT NULL,
+            `severity_medium_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `severity_low_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `severity_high_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            `severity_none_color` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
+            PRIMARY KEY  (`id`),
+            KEY `openvas_host` (`openvas_host`),
+            KEY `openvas_results_last_sync` (`openvas_results_last_sync`)
+         ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
          $tmp = [ 'id'                    => 1,
-                  'fusioninventory_url'   => 'localhost',
-                  'openvas_port'          => '9390',
-                  'openvas_console_port'  => '9392',
-                  'openvas_username'      => 'admin',
-                  'openvas_password'      => '',
-                  'openvas_omp_path'      => '/usr/bin/omp',
-                  'retention_delay'       => 30,
-                  'search_max_days'       => 10,
-                  'severity_high_color'   => '#ff0000',
-                  'severity_medium_color' => '#ffb800',
-                  'severity_low_color'    => '#3c9fb4',
-                  'severity_none_color'   => '#000000',
-                  'requesttypes_id'        => $requesttypes_id
-                ];
-         $config->add($tmp);
-      }
+         'fusioninventory_url'   => 'localhost',
+         'openvas_port'          => '9390',
+         'openvas_console_port'  => '9392',
+         'openvas_username'      => 'admin',
+         'openvas_password'      => '',
+         'openvas_omp_path'      => '/usr/bin/omp',
+         'retention_delay'       => 30,
+         'search_max_days'       => 10,
+         'severity_high_color'   => '#ff0000',
+         'severity_medium_color' => '#ffb800',
+         'severity_low_color'    => '#3c9fb4',
+         'severity_none_color'   => '#000000',
+         'requesttypes_id'        => $requesttypes_id
+      ];
+      $config->add($tmp);
    }
+}
 
-   public static function uninstall() {
-      global $DB;
-      $DB->query("DROP TABLE IF EXISTS `glpi_plugin_openvas_configs`");
-   }
+public static function uninstall() {
+   global $DB;
+   $DB->query("DROP TABLE IF EXISTS `glpi_plugin_openvas_configs`");
+}
 }

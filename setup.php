@@ -1,8 +1,8 @@
 <?php
 /*
  -------------------------------------------------------------------------
- {NAME} plugin for GLPI
- Copyright (C) {YEAR} by the {NAME} Development Team.
+ OpenVAS plugin for GLPI
+ Copyright (C) 2016 by the OpenVAS Development Team.
 
  https://github.com/pluginsGLPI/openvas
  -------------------------------------------------------------------------
@@ -11,7 +11,7 @@
 
  This file is part of OpenVAS.
 
- OpenVAS is free software; you can redistribute it and/or modify
+ OpenVAS plugin is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version.
@@ -97,7 +97,7 @@ function plugin_version_openvas() {
    return [ 'name'           => __("GLPi openvas Connector", 'openvas'),
             'version'        => PLUGIN_OPENVAS_VERSION,
             'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
-            'license'        => 'GPLv2+',
+            'license'        => 'GPLv3',
             'homepage'       => 'https://github.com/pluginsglpi/openvas',
             'minGlpiVersion' => "9.1.1"
           ];

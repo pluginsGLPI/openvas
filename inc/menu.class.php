@@ -39,7 +39,7 @@ class PluginOpenvasMenu extends CommonGLPI {
       global $CFG_GLPI;
 
       if (!Session::haveRight('plugin_openvas_task', READ)
-         && !Session::haveRight('plugin_openvas_vulnerability', READ)) {
+      && !Session::haveRight('plugin_openvas_vulnerability', READ)) {
          return [];
       }
       $menu          = [];

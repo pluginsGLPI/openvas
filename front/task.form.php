@@ -32,30 +32,30 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 include ("../../../inc/includes.php");
 
 Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
-             "tools", "PluginOpenvasMenu", "PluginOpenvasTask");
+"tools", "PluginOpenvasMenu", "PluginOpenvasTask");
 
 Session::checkRight("plugin_openvas_task", READ);
 
 if (isset($_POST['save'])) {
-  if (PluginOpenvasOmp::addTask($_POST)) {
-    Session::addMessageAfterRedirect(__("Task created", "openldap"), true);
-  }
-  Html::redirect(PluginOpenvasTask::getSearchURL(true));
+   if (PluginOpenvasOmp::addTask($_POST)) {
+      Session::addMessageAfterRedirect(__("Task created", "openldap"), true);
+   }
+   Html::redirect(PluginOpenvasTask::getSearchURL(true));
 } elseif (isset($_GET['action'])
    && isset($_GET['task_id'])
       && !empty($_GET['task_id'])) {
 
-  switch ($_GET['action']) {
-    case PluginOpenvasOmp::START_TASK:
-      PluginOpenvasOmp::startTask($_GET['task_id']);
+   switch ($_GET['action']) {
+      case PluginOpenvasOmp::START_TASK:
+         PluginOpenvasOmp::startTask($_GET['task_id']);
       break;
-    case PluginOpenvasOmp::CANCEL_TASK:
-      PluginOpenvasOmp::stopTask($_GET['task_id']);
+      case PluginOpenvasOmp::CANCEL_TASK:
+         PluginOpenvasOmp::stopTask($_GET['task_id']);
       break;
-    default:
+      default:
       break;
-  }
-  Html::redirect(PluginOpenvasTask::getSearchURL(true));
+   }
+   Html::redirect(PluginOpenvasTask::getSearchURL(true));
 }
 PluginOpenvasTask::showAddTaskForm($_POST);
 

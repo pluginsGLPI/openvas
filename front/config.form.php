@@ -35,7 +35,7 @@ $config = new PluginOpenvasConfig();
 
 if (isset($_POST["update"])) {
    if ($config->update($_POST)) {
-     PluginOpenvasConfig::reloadConfiguration();
+      PluginOpenvasConfig::reloadConfiguration();
    }
 
    Html::back();
@@ -49,12 +49,12 @@ if (isset($_POST["update"])) {
    Html::back();
 } else {
 
-Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
-             "tools", "PluginOpenvasMenu", "PluginOpenvasConfig");
+   Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
+   "tools", "PluginOpenvasMenu", "PluginOpenvasConfig");
 
-Session::checkRight("config", UPDATE);
-$config->showForm();
+   Session::checkRight("config", UPDATE);
+   $config->showForm();
 
-Html::footer();
+   Html::footer();
 
 }

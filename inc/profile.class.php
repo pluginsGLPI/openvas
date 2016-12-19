@@ -35,28 +35,28 @@ class PluginOpenvasProfile extends Profile {
 
    static function getAllRights() {
       return [
-                ['itemtype' => 'PluginOpenvasItem',
-                  'label'   => __('Assets'),
-                  'field'   => 'plugin_openvas_item'],
-                ['itemtype' => 'PluginOpenvasTask',
-                 'label'    => _n('Task', 'Tasks', 2),
-                 'field'    => 'plugin_openvas_task'],
-                ['itemtype' => 'PluginOpenvasVulnerability',
-                  'label'   => __('Vulnerability', 'openvas'),
-                  'field'   => 'plugin_openvas_vulnerability' ]
-           ];
+         ['itemtype' => 'PluginOpenvasItem',
+         'label'   => __('Assets'),
+         'field'   => 'plugin_openvas_item'],
+         ['itemtype' => 'PluginOpenvasTask',
+         'label'    => _n('Task', 'Tasks', 2),
+         'field'    => 'plugin_openvas_task'],
+         ['itemtype' => 'PluginOpenvasVulnerability',
+         'label'   => __('Vulnerability', 'openvas'),
+         'field'   => 'plugin_openvas_vulnerability' ]
+      ];
    }
 
    /**
-    * Clean profiles_id from plugin's profile table
-    *
-    * @param $ID
+   * Clean profiles_id from plugin's profile table
+   *
+   * @param $ID
    **/
    function cleanProfiles($ID) {
       global $DB;
       $query = "DELETE FROM `glpi_profiles`
-                WHERE `profiles_id`='$ID'
-                   AND `name` LIKE '%plugin_openvas%'";
+      WHERE `profiles_id`='$ID'
+      AND `name` LIKE '%plugin_openvas%'";
       $DB->query($query);
    }
 
@@ -86,13 +86,13 @@ class PluginOpenvasProfile extends Profile {
 
 
    /**
-    * @param $profile
+   * @param $profile
    **/
    static function addDefaultProfileInfos($profiles_id, $rights) {
       $profileRight = new ProfileRight();
       foreach ($rights as $right => $value) {
          if (!countElementsInTable('glpi_profilerights',
-                                   "`profiles_id`='$profiles_id' AND `name`='$right'")) {
+         "`profiles_id`='$profiles_id' AND `name`='$right'")) {
             $myright['profiles_id'] = $profiles_id;
             $myright['name']        = $right;
             $myright['rights']      = $value;
@@ -105,31 +105,31 @@ class PluginOpenvasProfile extends Profile {
    }
 
    /**
-    * @param $ID  integer
-    */
+   * @param $ID  integer
+   */
    static function createFirstAccess($profiles_id) {
       include_once(GLPI_ROOT."/plugins/openvas/inc/profile.class.php");
       foreach (self::getAllRights() as $right) {
          self::addDefaultProfileInfos($profiles_id,
-                                    ['plugin_openvas_item' => ALLSTANDARDRIGHT,
-                                     'plugin_openvas_task' => ALLSTANDARDRIGHT,
-                                     'plugin_openvas_vulnerability'  => ALLSTANDARDRIGHT]);
+         ['plugin_openvas_item' => ALLSTANDARDRIGHT,
+         'plugin_openvas_task' => ALLSTANDARDRIGHT,
+         'plugin_openvas_vulnerability'  => ALLSTANDARDRIGHT]);
       }
    }
 
-    /**
-    * Show profile form
-    *
-    * @param $items_id integer id of the profile
-    * @param $target value url of target
-    *
-    * @return nothing
-    **/
+   /**
+   * Show profile form
+   *
+   * @param $items_id integer id of the profile
+   * @param $target value url of target
+   *
+   * @return nothing
+   **/
    function showForm($profiles_id=0, $openform=TRUE, $closeform=TRUE) {
 
       echo "<div class='firstbloc'>";
       if (($canedit = Session::haveRightsOr(self::$rightname, [CREATE, UPDATE, PURGE]))
-          && $openform) {
+      && $openform) {
          $profile = new Profile();
          echo "<form method='post' action='".$profile->getFormURL()."'>";
       }
@@ -139,11 +139,11 @@ class PluginOpenvasProfile extends Profile {
 
       $rights = self::getAllRights();
       $profile->displayRightsChoiceMatrix(self::getAllRights(),
-                                          array('canedit'       => $canedit,
-                                                'default_class' => 'tab_bg_2',
-                                                'title'         => __('General')));
+      array('canedit'       => $canedit,
+      'default_class' => 'tab_bg_2',
+      'title'         => __('General')));
       if ($canedit
-          && $closeform) {
+      && $closeform) {
          echo "<div class='center'>";
          echo Html::hidden('id', array('value' => $profiles_id));
          echo Html::submit(_sx('button', 'Save'), array('name' => 'update'));
