@@ -94,6 +94,8 @@ It has 2 actions :
 * ignore vulnerabity import
 * create a ticket based on a template
 
+![vulnerabity display](https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/rule.png)
+
 To use threat as a criteria, here are the possible values:
 
 * Error
