@@ -235,26 +235,26 @@ class PluginOpenvasConfig extends CommonDBTM {
          $DB->query($query) or die ($DB->error());
 
          $tmp = [ 'id'                    => 1,
-         'fusioninventory_url'   => 'localhost',
-         'openvas_port'          => '9390',
-         'openvas_console_port'  => '9392',
-         'openvas_username'      => 'admin',
-         'openvas_password'      => '',
-         'openvas_omp_path'      => '/usr/bin/omp',
-         'retention_delay'       => 30,
-         'search_max_days'       => 10,
-         'severity_high_color'   => '#ff0000',
-         'severity_medium_color' => '#ffb800',
-         'severity_low_color'    => '#3c9fb4',
-         'severity_none_color'   => '#000000',
-         'requesttypes_id'        => $requesttypes_id
-      ];
-      $config->add($tmp);
+                  'fusioninventory_url'   => 'localhost',
+                  'openvas_port'          => '9390',
+                  'openvas_console_port'  => '9392',
+                  'openvas_username'      => 'admin',
+                  'openvas_password'      => '',
+                  'openvas_omp_path'      => '/usr/bin/omp',
+                  'retention_delay'       => 30,
+                  'search_max_days'       => 10,
+                  'severity_high_color'   => '#ff0000',
+                  'severity_medium_color' => '#ffb800',
+                  'severity_low_color'    => '#3c9fb4',
+                  'severity_none_color'   => '#000000',
+                  'requesttypes_id'        => $requesttypes_id
+               ];
+         $config->add($tmp);
+      }
    }
-}
 
-public static function uninstall() {
-   global $DB;
-   $DB->query("DROP TABLE IF EXISTS `glpi_plugin_openvas_configs`");
-}
+   public static function uninstall() {
+      global $DB;
+      $DB->query("DROP TABLE IF EXISTS `glpi_plugin_openvas_configs`");
+   }
 }

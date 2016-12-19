@@ -68,7 +68,6 @@ class PluginOpenvasTask extends CommonDBTM {
          .__("Last run")."</th><th>"
          ._n("Report", "Reports", 1)."</th></tr>";
 
-
          foreach ($tasks as $task) {
             $result = PluginOpenvasOmp::getOneTaskInfos($task);
             if (!is_array($result)) {

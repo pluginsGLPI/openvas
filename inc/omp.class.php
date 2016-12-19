@@ -351,240 +351,239 @@ class PluginOpenvasOmp {
       //Get targets uuid already in use
       $used    = array();
       foreach ($DB->request('glpi_plugin_openvas_items',
-      [ 'NOT' => [ 'openvas_id' => $value]]) as $val) {
+                            [ 'NOT' => [ 'openvas_id' => $value]]) as $val) {
          $used[$val['openvas_id']] = $val['openvas_id'];
       }
 
       asort($results);
       //Display a dropdown with targets data
       return Dropdown::showFromArray($name, $results,
-      ['value' => $value,
-      'used'  => $used,
-      'display_emptychoice' => true
-   ]);
-}
-
-/**
-* @since 1.0
-*
-* Get all available targets in OpenVAS
-* @return all targets as an array of target uuid => target name or IP address
-*/
-static function getTargetsAsArray() {
-   $target_response = self::executeCommand(self::TARGET);
-
-   $results       = array();
-   foreach ($target_response->target as $response) {
-      $host         = $response->hosts->__toString();
-      $name         = $response->name->__toString();
-      $id           = $response->attributes()->id->__toString();
-      $results[$id] = $host." ($name)";
+                                     ['value' => $value,
+                                      'used'  => $used,
+                                      'display_emptychoice' => true
+                                     ]);
    }
-   return $results;
-}
 
-/**
-* @since 1.0
-*
-* Get all available targets in OpenVAS
-* @return all targets as an array of target uuid => target name or IP address
-*/
-static function getOneTargetsDetail($target_id = false) {
-   if (!$target_id) {
+   /**
+   * @since 1.0
+   *
+   * Get all available targets in OpenVAS
+   * @return all targets as an array of target uuid => target name or IP address
+   */
+   static function getTargetsAsArray() {
+      $target_response = self::executeCommand(self::TARGET);
+
+      $results       = array();
+      foreach ($target_response->target as $response) {
+         $host         = $response->hosts->__toString();
+         $name         = $response->name->__toString();
+         $id           = $response->attributes()->id->__toString();
+         $results[$id] = $host." ($name)";
+      }
+      return $results;
+   }
+
+   /**
+   * @since 1.0
+   *
+   * Get all available targets in OpenVAS
+   * @return all targets as an array of target uuid => target name or IP address
+   */
+   static function getOneTargetsDetail($target_id = false) {
+      if (!$target_id) {
+         return false;
+      }
+
+      $options = [ 'filter' => [ 'first'         => 1,
+                                 self::SORT_DESC => 'name',
+                                'rows'          => 1,
+                               ],
+                   'target_id' => $target_id
+                 ];
+      $target_response = self::executeCommand(self::TARGET, $options);
+
+      $target          = array();
+      foreach ($target_response->target as $response) {
+         $target['host']    = $response->hosts->__toString();
+         $target['name']    = $response->name->__toString();
+         $target['id']      = $response->attributes()->id->__toString();
+         $target['comment'] = $response->comment->__toString();
+      }
+      return $target;
+   }
+
+   /**
+   * Get all tasks for a target
+   * @since 1.0
+   *
+   * @param target_id target ID
+   * @return tasks info as an array
+   */
+   static function getTasksForATarget($target_id = false) {
+      if (!$target_id) {
+         return true;
+      }
+
+      //To get all tasks for a target, we first need to get all tasks, and check for each
+      //task if it's linked to our target...
+
+      //Get all tasks : if not yet filled:  fill the cache
+      if (self::$tasks_cache_response == null) {
+         self::$tasks_cache_response
+         = self::executeCommand(self::TASK,
+                                [ 'filter' => [ self::SORT_DESC => 'last',
+                                                'rows' => -1
+                                              ]
+                                ]);
+      }
+
+      //Array to store the results
+      $results        = array();
+
+      foreach (self::$tasks_cache_response->task as $response) {
+         $tid = strval($response->target->attributes()->id);
+         if ($tid == $target_id) {
+            $ret = self::getOneTaskInfos($response);
+            if (is_array($ret)) {
+               $results[$ret['id']] = $ret;
+            }
+         }
+      }
+      return $results;
+   }
+
+   /**
+   * Get infos for a task as an arry
+   * @since 1.0
+   *
+   * @param task task ID
+   * @return task infos as an array
+   */
+   static function getOneTaskInfos($task) {
+      global $CFG_GLPI;
+
+      //If there's no target, go to the next task
+      if (!isset($task->attributes()->id) ||!strval($task->attributes()->id)) {
+         return false;
+      }
+
+      //Check it the tasks
+      $id    = strval($task->attributes()->id);
+      $tid   = strval($task->target->attributes()->id);
+      $tname = strval($task->target->name);
+
+      $progress  = "";
+      $severity  = 0;
+      $scan_date = '';
+      $report_id = '';
+
+      $name    = strval($task->name);
+      $status  = strval($task->status);
+      if ($status != 'Running') {
+         $node = 'last_report';
+      } else {
+         $node = 'current_report';
+      }
+      $progress  = strval($task->progress);
+      if (isset($task->$node->report->severity)) {
+         $severity = strval($task->$node->report->severity);
+      } else {
+         $severity = 0;
+      }
+
+      if (isset($task->$node->report->scan_end)) {
+         $tmp_scan_date = strval($task->$node->report->scan_end);
+         if (!empty($tmp_scan_date)) {
+            $date_scan_end = new DateTime($tmp_scan_date);
+            $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
+         }
+      }
+
+      if (isset($task->$node->report)
+         && isset($task->$node->report->attributes()->id)) {
+         $report_id = strval($task->$node->report->attributes()->id);
+      }
+
+      $config  = strval($task->config->name);
+      $scanner = strval($task->scanner->name);
+
+      $results       = [ 'name'           => $name,
+                         'config'         => $config,
+                         'scanner'        => $scanner,
+                         'status'         => $status,
+                         'progress'       => $progress,
+                         'date_last_scan' => $scan_date,
+                         'severity'       => $severity,
+                         'report'         => $report_id,
+                         'id'             => $id,
+                         'target'         => $tid,
+                         'target_name'    => $tname,
+                         'threat'         => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
+                      ];
+      return $results;
+   }
+
+   /**
+   * Indicates in an OpenVAS task is currently running
+   * @since 1.0
+   *
+   * @param task_status the current status or a task
+   * @return true is the task is running, false if it's not running
+   */
+   static function isTaskRunning($task_status) {
+      switch ($task_status) {
+         case 'Running':
+         case 'Internal Error':
+         case 'Requested':
+            return true;
+      }
       return false;
    }
 
-   $options = [ 'filter' => [ 'first'         => 1,
-   self::SORT_DESC => 'name',
-   'rows'          => 1, ],
-   'target_id' => $target_id
-];
-$target_response = self::executeCommand(self::TARGET, $options);
 
-$target          = array();
-foreach ($target_response->target as $response) {
-   $target['host']    = $response->hosts->__toString();
-   $target['name']    = $response->name->__toString();
-   $target['id']      = $response->attributes()->id->__toString();
-   $target['comment'] = $response->comment->__toString();
-}
-return $target;
-}
+   /**
+   * Display a dropdown with a list of values coming from OpenVAS
+   * @since 1.0
+   *
+   * @param $action the adction to do (get task, target, etc)
+   * @param $name the dropdown name
+   * @param $empty display an empty value in the dropdown
+   * @return the rand value of the dropdown
+   */
+   static function displayDropdown($action, $name, $empty = false) {
+      $response = self::executeCommand($action);
+      $returns  = [];
 
-/**
-* Get all tasks for a target
-* @since 1.0
-*
-* @param target_id target ID
-* @return tasks info as an array
-*/
-static function getTasksForATarget($target_id = false) {
-   if (!$target_id) {
-      return true;
-   }
-
-   //To get all tasks for a target, we first need to get all tasks, and check for each
-   //task if it's linked to our target...
-
-   //Get all tasks : if not yet filled:  fill the cache
-   if (self::$tasks_cache_response == null) {
-      self::$tasks_cache_response
-      = self::executeCommand(self::TASK,
-      [ 'filter' => [ self::SORT_DESC => 'last',
-      'rows' => -1
-   ]
-]);
-}
-
-//Array to store the results
-$results        = array();
-
-foreach (self::$tasks_cache_response->task as $response) {
-
-   $tid = strval($response->target->attributes()->id);
-   if ($tid == $target_id) {
-      $ret = self::getOneTaskInfos($response);
-      if (is_array($ret)) {
-         $results[$ret['id']] = $ret;
+      foreach ($response->$name as $res) {
+         $id = strval($res->attributes()->id);
+         $returns[$id] = strval($res->name);
       }
-   }
-}
-return $results;
-
-}
-
-/**
-* Get infos for a task as an arry
-* @since 1.0
-*
-* @param task task ID
-* @return task infos as an array
-*/
-static function getOneTaskInfos($task) {
-   global $CFG_GLPI;
-
-   //If there's no target, go to the next task
-   if (!isset($task->attributes()->id) ||!strval($task->attributes()->id)) {
-      return false;
-   }
-
-   //Check it the tasks
-   $id    = strval($task->attributes()->id);
-   $tid   = strval($task->target->attributes()->id);
-   $tname = strval($task->target->name);
-
-   $progress  = "";
-   $severity  = 0;
-   $scan_date = '';
-   $report_id = '';
-
-   $name    = strval($task->name);
-   $status  = strval($task->status);
-   if ($status != 'Running') {
-      $node = 'last_report';
-   } else {
-      $node = 'current_report';
-   }
-   $progress  = strval($task->progress);
-   if (isset($task->$node->report->severity)) {
-      $severity = strval($task->$node->report->severity);
-   } else {
-      $severity = 0;
-   }
-
-   if (isset($task->$node->report->scan_end)) {
-      $tmp_scan_date = strval($task->$node->report->scan_end);
-      if (!empty($tmp_scan_date)) {
-         $date_scan_end = new DateTime($tmp_scan_date);
-         $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
+      if ($empty) {
+         $returns[''] = Dropdown::EMPTY_VALUE;
       }
+      return Dropdown::showFromArray($name, $returns);
    }
 
-   if (isset($task->$node->report)
-   && isset($task->$node->report->attributes()->id)) {
-      $report_id = strval($task->$node->report->attributes()->id);
+   /**
+   * Add a task
+   * @since 1.0
+   *
+   * @param $options the task parameters
+   * @return true if the task was correctly added
+   */
+   static function addTask($options = []) {
+      $command = "<create_task><name>".$options['name']."</name>";
+      $command.= "<comment>".$options['comment']."</comment>";
+      $command.= "<scanner id='".$options['scanner']."'/>";
+      $command.= "<config id='".$options['config']."'/>";
+      $command.= "<target id='".$options['target']."'/>";
+      if ($options['schedule'] !='') {
+         $command.= "<schedule id='".$options['schedule']."'/>";
+      }
+      $command.= "</create_task>";
+
+      $response = self::executeCommand(self::ADD_TASK,
+      ['command' => $command], true);
+      return ($response->status == '201');
    }
-
-   $config  = strval($task->config->name);
-   $scanner = strval($task->scanner->name);
-
-   $results       = [ 'name'           => $name,
-   'config'         => $config,
-   'scanner'        => $scanner,
-   'status'         => $status,
-   'progress'       => $progress,
-   'date_last_scan' => $scan_date,
-   'severity'       => $severity,
-   'report'         => $report_id,
-   'id'             => $id,
-   'target'         => $tid,
-   'target_name'    => $tname,
-   'threat'         => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
-];
-return $results;
-}
-
-/**
-* Indicates in an OpenVAS task is currently running
-* @since 1.0
-*
-* @param task_status the current status or a task
-* @return true is the task is running, false if it's not running
-*/
-static function isTaskRunning($task_status) {
-   switch ($task_status) {
-      case 'Running':
-      case 'Internal Error':
-      case 'Requested':
-      return true;
-   }
-   return false;
-}
-
-
-/**
-* Display a dropdown with a list of values coming from OpenVAS
-* @since 1.0
-*
-* @param $action the adction to do (get task, target, etc)
-* @param $name the dropdown name
-* @param $empty display an empty value in the dropdown
-* @return the rand value of the dropdown
-*/
-static function displayDropdown($action, $name, $empty = false) {
-   $response = self::executeCommand($action);
-   $returns  = [];
-
-   foreach ($response->$name as $res) {
-      $id = strval($res->attributes()->id);
-      $returns[$id] = strval($res->name);
-   }
-   if ($empty) {
-      $returns[''] = Dropdown::EMPTY_VALUE;
-   }
-   return Dropdown::showFromArray($name, $returns);
-}
-
-/**
-* Add a task
-* @since 1.0
-*
-* @param $options the task parameters
-* @return true if the task was correctly added
-*/
-static function addTask($options = []) {
-   $command = "<create_task><name>".$options['name']."</name>";
-   $command.= "<comment>".$options['comment']."</comment>";
-   $command.= "<scanner id='".$options['scanner']."'/>";
-   $command.= "<config id='".$options['config']."'/>";
-   $command.= "<target id='".$options['target']."'/>";
-   if ($options['schedule'] !='') {
-      $command.= "<schedule id='".$options['schedule']."'/>";
-   }
-   $command.= "</create_task>";
-
-   $response = self::executeCommand(self::ADD_TASK,
-   ['command' => $command], true);
-   return ($response->status == '201');
-}
 }

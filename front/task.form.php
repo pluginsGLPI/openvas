@@ -41,16 +41,14 @@ if (isset($_POST['save'])) {
       Session::addMessageAfterRedirect(__("Task created", "openldap"), true);
    }
    Html::redirect(PluginOpenvasTask::getSearchURL(true));
-} elseif (isset($_GET['action'])
-   && isset($_GET['task_id'])
-      && !empty($_GET['task_id'])) {
+} else if (isset($_GET['action']) && isset($_GET['task_id']) && !empty($_GET['task_id'])) {
 
    switch ($_GET['action']) {
       case PluginOpenvasOmp::START_TASK:
-         PluginOpenvasOmp::startTask($_GET['task_id']);
+      PluginOpenvasOmp::startTask($_GET['task_id']);
       break;
       case PluginOpenvasOmp::CANCEL_TASK:
-         PluginOpenvasOmp::stopTask($_GET['task_id']);
+      PluginOpenvasOmp::stopTask($_GET['task_id']);
       break;
       default:
       break;
