@@ -44,9 +44,9 @@
          </en>
       </tags>
       <screenshots>
-         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/config.png</screenshot>
-         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/item.png</screenshot>
-         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/rule.png</screenshot>
-         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/screenshots/vulerability.png</screenshot>
+         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/misc/screenshots/config.png</screenshot>
+         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/misc/screenshots/item.png</screenshot>
+         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/misc/screenshots/rule.png</screenshot>
+         <screenshot>https://raw.githubusercontent.com/pluginsGLPI/openvas/develop/misc/screenshots/vulerability.png</screenshot>
       </screenshots>
 </root>
