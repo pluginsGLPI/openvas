@@ -128,7 +128,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<th colspan='4'>" . __("Color palette") . "</th></tr>";
+      echo "<th colspan='4'>" . __('Vulnerability', 'openvas'). ' - '. __("Color palette") . "</th></tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . _x('priority', 'High') . "</td>";

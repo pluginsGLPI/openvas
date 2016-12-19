@@ -28,87 +28,87 @@ msgstr "OpenVAS"
 
 #: hook.php:58
 msgid "Target ID"
-msgstr "Identifiant de la cible"
+msgstr "Target identifier"
 
 #: hook.php:66 inc/vulnerability.class.php:70 inc/vulnerability.class.php:223
 #: inc/vulnerability.class.php:369 inc/task.class.php:65
 #: inc/rulevulnerability.class.php:75 inc/vulnerability_item.class.php:174
 msgid "Threat"
-msgstr "Menace"
+msgstr "Threat"
 
 #: hook.php:81 inc/item.class.php:135 inc/task.class.php:62
 #: inc/task.class.php:161
 msgid "Target"
-msgstr "Cible"
+msgstr "Target"
 
 #: hook.php:104 inc/item.class.php:202 inc/item.class.php:225
 #: inc/vulnerability.class.php:64 inc/vulnerability.class.php:368
 #: inc/rulevulnerability.class.php:76
 msgid "Severity"
-msgstr "Sévérité"
+msgstr "Severity"
 
 #: hook.php:125 inc/vulnerabilitycategory.class.php:47
 #: inc/rulevulnerability.class.php:95
 msgid "Vulnerability category"
-msgstr "Catégorie de vulnérabilité"
+msgstr "Vulnerability category"
 
 #: inc/profile.class.php:45 inc/vulnerability.class.php:42
 #: inc/vulnerability_item.class.php:175
 msgid "Vulnerability"
-msgstr "Vulnérabilité"
+msgstr "Vulnerability"
 
 #: inc/config.class.php:62 setup.php:97
 msgid "GLPi openvas Connector"
-msgstr "Connecteur OpenVAS pour GLPi"
+msgstr "OpenVAS connector for GLPi"
 
 #: inc/config.class.php:78
 msgid "Host"
-msgstr "Hôte"
+msgstr "Host"
 
 #: inc/config.class.php:82
 msgid "Manager port"
-msgstr "Port du Manager"
+msgstr "Manager port"
 
 #: inc/config.class.php:89
 msgid "Path to omp"
-msgstr "Chemin vers l'exécutable omp"
+msgstr "Omp executable path"
 
 #: inc/config.class.php:93
 msgid "Console port"
-msgstr "Port de la console web"
+msgstr "Web console port"
 
 #: inc/config.class.php:111
 msgid "Target retention delay"
-msgstr "Temps de rétention des données"
+msgstr "Retention delay for OpenVAS data"
 
 #: inc/config.class.php:116
 msgid "Number of days for searches"
-msgstr "Nombre de jours maximum pour les recherches"
+msgstr "Maximum number of days for OpenVAS queries"
 
 #: inc/item.class.php:49
 msgid "Openvas Item"
-msgstr "Élément OpenVAS"
+msgstr "OpenVAS Item"
 
 #: inc/item.class.php:140 inc/task.class.php:112 inc/task.class.php:134
 msgid "Cannot contact OpenVAS"
-msgstr "Impossible de contacter OpenVAS"
+msgstr "Cannot contact OpenVAS"
 
 #: inc/item.class.php:147 inc/item.class.php:148 inc/item.class.php:256
 #: inc/item.class.php:257 inc/task.class.php:103 inc/task.class.php:104
 msgid "View in OpenVAS"
-msgstr "Voir dans la console OpenVAS"
+msgstr "View in OpenVAS console"
 
 #: inc/item.class.php:227 inc/task.class.php:67 inc/task.class.php:147
 msgid "Scanner"
-msgstr "Scanneur"
+msgstr "Scanner"
 
 #: inc/item.class.php:676
 msgid "Synchronize OpenVAS hosts"
-msgstr "Synchroniser les hôtes OpenVAS"
+msgstr "Synchronise OpenVAS hosts"
 
 #: inc/item.class.php:678
 msgid "Clean OpenVAS infos"
-msgstr "Nettoyer les données d'OpenVAS"
+msgstr "Clean OpenVAS data"
 
 #: inc/vulnerability.class.php:201
 msgid "Name"
@@ -120,12 +120,12 @@ msgstr ""
 
 #: inc/vulnerability.class.php:446
 msgid "Synchronize OpenVAS vulnerabilities"
-msgstr "Synchronisation des vulnérabilités OpenVAS"
+msgstr "OpenVAS vulnerabilities synchronisation"
 
 #: inc/rulevulnerabilitycollection.class.php:60
 #: inc/rulevulnerability.class.php:46
 msgid "Rules for OpenVAS vulnerabilities"
-msgstr "Règles pour les vulnérabilités OpenVAS"
+msgstr "Rules for OpenVAS vulnerabilities"
 
 #: inc/task.class.php:154
 msgid "Config"
@@ -133,24 +133,24 @@ msgstr "Config"
 
 #: inc/task.class.php:168
 msgid "Schedule"
-msgstr "Planification"
+msgstr "Schedule"
 
 #: inc/task.class.php:202
 msgid "Start Requested"
-msgstr "Démarrage demandé"
+msgstr "Start requested"
 
 #: inc/task.class.php:211
 msgid "Stop Requested"
-msgstr "Arrêt demandé"
+msgstr "Stop requested"
 
 #: inc/rulevulnerability.class.php:91
 msgid "Create a new ticket using a template"
-msgstr "Créer un nouveau ticket à partir du gabarit"
+msgstr "Create new ticket using template"
 
 #: inc/vulnerability_item.class.php:107
 msgid "Result ID"
-msgstr "Identifiant du résultat"
+msgstr "Result identifier"
 
 #: front/task.form.php:41
 msgid "Task created"
-msgstr "Tâche créée"
+msgstr "Task successfully created"
