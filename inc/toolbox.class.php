@@ -69,13 +69,13 @@ class PluginOpenvasToolbox {
    * @return threat levels as an array
    */
    static function getThreatLevels() {
-     return [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
-             PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
-             PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
-             PluginOpenvasOmp::THREAT_NONE   => __('None'),
-             PluginOpenvasOmp::THREAT_ERROR  => __('Error'),
-             PluginOpenvasOmp::THREAT_LOG    => __('Log')
-            ];
+      return [PluginOpenvasOmp::THREAT_HIGH   => _x('priority', 'High'),
+              PluginOpenvasOmp::THREAT_MEDIUM => _x('priority', 'Medium'),
+              PluginOpenvasOmp::THREAT_LOW    => _x('priority', 'Low'),
+              PluginOpenvasOmp::THREAT_NONE   => __('None'),
+              PluginOpenvasOmp::THREAT_ERROR  => __('Error'),
+              PluginOpenvasOmp::THREAT_LOG    => __('Log')
+             ];
    }
 
    /**
@@ -86,8 +86,7 @@ class PluginOpenvasToolbox {
    * @return the threat label
    */
    static function getThreat($threat) {
-     $threats = self::getThreatLevels();
-
+      $threats = self::getThreatLevels();
       if (isset($threats[$threat])) {
          return $threats[$threat];
       } else {
@@ -156,7 +155,7 @@ class PluginOpenvasToolbox {
 
       $text  = self::getThreat($threat);
       if ($severity) {
-        $text.= " ($severity)";
+         $text.= " ($severity)";
       }
       $color = self::getThreatColor($threat);
       if (!$color) {
@@ -171,8 +170,6 @@ class PluginOpenvasToolbox {
 
       return $out;
    }
-
-
 
    /**
     * Get ITIL object priority Name

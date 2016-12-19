@@ -39,7 +39,7 @@ if (isset($_POST["update"])) {
    }
 
    Html::back();
-} elseif (isset($_POST["test"])) {
+} else if (isset($_POST["test"])) {
    $result = PluginOpenvasOmp::ping();
    if (!$result) {
       Session::addMessageAfterRedirect(__("Connection failed"), false, ERROR);

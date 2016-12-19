@@ -45,10 +45,10 @@ if (isset($_POST['save'])) {
 
    switch ($_GET['action']) {
       case PluginOpenvasOmp::START_TASK:
-      PluginOpenvasOmp::startTask($_GET['task_id']);
+         PluginOpenvasOmp::startTask($_GET['task_id']);
       break;
       case PluginOpenvasOmp::CANCEL_TASK:
-      PluginOpenvasOmp::stopTask($_GET['task_id']);
+         PluginOpenvasOmp::stopTask($_GET['task_id']);
       break;
       default:
       break;

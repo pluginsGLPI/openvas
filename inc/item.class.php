@@ -357,60 +357,60 @@ class PluginOpenvasItem extends CommonDBChild {
                                          'items_id' => $tmp['items_id']
                                        ];
          return self::$host_matching[$host];
-   } else {
-      //Second step: check if the host refers to an IP address
-      $iterator_ip = $DB->request('glpi_ipaddresses', [ 'name' => $host]);
-      if ($iterator_ip->numrows()) {
-            $tmp = $iterator_ip->next();
-            self::$host_matching[$host] = [ 'itemtype' => $tmp['mainitemtype'],
-            'items_id' => $tmp['mainitems_id']
-         ];
-         return self::$host_matching[$host];
-      } else if ($check_fqdn) {
+      } else {
+         //Second step: check if the host refers to an IP address
+         $iterator_ip = $DB->request('glpi_ipaddresses', [ 'name' => $host]);
+         if ($iterator_ip->numrows()) {
+               $tmp = $iterator_ip->next();
+               self::$host_matching[$host] = [ 'itemtype' => $tmp['mainitemtype'],
+               'items_id' => $tmp['mainitems_id']
+            ];
+            return self::$host_matching[$host];
+         } else if ($check_fqdn) {
 
-         //Third step: try the FQDN
-         foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
-            $table = getTableForItemtype($itemtype);
-            if (FieldExists($table, 'domains_id')) {
-               $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
-               $left_join = "LEFT JOIN `glpi_domains`
-               ON `glpi_domains`.`id`=`$table`.`domains_id`";
-            } else {
-               $concat    = "`$table`.`name`";
-               $left_join = "";
+            //Third step: try the FQDN
+            foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
+               $table = getTableForItemtype($itemtype);
+               if (FieldExists($table, 'domains_id')) {
+                  $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
+                  $left_join = "LEFT JOIN `glpi_domains`
+                  ON `glpi_domains`.`id`=`$table`.`domains_id`";
+               } else {
+                  $concat    = "`$table`.`name`";
+                  $left_join = "";
+               }
+               $query = "SELECT `$table`.`id`, $concat AS `fqdn`
+               FROM `$table` $left_join
+               HAVING `fqdn`='".$host."'";
+               $iterator_fqdn = $DB->request($query);
+               if ($iterator_fqdn->numrows()) {
+                  $asset = $iterator_fqdn->next();
+                  self::$host_matching[$host] = [ 'itemtype' => $itemtype,
+                                                  'items_id' => $asset['id']
+                                                ];
+                  return self::$host_matching[$host];
+               }
             }
-            $query = "SELECT `$table`.`id`, $concat AS `fqdn`
-            FROM `$table` $left_join
-            HAVING `fqdn`='".$host."'";
-            $iterator_fqdn = $DB->request($query);
-            if ($iterator_fqdn->numrows()) {
-               $asset = $iterator_fqdn->next();
-               self::$host_matching[$host] = [ 'itemtype' => $itemtype,
-                                               'items_id' => $asset['id']
-                                             ];
-               return self::$host_matching[$host];
+         }
+
+         //Forth step : check the hostname only
+         //only if the host provided is a fqdn
+         if (preg_match("/[.]/", $host)) {
+            foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
+               $table = getTableForItemtype($itemtype);
+               $iterator = $DB->request($table, [ 'name' =>  $host]);
+               if ($iterator->numrows()) {
+                  $asset = $iterator->next();
+                  self::$host_matching[$host] = [ 'itemtype' => $itemtype,
+                                                  'items_id' => $asset['id']
+                                                ];
+                  return self::$host_matching[$host];
+               }
             }
          }
       }
-
-      //Forth step : check the hostname only
-      //only if the host provided is a fqdn
-      if (preg_match("/[.]/", $host)) {
-         foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
-            $table = getTableForItemtype($itemtype);
-            $iterator = $DB->request($table, [ 'name' =>  $host]);
-            if ($iterator->numrows()) {
-               $asset = $iterator->next();
-               self::$host_matching[$host] = [ 'itemtype' => $itemtype,
-                                               'items_id' => $asset['id']
-                                             ];
-               return self::$host_matching[$host];
-            }
-         }
-      }
+      return false;
    }
-   return false;
-}
 
    /**
    * Import or update data coming from OpenVAS
@@ -458,35 +458,35 @@ class PluginOpenvasItem extends CommonDBChild {
                   'openvas_comment' => $target->comment->__toString()
                 ];
 
-      $id = $item->addOrUpdateItem($openvas_id, $tmp, $tmp['openvas_host'],
-      $index);
+         $id = $item->addOrUpdateItem($openvas_id, $tmp, $tmp['openvas_host'],
+         $index);
 
-      //If the host is linked to an asset: update last task infos
-      if ($id) {
-         self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
-      }
-   }
-
-   //Second step : try to get assets from reports
-   $response = PluginOpenvasOmp::getReports([ 'type'   => 'assets',
-                                              'pos'    => 1,
-                                              'filter' => [ 'extra' => 'modification_time<'.$days.'d' ]
-                                            ]);
-   if (isset($response->report->report->host)) {
-      foreach ($response->report->report->host as $ovhost) {
-         $host = $ovhost->ip->__toString();
-         $id   = $item->addOrUpdateItem(NOT_AVAILABLE,
-                                        [ 'openvas_host' => $host,
-                                          'openvas_id'   => NOT_AVAILABLE
-                                        ], $host, $index);
+         //If the host is linked to an asset: update last task infos
          if ($id) {
             self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
          }
       }
-   }
 
-   $task->addVolume($index);
-   return true;
+      //Second step : try to get assets from reports
+      $response = PluginOpenvasOmp::getReports([ 'type'   => 'assets',
+                                                 'pos'    => 1,
+                                                 'filter' => [ 'extra' => 'modification_time<'.$days.'d' ]
+                                               ]);
+      if (isset($response->report->report->host)) {
+         foreach ($response->report->report->host as $ovhost) {
+            $host = $ovhost->ip->__toString();
+            $id   = $item->addOrUpdateItem(NOT_AVAILABLE,
+                                           [ 'openvas_host' => $host,
+                                             'openvas_id'   => NOT_AVAILABLE
+                                           ], $host, $index);
+            if ($id) {
+               self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
+            }
+         }
+      }
+
+      $task->addVolume($index);
+      return true;
    }
 
    /**
@@ -630,18 +630,18 @@ class PluginOpenvasItem extends CommonDBChild {
 
       $config = PluginOpenvasConfig::getInstance();
       $item   = new self();
-
-      $index = 0;
+      $index  = 0;
 
       //TODO to replace by a non SQL query when dbiterator will be able to handle the query
       $query = "SELECT `id`
-      FROM `glpi_plugin_openvas_items`
-      WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(),
-      INTERVAL -".$config->fields['retention_delay']." DAY)";
+                FROM `glpi_plugin_openvas_items`
+                WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(),
+                   INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
          $tmp = ['id'               => $target['id'],
-         'openvas_threat'   => NULL,
-         'openvas_severity' => NULL];
+                 'openvas_threat'   => NULL,
+                 'openvas_severity' => NULL
+                ];
          if ($item->update($tmp)) {
             $index++;
          }
@@ -650,9 +650,9 @@ class PluginOpenvasItem extends CommonDBChild {
       $vuln_item = new PluginOpenvasVulnerability_Item();
       $ids = [];
       $query = "SELECT `id`
-      FROM `glpi_plugin_openvas_vulnerabilities_items`
-      WHERE `creation_time` < DATE_ADD(CURDATE(),
-      INTERVAL -".$config->fields['retention_delay']." DAY)";
+                FROM `glpi_plugin_openvas_vulnerabilities_items`
+                WHERE `creation_time` < DATE_ADD(CURDATE(),
+                   INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query, '', true) as $target) {
          $vuln_item->delete($target);
          $index++;
@@ -660,13 +660,13 @@ class PluginOpenvasItem extends CommonDBChild {
 
       $vuln = new PluginOpenvasVulnerability();
       $query = "SELECT `id`
-      FROM `glpi_plugin_openvas_vulnerabilities`
-      WHERE `id` NOT IN (SELECT DISTINCT `plugin_openvas_vulnerabilities_id`
-         FROM `glpi_plugin_openvas_vulnerabilities_items`)";
-         foreach ($DB->request($query, '', true) as $target) {
-            $vuln->delete($target);
-            $index++;
-         }
+                FROM `glpi_plugin_openvas_vulnerabilities`
+                WHERE `id` NOT IN (SELECT DISTINCT `plugin_openvas_vulnerabilities_id`
+                   FROM `glpi_plugin_openvas_vulnerabilities_items`)";
+      foreach ($DB->request($query, '', true) as $target) {
+         $vuln->delete($target);
+         $index++;
+      }
       $task->addVolume($index);
       return true;
    }
