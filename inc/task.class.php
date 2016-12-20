@@ -105,6 +105,7 @@ class PluginOpenvasTask extends CommonDBTM {
             }
             echo "</td></tr>";
          }
+         echo "</table>";
       } else {
          echo "<table class='tab_cadre_fixe' id='taskformtable'>";
          echo "<tr class='tab_bg_1' align='center'>";
