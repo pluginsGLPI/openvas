@@ -29,21 +29,21 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-include ('../../../inc/includes.php');
-
-Session::checkSeveralRightsOr(["plugin_openvas_task" => READ,
-                               "plugin_openvas_vulnerability" => READ]);
+include ("../../../inc/includes.php");
 
 Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
-             'tools', 'PluginOpenvasMenu', 'PluginOpenvasVulnerability');
+             "tools", "PluginOpenvasMenu", "PluginOpenvasTask");
+
+Session::checkRight("plugin_openvas_task", READ);
 
 if ($_SESSION['glpirefresh_ticket_list'] > 0) {
+   // Refresh automatique  sur tracking.php
    echo "<script type=\"text/javascript\">\n";
    echo "setInterval(\"window.location.reload()\",".
-        (60000 * $_SESSION['glpirefresh_ticket_list']).");\n";
+         (60000 * $_SESSION['glpirefresh_ticket_list']).");\n";
    echo "</script>\n";
 }
 
-Search::show('PluginOpenvasVulnerability');
+PluginOpenvasTask::showTasks();
 
 Html::footer();

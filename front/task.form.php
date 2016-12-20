@@ -29,21 +29,32 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-include ('../../../inc/includes.php');
-
-Session::checkSeveralRightsOr(["plugin_openvas_task" => READ,
-                               "plugin_openvas_vulnerability" => READ]);
+include ("../../../inc/includes.php");
 
 Html::header(__("OpenVAS", "openvas"), $_SERVER['PHP_SELF'],
-             'tools', 'PluginOpenvasMenu', 'PluginOpenvasVulnerability');
+"tools", "PluginOpenvasMenu", "PluginOpenvasTask");
 
-if ($_SESSION['glpirefresh_ticket_list'] > 0) {
-   echo "<script type=\"text/javascript\">\n";
-   echo "setInterval(\"window.location.reload()\",".
-        (60000 * $_SESSION['glpirefresh_ticket_list']).");\n";
-   echo "</script>\n";
+Session::checkRight("plugin_openvas_task", READ);
+
+if (isset($_POST['save'])) {
+   if (PluginOpenvasOmp::addTask($_POST)) {
+      Session::addMessageAfterRedirect(__("Task created", "openldap"), true);
+   }
+   Html::redirect(PluginOpenvasTask::getSearchURL(true));
+} else if (isset($_GET['action']) && isset($_GET['task_id']) && !empty($_GET['task_id'])) {
+
+   switch ($_GET['action']) {
+      case PluginOpenvasOmp::START_TASK:
+         PluginOpenvasOmp::startTask($_GET['task_id']);
+      break;
+      case PluginOpenvasOmp::CANCEL_TASK:
+         PluginOpenvasOmp::stopTask($_GET['task_id']);
+      break;
+      default:
+      break;
+   }
+   Html::redirect(PluginOpenvasTask::getSearchURL(true));
 }
-
-Search::show('PluginOpenvasVulnerability');
+PluginOpenvasTask::showAddTaskForm($_POST);
 
 Html::footer();
