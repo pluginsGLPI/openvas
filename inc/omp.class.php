@@ -284,11 +284,11 @@ class PluginOpenvasOmp {
 
       //Build the omp command line
       //By using the -X flag, we can send XML commands
-      $url = $config->fields['openvas_omp_path']." -h "
-      .$config->fields['openvas_host']." -p "
-      .$config->fields['openvas_port']."  -u "
-      .$config->fields['openvas_username']." -w "
-      .$config->fields['openvas_password']." -X \"$command\"";
+      $url = $config->fields['openvas_omp_path']." -h \""
+      .$config->fields['openvas_host']."\" -p "
+      .$config->fields['openvas_port']."  -u \""
+      .$config->fields['openvas_username']."\" -w \""
+      .$config->fields['openvas_password']."\" -X \"$command\"";
 
       //Enable to display command sent to OpenVAS Manager
       //Toolbox::logDebug("Execute command : ".$url);
