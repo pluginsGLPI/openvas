@@ -30,10 +30,10 @@ The use should be able to see all data, and create tasks/request task start & st
 ### Glpi Configuration
 
 Copy the plugin folder into your glpi/plugins directory.
-The folder must be named 'prelude' otherwise GLPI framework will fail to initialize the plugin.
+The folder must be named 'openvas' otherwise GLPI framework will fail to initialize the plugin.
 
 Next, go to glpi interface, navigate to the _Administatrion > Plugins_ page.
-Find the prelude line, click on _Install_ button, and after refresh, click on _Enable_ button.
+Find the openvas line, click on _Install_ button, and after refresh, click on _Enable_ button.
 
 Once the plugin enabled, you may click on this name or go into _Setup > General_ menu to display the plugin configuration.
 
