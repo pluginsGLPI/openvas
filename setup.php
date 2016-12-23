@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.0');
+define('PLUGIN_OPENVAS_VERSION', '1.0.1');
 
 /**
  * Init hooks of the plugin.
