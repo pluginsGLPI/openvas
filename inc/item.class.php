@@ -29,7 +29,7 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-if (!defined('GLPI_ROOT')){
+if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
@@ -497,14 +497,14 @@ class PluginOpenvasItem extends CommonDBChild {
    * @param $openvas_item the OpenVAs item linked to the asset
    * @return nothing
    */
-   function addOrUpdateItem($openvas_id, $params = [], $host, &$index) {
+   function addOrUpdateItem($openvas_id, array $params, $host, &$index) {
       global $DB;
 
       $id = false;
 
       if ($openvas_id != NOT_AVAILABLE) {
          $sql = [ 'openvas_id' => $openvas_id];
-      }  else {
+      } else {
          $sql = ['openvas_host' => $host, 'openvas_id' => NOT_AVAILABLE];
       }
       //Check if the host is already linked to a GLPi asset

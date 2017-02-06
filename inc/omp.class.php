@@ -29,7 +29,7 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-if (!defined('GLPI_ROOT')){
+if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
@@ -299,7 +299,7 @@ class PluginOpenvasOmp {
       //We do not use exec() because output is truncated
       $handle = popen($url, 'r');
       //Read until there's no data left
-      while(!feof($handle)) {
+      while (!feof($handle)) {
          $content.=fread($handle, 1024);
       }
 
