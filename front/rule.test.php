@@ -82,4 +82,3 @@ if (isset($_POST["test_rule"])) {
 }
 
 Html::popFooter();
-?>
