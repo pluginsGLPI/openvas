@@ -154,7 +154,7 @@ class PluginOpenvasItem extends CommonDBChild {
             $form = self::getFormURL(true);
             echo "<a href='$form?id=$id&refresh=1'>"
             ."<img src='".$CFG_GLPI["root_doc"]."/pics/refresh.png'
-            alt='".__('Refresh')."' title='".__('Refresh')."'></a>";
+            alt='".__('Refresh', 'openvas')."' title='".__('Refresh', 'openvas')."'></a>";
          }
          echo "</td>";
 
