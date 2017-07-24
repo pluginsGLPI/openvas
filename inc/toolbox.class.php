@@ -161,7 +161,7 @@ class PluginOpenvasToolbox {
       if (!$color) {
          return $text;
       }
-      $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 100%;
+      $out  = "<div class='center' style='color: white; background-color: #ffffff; width: 90px;
                 border: 0px solid #9BA563; position: relative;' >";
       $out .= "<div style='position:absolute;'>&nbsp;".$text."</div>";
       $out .= "<div class='center' style='background-color: ".$color.";

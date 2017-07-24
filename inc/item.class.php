@@ -128,7 +128,7 @@ class PluginOpenvasItem extends CommonDBChild {
       $options = ['candel'    => false,
       'formtitle' => __("OpenVAS", "openvas"),
       'target'    => $form_url,
-      'colspan'   => 4];
+      'colspan'   => 2];
 
       $openvas_item->showFormHeader($options);
 
@@ -159,11 +159,14 @@ class PluginOpenvasItem extends CommonDBChild {
          echo "</td>";
 
          if ($openvas_item->fields['openvas_host']) {
-            echo "<td>".__('Host')."</td>";
+            echo "<td>".__('Host', 'openvas')."</td>";
             echo "<td>".$openvas_item->fields['openvas_host']."</td>";
          } else {
-            echo "<td colspan='2'></td>";
+            echo "<td colspan='3'></td>";
          }
+      } else {
+         echo "</td>";
+         echo "<td colspan='2'></td>";
       }
       echo "</tr>";
 
