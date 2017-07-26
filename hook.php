@@ -95,7 +95,7 @@ function plugin_openvas_getAddSearchOptions($itemtype) {
       $sopt[6105]['table']         = 'glpi_plugin_openvas_items';
       $sopt[6105]['field']         = 'openvas_host';
       $sopt[6105]['name']          = __('OpenVAS', 'openvas').'-'.
-      __('Host');
+      __('Host', 'openvas');
       $sopt[6105]['datatype']      = 'string';
       $sopt[6105]['joinparams']    = [ 'jointype' => 'itemtype_item' ];
       $sopt[6105]['massiveaction'] = false;
