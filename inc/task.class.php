@@ -75,36 +75,36 @@ class PluginOpenvasTask extends CommonDBTM {
             }
             echo "<tr class='tab_bg_1' align='center'>";
             $link = PluginOpenvasConfig::getConsoleURL();
-            $link.= "?cmd=get_task&task_id=".$task['id'];
-            echo "<td><a href='$link' target='_blank'>".$result['name']."</a></td>";
+            $link .= "?cmd=get_task&task_id=" . $task['id'];
+            echo "<td><a href='$link' target='_blank'>" . $result['name'] . "</a></td>";
 
-            $link.= "?cmd=get_target&target_id=".$result['target'];
-            echo "<td><a href='$link' target='_blank'>".$result['target_name']."</a></td>";
+            $link .= "?cmd=get_target&target_id=" . $result['target'];
+            echo "<td><a href='$link' target='_blank'>" . $result['target_name'] . "</a></td>";
 
             $status = $result['status'];
             if ($result['progress'] && $result['progress'] > 0) {
-               $status .= " (".$result['progress']."%)";
+               $status .= " (" . $result['progress'] . "%)";
             }
             echo "<td>$status</td>";
-            echo "<td>".self::getTaskActionButton(self::getFormURL(true),
-            $result['id'],
-            $result['status'])."</td>";
-            echo "<td>".PluginOpenvasToolbox::displayThreat($result['threat'])."</td>";
-            echo "<td>".$result['scanner']."</td>";
-            echo "<td>".$result['config']."</td>";
-            echo "<td>".$result['date_last_scan']."</td>";
+            echo "<td>" . self::getTaskActionButton(self::getFormURL(true),
+                                                    $result['id'],
+                                                    $result['status']) . "</td>";
+            echo "<td>" . PluginOpenvasToolbox::displayThreat($result['threat']) . "</td>";
+            echo "<td>" . $result['scanner'] . "</td>";
+            echo "<td>" . $result['config'] . "</td>";
+            echo "<td>" . $result['date_last_scan'] . "</td>";
             echo "<td>";
             if (!PluginOpenvasOmp::isTaskRunning($result['status'])) {
                $link = PluginOpenvasConfig::getConsoleURL();
-               $link.= "?cmd=get_report&report_id=".$result['report'];
+               $link .= "?cmd=get_report&report_id=" . $result['report'];
                echo "<a href='$link' target='_blank'>";
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/web.png' class='middle' alt=\""
-               .__('View in OpenVAS', 'openvas')."\" title=\""
-               .__('View in OpenVAS', 'openvas')."\" >";
+               echo "<img src='" . $CFG_GLPI["root_doc"] . "/pics/web.png' class='middle' alt=\""
+                    . __('View in OpenVAS', 'openvas') . "\" title=\""
+                    . __('View in OpenVAS', 'openvas') . "\" >";
                echo "</a>";
             }
-            echo "</td></tr>";
          }
+         echo "</td></tr>";
          echo "</table>";
       } else {
          echo "<table class='tab_cadre_fixe' id='taskformtable'>";
@@ -121,6 +121,7 @@ class PluginOpenvasTask extends CommonDBTM {
    * @return nothing
    */
    static function showAddTaskForm() {
+      global $CFG_GLPI;
 
       echo "<form name='addtask' method='post'
       action='".PluginOpenvasTask::getFormURL(true)."'>";
@@ -128,7 +129,7 @@ class PluginOpenvasTask extends CommonDBTM {
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<table class='tab_cadre_fixe' id='taskformtable'>";
       echo "<tr class='tab_bg_1' align='center'>";
-      echo "<th colspan='2'>".__('New task')."</th></tr>";
+      echo "<th colspan='3'>".__('New task')."</th></tr>";
       if (!PluginOpenvasOmp::ping()) {
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
@@ -161,13 +162,25 @@ class PluginOpenvasTask extends CommonDBTM {
          echo "<td>".__('Target', 'openvas')."</td>";
          echo "<td>";
          PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::TARGET, 'target');
+         echo "<img alt='' title=\"" . __s('Add') . "\" src='" . $CFG_GLPI["root_doc"] .
+              "/pics/add_dropdown.png' style='cursor:pointer; margin-left:2px;'
+                            onClick=\"" . Html::jsGetElementbyID('add_target') . ".dialog('open');\">";
+         echo Ajax::createIframeModalWindow('add_target',
+                                            $CFG_GLPI['root_doc'] . "/plugins/openvas/front/target.form.php",
+                                            array('display' => false, 'reloadonclose' => true));
          echo "</td>";
          echo "</tr>";
 
          echo "<tr class='tab_bg_1' align='center'>";
-         echo "<td>".__('Schedule', 'openvas')."</td>";
+         echo "<td>" . __('Schedule', 'openvas') . "</td>";
          echo "<td>";
          PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::SCHEDULE, 'schedule', true);
+         echo "<img alt='' title=\"" . __s('Add') . "\" src='" . $CFG_GLPI["root_doc"] .
+              "/pics/add_dropdown.png' style='cursor:pointer; margin-left:2px;'
+                            onClick=\"" . Html::jsGetElementbyID('add_schedule') . ".dialog('open');\">";
+         echo Ajax::createIframeModalWindow('add_schedule',
+                                            $CFG_GLPI['root_doc'] . "/plugins/openvas/front/schedule.form.php",
+                                            array('display' => false, 'reloadonclose' => true));
          echo "</td>";
          echo "</tr>";
 
@@ -219,6 +232,121 @@ class PluginOpenvasTask extends CommonDBTM {
          break;
       }
       return $html;
+   }
+
+   function formForTarget() {
+
+      global $CFG_GLPI;
+
+      echo "<form name='addtarget' method='post' action='" . $CFG_GLPI['root_doc'] . "/plugins/openvas/front/target.form.php'>";
+
+      echo "<table class='tab_cadre_fixe'>";
+      echo "<tr class='headerRow'>";
+      echo '<th colspan="4">' . __('New target', 'openvas') . '</th>';
+      echo '</tr>';
+
+      if (!PluginOpenvasOmp::ping()) {
+         echo "<tr class='tab_bg_1' align='center'>";
+         echo "<th>" . __('Cannot contact OpenVAS', 'openvas') . "</th>";
+         echo "</tr>";
+      } else {
+
+         echo '<tr class="tab_bg_1">';
+         echo '<td colspan="4">';
+         Dropdown::showSelectItemFromItemtypes(array('itemtype_name'       => 'item',
+                                                     'items_id_name'       => 'add_items_id',
+                                                     'itemtypes'           => $CFG_GLPI["asset_types"]));
+         echo '</td>';
+         echo '</tr>';
+
+         echo '<tr class="tab_bg_1">';
+         echo "<td>";
+         echo __('Credentials for ', 'openvas') . __('SSH');
+         echo "</td>";
+         echo "<td>";
+         PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::CREDENTIAL, 'credential', 'credential_ssh');
+         echo "</td>";
+         echo "<td>";
+         echo __('On port:', 'openvas');
+         echo "</td>";
+         echo "<td>";
+         echo "<input id='text' type='text' name='port' value='' class='autocompletion-text-field'>";
+         echo "</td>";
+         echo '</tr>';
+
+         echo '<tr class="tab_bg_1">';
+         echo "<td>";
+         echo __('Credentials for ', 'openvas') . __('SMB');
+         echo "</td>";
+         echo "<td colspan='3'>";
+         PluginOpenvasOmp::displayDropdown(PluginOpenvasOmp::CREDENTIAL, 'credential', 'credential_smb');
+         echo "</td>";
+         echo '</tr>';
+
+
+         echo "<tr class='tab_bg_2 center'><td colspan='4'>";
+         echo Html::submit(_x('button', 'Add'), array('name' => 'add'));
+         echo "</td></tr>";
+         echo "</table>";
+         Html::closeForm();
+
+      }
+
+   }
+
+
+   function formForSchedule() {
+
+      global $CFG_GLPI;
+
+      echo "<form name='addschedule' method='post' action='" . $CFG_GLPI['root_doc'] . "/plugins/openvas/front/schedule.form.php'>";
+
+      echo "<table class='tab_cadre_fixe'>";
+      echo "<tr class='headerRow'>";
+      echo '<th colspan="2">' . __('New schedule', 'openvas') . '</th>';
+      echo '</tr>';
+
+      if (!PluginOpenvasOmp::ping()) {
+         echo "<tr class='tab_bg_1' align='center'>";
+         echo "<th>" . __('Cannot contact OpenVAS', 'openvas') . "</th>";
+         echo "</tr>";
+      } else {
+
+         echo '<tr class="tab_bg_1">';
+         echo "<td>";
+         echo __('Name');
+         echo "</td>";
+         echo "<td>";
+         echo "<input type='text' name='name' value=''>";
+         echo "</td>";
+         echo '</tr>';
+
+         echo '<tr class="tab_bg_1">';
+         echo "<td>";
+         echo __('First time', 'openvas');
+         echo "</td>";
+         echo "<td>";
+         Html::showDateFormItem("date", "", false);
+         echo "</td>";
+         echo '</tr>';
+
+         echo '<tr class="tab_bg_1">';
+         echo "<td>";
+         echo __('Period (in days)', 'openvas');
+         echo "</td>";
+         echo "<td>";
+         echo "<input type='number' name='period' value='0'>";
+         echo "</td>";
+         echo '</tr>';
+
+         echo "<tr class='tab_bg_2 center'><td colspan='2'>";
+         echo Html::submit(_x('button', 'Add'), array('name' => 'add'));
+         echo "</td></tr>";
+         echo "</table>";
+         Html::closeForm();
+
+      }
+
    }
 
 }
