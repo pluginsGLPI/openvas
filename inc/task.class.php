@@ -283,7 +283,6 @@ class PluginOpenvasTask extends CommonDBTM {
          echo "</td>";
          echo '</tr>';
 
-
          echo "<tr class='tab_bg_2 center'><td colspan='4'>";
          echo Html::submit(_x('button', 'Add'), array('name' => 'add'));
          echo "</td></tr>";
