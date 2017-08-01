@@ -652,7 +652,7 @@ class PluginOpenvasItem extends CommonDBChild {
       //Clean items without openvas id
       $query = "SELECT `id`
                 FROM `glpi_plugin_openvas_items`
-                WHERE `openvas_id` = 0";
+                WHERE `openvas_id` = '0'";
       foreach ($DB->request($query) as $target) {
          $tmp = ['id'               => $target['id']
                 ];
