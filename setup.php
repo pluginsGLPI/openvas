@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.0.1');
+define('PLUGIN_OPENVAS_VERSION', '1.1.0');
 
 /**
  * Init hooks of the plugin.
@@ -94,13 +94,19 @@ function plugin_init_openvas() {
 function plugin_version_openvas() {
    global $LANG;
 
-   return [ 'name'           => __("GLPi openvas Connector", 'openvas'),
-            'version'        => PLUGIN_OPENVAS_VERSION,
-            'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
-            'license'        => 'GPLv3',
-            'homepage'       => 'https://github.com/pluginsglpi/openvas',
-            'minGlpiVersion' => "9.1.1"
-          ];
+   return [
+      'name'           => __("GLPi openvas Connector", 'openvas'),
+      'version'        => PLUGIN_OPENVAS_VERSION,
+      'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
+      'license'        => 'GPLv3',
+      'homepage'       => 'https://github.com/pluginsglpi/openvas',
+      'requirements'   => [
+         'glpi' => [
+            'min' => '9.2',
+            'dev' => true
+         ]
+      ]
+   ];
 }
 
 /**
@@ -110,8 +116,9 @@ function plugin_version_openvas() {
  * @return boolean
  */
 function plugin_openvas_check_prerequisites() {
-   if (version_compare(GLPI_VERSION, '9.1.1', 'lt')) {
-      echo "This plugin requires GLPI 9.1 or higher";
+   $version = rtrim(GLPI_VERSION, '-dev');
+   if (version_compare($version, '9.2', 'lt')) {
+      echo "This plugin requires GLPI 9.2";
       return false;
    }
    return true;
