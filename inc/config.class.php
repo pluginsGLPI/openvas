@@ -206,7 +206,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       }
 
       //This class is available since version 1.3.0
-      if (!TableExists("glpi_plugin_openvas_configs")) {
+      if (!$DB->tableExists("glpi_plugin_openvas_configs")) {
          $migration->displayMessage("Install glpi_plugin_openvas_configs");
 
          $config = new self();

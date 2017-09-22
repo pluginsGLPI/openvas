@@ -371,7 +371,7 @@ class PluginOpenvasItem extends CommonDBChild {
             //Third step: try the FQDN
             foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
                $table = getTableForItemtype($itemtype);
-               if (FieldExists($table, 'domains_id')) {
+               if ($DB->fieldExists($table, 'domains_id')) {
                   $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
                   $left_join = "LEFT JOIN `glpi_domains`
                   ON `glpi_domains`.`id`=`$table`.`domains_id`";
@@ -684,7 +684,7 @@ class PluginOpenvasItem extends CommonDBChild {
       global $DB;
 
       //This class is available since version 1.3.0
-      if (!TableExists("glpi_plugin_openvas_items")) {
+      if (!$DB->tableExists("glpi_plugin_openvas_items")) {
          $migration->displayMessage("Install glpi_plugin_openvas_items");
 
          $config = new self();
