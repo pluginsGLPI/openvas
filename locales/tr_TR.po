@@ -1,0 +1,156 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-18 22:13+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kaya Zeren <kayazeren@gmail.com>, 2017\n"
+"Language-Team: Turkish (Turkey) (https://www.transifex.com/teclib/teams/28042/tr_TR/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: tr_TR\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: hook.php:57 hook.php:65 hook.php:72 hook.php:80 hook.php:88 hook.php:96
+#: hook.php:104 hook.php:110 inc/profile.class.php:67 inc/menu.class.php:35
+#: inc/item.class.php:128 inc/vulnerability.class.php:48
+#: front/config.form.php:52 front/vulnerability.form.php:36
+#: front/vulnerability.php:37 front/task.form.php:34 front/task.php:34
+msgid "OpenVAS"
+msgstr "OpenVAS"
+
+#: hook.php:58
+msgid "Target ID"
+msgstr "Hedef kodu"
+
+#: hook.php:66 inc/vulnerability.class.php:70 inc/vulnerability.class.php:223
+#: inc/vulnerability.class.php:369 inc/task.class.php:65
+#: inc/rulevulnerability.class.php:75 inc/vulnerability_item.class.php:174
+msgid "Threat"
+msgstr "Tehdit"
+
+#: hook.php:81 inc/item.class.php:135 inc/task.class.php:62
+#: inc/task.class.php:161
+msgid "Target"
+msgstr "Hedef"
+
+#: hook.php:104 inc/item.class.php:202 inc/item.class.php:225
+#: inc/vulnerability.class.php:64 inc/vulnerability.class.php:368
+#: inc/rulevulnerability.class.php:76
+msgid "Severity"
+msgstr "Şiddet"
+
+#: hook.php:125 inc/vulnerabilitycategory.class.php:47
+#: inc/rulevulnerability.class.php:95
+msgid "Vulnerability category"
+msgstr "Güvenlik açığı kategorisi"
+
+#: inc/profile.class.php:45 inc/vulnerability.class.php:42
+#: inc/vulnerability_item.class.php:175
+msgid "Vulnerability"
+msgstr "Güvenlik açığı"
+
+#: inc/config.class.php:62 setup.php:97
+msgid "GLPi openvas Connector"
+msgstr "GLPI OpenVAS Bağlantısı"
+
+#: inc/config.class.php:78
+msgid "Host"
+msgstr "Sunucu"
+
+#: inc/config.class.php:82
+msgid "Manager port"
+msgstr "Yönetim kapı numarası"
+
+#: inc/config.class.php:89
+msgid "Path to omp"
+msgstr "OMP yolu"
+
+#: inc/config.class.php:93
+msgid "Console port"
+msgstr "Konsol kapı numarası"
+
+#: inc/config.class.php:111
+msgid "Target retention delay"
+msgstr "Hedef tutma gecikmesi"
+
+#: inc/config.class.php:116
+msgid "Number of days for searches"
+msgstr "Aramalar için gün sayısı"
+
+#: inc/item.class.php:49
+msgid "Openvas Item"
+msgstr "OpenVAS Ögesi"
+
+#: inc/item.class.php:140 inc/task.class.php:112 inc/task.class.php:134
+msgid "Cannot contact OpenVAS"
+msgstr "OpenVAS bağlantısı kurulamadı"
+
+#: inc/item.class.php:147 inc/item.class.php:148 inc/item.class.php:256
+#: inc/item.class.php:257 inc/task.class.php:103 inc/task.class.php:104
+msgid "View in OpenVAS"
+msgstr "OpenVAS üzerinde görüntüle"
+
+#: inc/item.class.php:227 inc/task.class.php:67 inc/task.class.php:147
+msgid "Scanner"
+msgstr "Tarayıcı"
+
+#: inc/item.class.php:676
+msgid "Synchronize OpenVAS hosts"
+msgstr "OpenVAS sunucularını eşitle"
+
+#: inc/item.class.php:678
+msgid "Clean OpenVAS infos"
+msgstr "OpenVAS bilgilerini temizle"
+
+#: inc/vulnerability.class.php:201
+msgid "Name"
+msgstr "Ad"
+
+#: inc/vulnerability.class.php:205
+msgid "Port"
+msgstr "Kapı No"
+
+#: inc/vulnerability.class.php:446
+msgid "Synchronize OpenVAS vulnerabilities"
+msgstr "OpenVAS güvenlik açıklarını eşitle"
+
+#: inc/rulevulnerabilitycollection.class.php:60
+#: inc/rulevulnerability.class.php:46
+msgid "Rules for OpenVAS vulnerabilities"
+msgstr "OpenVAS güvenlik açıkları kuralları"
+
+#: inc/task.class.php:154
+msgid "Config"
+msgstr "Yapılandırma"
+
+#: inc/task.class.php:168
+msgid "Schedule"
+msgstr "Zamanla"
+
+#: inc/task.class.php:202
+msgid "Start Requested"
+msgstr "Başlangıç Zorunludur"
+
+#: inc/task.class.php:211
+msgid "Stop Requested"
+msgstr "Bitiş Zorunludur"
+
+#: inc/rulevulnerability.class.php:91
+msgid "Create a new ticket using a template"
+msgstr "Bir kalıp kullanarak yeni bir çağrı kaydı oluştur"
+
+#: inc/vulnerability_item.class.php:107
+msgid "Result ID"
+msgstr "Sonuç Kodu"
+
+#: front/task.form.php:41
+msgid "Task created"
+msgstr "Görev oluşturuldu"
