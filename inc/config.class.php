@@ -29,7 +29,7 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-if (!defined('GLPI_ROOT')){
+if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
@@ -206,7 +206,7 @@ class PluginOpenvasConfig extends CommonDBTM {
       }
 
       //This class is available since version 1.3.0
-      if (!TableExists("glpi_plugin_openvas_configs")) {
+      if (!$DB->tableExists("glpi_plugin_openvas_configs")) {
          $migration->displayMessage("Install glpi_plugin_openvas_configs");
 
          $config = new self();

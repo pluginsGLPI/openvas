@@ -29,7 +29,7 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-if (!defined('GLPI_ROOT')){
+if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
@@ -284,11 +284,11 @@ class PluginOpenvasOmp {
 
       //Build the omp command line
       //By using the -X flag, we can send XML commands
-      $url = $config->fields['openvas_omp_path']." -h "
-      .$config->fields['openvas_host']." -p "
-      .$config->fields['openvas_port']."  -u "
-      .$config->fields['openvas_username']." -w "
-      .$config->fields['openvas_password']." -X \"$command\"";
+      $url = $config->fields['openvas_omp_path']." -h \""
+      .$config->fields['openvas_host']."\" -p "
+      .$config->fields['openvas_port']."  -u \""
+      .$config->fields['openvas_username']."\" -w \""
+      .$config->fields['openvas_password']."\" -X \"$command\"";
 
       //Enable to display command sent to OpenVAS Manager
       //Toolbox::logDebug("Execute command : ".$url);
@@ -299,7 +299,7 @@ class PluginOpenvasOmp {
       //We do not use exec() because output is truncated
       $handle = popen($url, 'r');
       //Read until there's no data left
-      while(!feof($handle)) {
+      while (!feof($handle)) {
          $content.=fread($handle, 1024);
       }
 

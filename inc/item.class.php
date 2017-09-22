@@ -29,7 +29,7 @@ along with GLPI; along with openvas. If not, see <http://www.gnu.org/licenses/>.
 @since     2016
 ----------------------------------------------------------------------*/
 
-if (!defined('GLPI_ROOT')){
+if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
 }
 
@@ -371,7 +371,7 @@ class PluginOpenvasItem extends CommonDBChild {
             //Third step: try the FQDN
             foreach ($CFG_GLPI['networkport_types'] as $itemtype) {
                $table = getTableForItemtype($itemtype);
-               if (FieldExists($table, 'domains_id')) {
+               if ($DB->fieldExists($table, 'domains_id')) {
                   $concat    = "CONCAT_WS('.', `$table`.`name`, `glpi_domains`.`name`)";
                   $left_join = "LEFT JOIN `glpi_domains`
                   ON `glpi_domains`.`id`=`$table`.`domains_id`";
@@ -497,14 +497,14 @@ class PluginOpenvasItem extends CommonDBChild {
    * @param $openvas_item the OpenVAs item linked to the asset
    * @return nothing
    */
-   function addOrUpdateItem($openvas_id, $params = [], $host, &$index) {
+   function addOrUpdateItem($openvas_id, array $params, $host, &$index) {
       global $DB;
 
       $id = false;
 
       if ($openvas_id != NOT_AVAILABLE) {
          $sql = [ 'openvas_id' => $openvas_id];
-      }  else {
+      } else {
          $sql = ['openvas_host' => $host, 'openvas_id' => NOT_AVAILABLE];
       }
       //Check if the host is already linked to a GLPi asset
@@ -684,7 +684,7 @@ class PluginOpenvasItem extends CommonDBChild {
       global $DB;
 
       //This class is available since version 1.3.0
-      if (!TableExists("glpi_plugin_openvas_items")) {
+      if (!$DB->tableExists("glpi_plugin_openvas_items")) {
          $migration->displayMessage("Install glpi_plugin_openvas_items");
 
          $config = new self();

@@ -10,12 +10,12 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-18 22:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Walid Nouh <wnouh@teclib.com>, 2016\n"
-"Language-Team: French (France) (https://www.transifex.com/teclib/teams/28042/fr_FR/)\n"
+"Last-Translator: Arthur Ramos Schaefer <arthur.r.schaefer@gmail.com>, 2017\n"
+"Language-Team: Portuguese (Brazil) (https://www.transifex.com/teclib/teams/28042/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr_FR\n"
+"Language: pt_BR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: hook.php:57 hook.php:65 hook.php:72 hook.php:80 hook.php:88 hook.php:96
@@ -28,129 +28,129 @@ msgstr "OpenVAS"
 
 #: hook.php:58
 msgid "Target ID"
-msgstr "Identifiant de cible"
+msgstr "ID Alvo"
 
 #: hook.php:66 inc/vulnerability.class.php:70 inc/vulnerability.class.php:223
 #: inc/vulnerability.class.php:369 inc/task.class.php:65
 #: inc/rulevulnerability.class.php:75 inc/vulnerability_item.class.php:174
 msgid "Threat"
-msgstr "Menace"
+msgstr "Ameaça"
 
 #: hook.php:81 inc/item.class.php:135 inc/task.class.php:62
 #: inc/task.class.php:161
 msgid "Target"
-msgstr "Cible"
+msgstr "Alvo"
 
 #: hook.php:104 inc/item.class.php:202 inc/item.class.php:225
 #: inc/vulnerability.class.php:64 inc/vulnerability.class.php:368
 #: inc/rulevulnerability.class.php:76
 msgid "Severity"
-msgstr "Sévérité"
+msgstr "Severidade"
 
 #: hook.php:125 inc/vulnerabilitycategory.class.php:47
 #: inc/rulevulnerability.class.php:95
 msgid "Vulnerability category"
-msgstr "Catégorie de vulnérabilité"
+msgstr "Categoria de vulnerabilidade"
 
 #: inc/profile.class.php:45 inc/vulnerability.class.php:42
 #: inc/vulnerability_item.class.php:175
 msgid "Vulnerability"
-msgstr "Vulnérabilité"
+msgstr "vULNERABILIDADE"
 
 #: inc/config.class.php:62 setup.php:97
 msgid "GLPi openvas Connector"
-msgstr "Connecteur OpenVAS pour GLPi"
+msgstr "Conector OpenVAS GLPI"
 
 #: inc/config.class.php:78
 msgid "Host"
-msgstr "Hôte"
+msgstr "Host"
 
 #: inc/config.class.php:82
 msgid "Manager port"
-msgstr "Port du Manager"
+msgstr "Porta do gerenciador"
 
 #: inc/config.class.php:89
 msgid "Path to omp"
-msgstr "Chemin vers l'exécutable omp"
+msgstr "Caminho para omp"
 
 #: inc/config.class.php:93
 msgid "Console port"
-msgstr "Port de la console web"
+msgstr "Porta de console"
 
 #: inc/config.class.php:111
 msgid "Target retention delay"
-msgstr "Temps de rétention des données"
+msgstr "Atraso de retenção de alvo"
 
 #: inc/config.class.php:116
 msgid "Number of days for searches"
-msgstr "Nombre de jours maximum pour les recherches"
+msgstr "Número de dias para pesquisas"
 
 #: inc/item.class.php:49
 msgid "Openvas Item"
-msgstr "Élément OpenVAS"
+msgstr "Item OpenVAS"
 
 #: inc/item.class.php:140 inc/task.class.php:112 inc/task.class.php:134
 msgid "Cannot contact OpenVAS"
-msgstr "Impossible de contacter OpenVAS"
+msgstr "Não é possível contatar OpenVAS"
 
 #: inc/item.class.php:147 inc/item.class.php:148 inc/item.class.php:256
 #: inc/item.class.php:257 inc/task.class.php:103 inc/task.class.php:104
 msgid "View in OpenVAS"
-msgstr "Voir dans la console OpenVAS"
+msgstr "Visualizar no OpenVAS"
 
 #: inc/item.class.php:227 inc/task.class.php:67 inc/task.class.php:147
 msgid "Scanner"
-msgstr "Scanneur"
+msgstr "Scanner"
 
 #: inc/item.class.php:676
 msgid "Synchronize OpenVAS hosts"
-msgstr "Synchroniser les hôtes OpenVAS"
+msgstr "Sincronizar hosts OpenVAS"
 
 #: inc/item.class.php:678
 msgid "Clean OpenVAS infos"
-msgstr "Nettoyer les données d'OpenVAS"
+msgstr "Limpar informações do OpenVAS"
 
 #: inc/vulnerability.class.php:201
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: inc/vulnerability.class.php:205
 msgid "Port"
-msgstr ""
+msgstr "Porta"
 
 #: inc/vulnerability.class.php:446
 msgid "Synchronize OpenVAS vulnerabilities"
-msgstr "Synchronisation des vulnérabilités OpenVAS"
+msgstr "Sincronizar vulnerabilidades do OpenVAS"
 
 #: inc/rulevulnerabilitycollection.class.php:60
 #: inc/rulevulnerability.class.php:46
 msgid "Rules for OpenVAS vulnerabilities"
-msgstr "Règles pour les vulnérabilités OpenVAS"
+msgstr "Regras para vulnerabilidades do OpenVAS"
 
 #: inc/task.class.php:154
 msgid "Config"
-msgstr "Config"
+msgstr "Configurar"
 
 #: inc/task.class.php:168
 msgid "Schedule"
-msgstr "Planification"
+msgstr "Agendar"
 
 #: inc/task.class.php:202
 msgid "Start Requested"
-msgstr "Démarrage demandé"
+msgstr "Início Solicitado"
 
 #: inc/task.class.php:211
 msgid "Stop Requested"
-msgstr "Arrêt demandé"
+msgstr "Parada Solicitada"
 
 #: inc/rulevulnerability.class.php:91
 msgid "Create a new ticket using a template"
-msgstr "Créer un nouveau ticket à partir du gabarit"
+msgstr "Criar novo chamado usando um modelo"
 
 #: inc/vulnerability_item.class.php:107
 msgid "Result ID"
-msgstr "Identifiant du résultat"
+msgstr "ID do Resultado"
 
 #: front/task.form.php:41
 msgid "Task created"
-msgstr "Tâche créée"
+msgstr "Tarefa criada"

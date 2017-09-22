@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.0');
+define('PLUGIN_OPENVAS_VERSION', '1.1.0');
 
 /**
  * Init hooks of the plugin.
@@ -68,6 +68,9 @@ function plugin_init_openvas() {
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
       $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
 
+      // require spectrum (for glpi >= 9.2)
+      $CFG_GLPI['javascript']['tools']['pluginopenvasmenu']['PluginOpenvasConfig'] = ['colorpicker'];
+
       if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
          Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
                                [ 'rulecollections_types' => true]);
@@ -94,13 +97,19 @@ function plugin_init_openvas() {
 function plugin_version_openvas() {
    global $LANG;
 
-   return [ 'name'           => __("GLPi openvas Connector", 'openvas'),
-            'version'        => PLUGIN_OPENVAS_VERSION,
-            'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
-            'license'        => 'GPLv3',
-            'homepage'       => 'https://github.com/pluginsglpi/openvas',
-            'minGlpiVersion' => "9.1.1"
-          ];
+   return [
+      'name'           => __("GLPi openvas Connector", 'openvas'),
+      'version'        => PLUGIN_OPENVAS_VERSION,
+      'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
+      'license'        => 'GPLv3',
+      'homepage'       => 'https://github.com/pluginsglpi/openvas',
+      'requirements'   => [
+         'glpi' => [
+            'min' => '9.2',
+            'dev' => true
+         ]
+      ]
+   ];
 }
 
 /**
@@ -110,8 +119,9 @@ function plugin_version_openvas() {
  * @return boolean
  */
 function plugin_openvas_check_prerequisites() {
-   if (version_compare(GLPI_VERSION, '9.1.1', 'lt')) {
-      echo "This plugin requires GLPI 9.1 or higher";
+   $version = rtrim(GLPI_VERSION, '-dev');
+   if (version_compare($version, '9.2', 'lt')) {
+      echo "This plugin requires GLPI 9.2";
       return false;
    }
    return true;
