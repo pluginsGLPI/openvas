@@ -499,7 +499,7 @@ class PluginOpenvasOmp {
             $scan_date     = date_format($date_scan_end, 'Y-m-d H:i:s');
          }
       }
-      
+
       $scan_begindate = date('Y-m-d H:i:s');
       if (isset($task->$node->report->timestamp)) {
          $timestamp = strval($task->$node->report->timestamp);
