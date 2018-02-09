@@ -325,7 +325,7 @@ class PluginOpenvasTask extends CommonDBTM {
          echo __('First time', 'openvas');
          echo "</td>";
          echo "<td>";
-         Html::showDateFormItem("date", "", false);
+         Html::showDateField("date", ['maybeempty' => false]);
          echo "</td>";
          echo '</tr>';
 
