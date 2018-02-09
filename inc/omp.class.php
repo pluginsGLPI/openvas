@@ -50,11 +50,13 @@ class PluginOpenvasOmp {
    const CONFIG   = 'get_configs';
    const SCANNER  = 'get_scanners';
    const SCHEDULE = 'get_schedules';
-
+   const CREDENTIAL = 'get_credentials';
    //Execute actions
-   const START_TASK  = 'start_task';
-   const CANCEL_TASK = 'stop_task';
-   const ADD_TASK    = 'create_task';
+   const START_TASK     = 'start_task';
+   const CANCEL_TASK    = 'stop_task';
+   const ADD_TASK       = 'create_task';
+   const ADD_TARGET     = 'create_target';
+   const ADD_SCHEDULE   = 'create_schedule';
 
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
@@ -555,15 +557,17 @@ class PluginOpenvasOmp {
       $response = self::executeCommand($action);
       $returns  = [];
 
+      if ($empty) {
+         $returns[''] = Dropdown::EMPTY_VALUE;
+      }
       foreach ($response->$name as $res) {
          $id = strval($res->attributes()->id);
          $returns[$id] = strval($res->name);
       }
-      if ($empty) {
-         $returns[''] = Dropdown::EMPTY_VALUE;
-      }
+
       return Dropdown::showFromArray($name, $returns);
    }
+
 
    /**
    * Add a task
@@ -586,5 +590,63 @@ class PluginOpenvasOmp {
       $response = self::executeCommand(self::ADD_TASK,
       ['command' => $command], true);
       return ($response->status == '201');
+   }
+
+
+   /**
+    * Add a target
+    * @since 1.0
+    *
+    * @param $options the target parameters
+    *
+    * @return true if the target was correctly added
+    */
+   static function addTarget($options) {
+      $command = "<create_target><name>" . $options['name'] . "</name>";
+      //$command.= "<comment>".$options['content']."</comment>";
+      $command .= "<hosts>" . $options['host'] . "</hosts>";
+      if (!empty($options['credential_ssh'])) {
+         $command .= "<ssh_credential id='" . $options['credential_ssh']
+                     . "'><port>" . $options['port'] . "</port>"
+                     . "</ssh_credential>";
+      }
+      if (!empty($options['credential_smb'])) {
+         $command .= "<smb_credential id='" . $options['credential_smb'] . "'></smb_credential>";
+      }
+      $command .= "</create_target>";
+
+      $response = self::executeCommand(self::ADD_TARGET,
+                                       ['command' => $command], true);
+      return ($response['status'] == '201');
+   }
+
+
+   /**
+    * Add a Schedule
+    * @since 1.0
+    *
+    * @param $options the schedule parameters
+    *
+    * @return true if the schedule was correctly added
+    */
+   static function addSchedule($options) {
+      $command = "<create_schedule><name>" . $options['name'] . "</name>";
+      //$command.= "<comment>".$options['content']."</comment>";
+      $command .= "<first_time>";
+      $command .= "<day_of_month>" . $options['day'] . "</day_of_month>";
+      $command .= "<hour>" . $options['hour'] . "</hour>";
+      $command .= "<minute>" . $options['min'] . "</minute>";
+      $command .= "<month>" . $options['month'] . "</month>";
+      $command .= "<year>" . $options['year'] . "</year>";
+      $command .= "</first_time>";
+      if (!empty($options['period'])) {
+         $command .= "<period>" . $options['period'];
+         $command .= "<unit>day</unit>";
+         $command .= "</period>";
+      }
+      $command  .= "</create_schedule>";
+      $response = self::executeCommand(self::ADD_SCHEDULE,
+                                       ['command' => $command], true);
+      return ($response['status'] == '201');
    }
 }
