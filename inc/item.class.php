@@ -718,7 +718,7 @@ class PluginOpenvasItem extends CommonDBChild {
             KEY `openvas_date_last_scan` (`openvas_date_last_scan`),
             KEY `date_creation` (`date_creation`),
             KEY `date_mod` (`date_mod`)
-         ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
          //New installation : add default profile
