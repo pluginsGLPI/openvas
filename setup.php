@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.1.0');
+define('PLUGIN_OPENVAS_VERSION', '2.0.0');
 
 /**
  * Init hooks of the plugin.
@@ -85,6 +85,10 @@ function plugin_init_openvas() {
       }
 
       $PLUGIN_HOOKS['menu_toadd']['openvas']['tools'] = 'PluginOpenvasMenu';
+
+      if (class_exists('PluginMydashboardMenu')) {
+         $PLUGIN_HOOKS['mydashboard']['openvas'] = array("PluginOpenvasDashboard");
+      }
    }
 }
 
@@ -105,7 +109,7 @@ function plugin_version_openvas() {
       'homepage'       => 'https://github.com/pluginsglpi/openvas',
       'requirements'   => [
          'glpi' => [
-            'min' => '9.2',
+            'min' => '9.3',
             'dev' => true
          ]
       ]
@@ -120,8 +124,8 @@ function plugin_version_openvas() {
  */
 function plugin_openvas_check_prerequisites() {
    $version = rtrim(GLPI_VERSION, '-dev');
-   if (version_compare($version, '9.2', 'lt')) {
-      echo "This plugin requires GLPI 9.2";
+   if (version_compare($version, '9.3', 'lt')) {
+      echo "This plugin requires GLPI 9.3";
       return false;
    }
    return true;
