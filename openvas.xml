@@ -5,10 +5,12 @@
       <logo>https://raw.githubusercontent.com/pluginsGLPI/openvas/master/misc/logo.png</logo>
       <description>
          <short>
+            <cs>GLPi zásuvný modul pro interakci s OpenVAS</cs>
             <en>GLPi plugin to interact with OpenVAS</en>
             <fr>Plugin GLPi pour interagir avec OpenVAS</fr>
          </short>
          <long>
+            <cs>Tento zásuvný modul získává ohrožení a zranitelnosti ze skeneru zranitelností OpenVAS do GLPi</cs>
             <en>This plugin retrieve hosts threat and vulnerabilities from OpenVAS vulnerability scanner into GLPi</en>
             <fr>Ce plugin récupère dans GLPi les menaces et vulnérabilités des hôtes depuis le scanner de vulnérabilités OpenVAS</fr>
          </long>
@@ -35,11 +37,17 @@
          </version>
       </versions>
       <langs>
+         <lang>cs_CZ</lang>
          <lang>en_GB</lang>
          <lang>fr_FR</lang>
       </langs>
       <license>GPL v2+</license>
       <tags>
+         <cs>
+           <tag>inventura</tag>
+           <tag>zabezpečení</tag>
+           <tag>službapodpory</tag>
+         </cs>
          <fr>
             <tag>inventaire</tag>
             <tag>sécurité</tag>
