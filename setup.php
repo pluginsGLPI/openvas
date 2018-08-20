@@ -54,7 +54,7 @@ function plugin_init_openvas() {
       $PLUGIN_HOOKS['status']['openvas'] = 'plugin_openvas_Status';
 
       Plugin::registerClass('PluginOpenvasProfile',
-                          array('addtabon' => array('Profile')));
+                          ['addtabon' => ['Profile']]);
 
       if (Session::haveRight('plugin_openvas_item', READ)) {
          Plugin::registerClass('PluginOpenvasItem',

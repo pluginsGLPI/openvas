@@ -82,7 +82,7 @@ class PluginOpenvasOmp {
    * @param $options options as an array
    * @return a string representing the filter to be applied during query
    */
-   private static function getFilter($options = array ()) {
+   private static function getFilter($options = []) {
 
       $filter = '';
       $params = [];
@@ -246,7 +246,7 @@ class PluginOpenvasOmp {
    * @param send raw command or it should be processed
    * @return the command's result, as a SimpleXMLObject
    */
-   private static function executeCommand($action, $options = array(), $raw = false) {
+   private static function executeCommand($action, $options = [], $raw = false) {
       $config = PluginOpenvasConfig::getInstance();
       $omp    = new self();
 
@@ -345,14 +345,14 @@ class PluginOpenvasOmp {
    * @param value the selected value to show
    * @return the dropdown ID (is needed)
    */
-   static function dropdownTargets($name, $value='') {
+   static function dropdownTargets($name, $value = '') {
       global $DB;
 
       //Get all targets
       $results = self::getTargetsAsArray();
 
       //Get targets uuid already in use
-      $used    = array();
+      $used    = [];
       foreach ($DB->request('glpi_plugin_openvas_items',
                             [ 'NOT' => [ 'openvas_id' => $value]]) as $val) {
          $used[$val['openvas_id']] = $val['openvas_id'];
@@ -376,7 +376,7 @@ class PluginOpenvasOmp {
    static function getTargetsAsArray() {
       $target_response = self::executeCommand(self::TARGET);
 
-      $results       = array();
+      $results       = [];
       foreach ($target_response->target as $response) {
          $host         = $response->hosts->__toString();
          $name         = $response->name->__toString();
@@ -405,7 +405,7 @@ class PluginOpenvasOmp {
                  ];
       $target_response = self::executeCommand(self::TARGET, $options);
 
-      $target          = array();
+      $target          = [];
       foreach ($target_response->target as $response) {
          $target['host']    = $response->hosts->__toString();
          $target['name']    = $response->name->__toString();
@@ -441,7 +441,7 @@ class PluginOpenvasOmp {
       }
 
       //Array to store the results
-      $results        = array();
+      $results        = [];
 
       foreach (self::$tasks_cache_response->task as $response) {
          $tid = strval($response->target->attributes()->id);

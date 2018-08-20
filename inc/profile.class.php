@@ -60,7 +60,7 @@ class PluginOpenvasProfile extends Profile {
       $DB->query($query);
    }
 
-   function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
+   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
 
       if ($item->getType() == 'Profile') {
          if ($item->getField('interface') == 'central') {
@@ -72,7 +72,7 @@ class PluginOpenvasProfile extends Profile {
    }
 
 
-   static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
+   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0) {
 
       if ($item->getType() == 'Profile') {
          $profile = new self();
@@ -125,7 +125,7 @@ class PluginOpenvasProfile extends Profile {
    *
    * @return nothing
    **/
-   function showForm($profiles_id=0, $openform=TRUE, $closeform=TRUE) {
+   function showForm($profiles_id = 0, $openform = true, $closeform = true) {
 
       echo "<div class='firstbloc'>";
       if (($canedit = Session::haveRightsOr(self::$rightname, [CREATE, UPDATE, PURGE]))
@@ -139,14 +139,14 @@ class PluginOpenvasProfile extends Profile {
 
       $rights = self::getAllRights();
       $profile->displayRightsChoiceMatrix(self::getAllRights(),
-      array('canedit'       => $canedit,
+      ['canedit'       => $canedit,
       'default_class' => 'tab_bg_2',
-      'title'         => __('General')));
+      'title'         => __('General')]);
       if ($canedit
       && $closeform) {
          echo "<div class='center'>";
-         echo Html::hidden('id', array('value' => $profiles_id));
-         echo Html::submit(_sx('button', 'Save'), array('name' => 'update'));
+         echo Html::hidden('id', ['value' => $profiles_id]);
+         echo Html::submit(_sx('button', 'Save'), ['name' => 'update']);
          echo "</div>\n";
          Html::closeForm();
       }
