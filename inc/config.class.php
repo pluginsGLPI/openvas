@@ -190,7 +190,7 @@ class PluginOpenvasConfig extends CommonDBTM {
    public static function install(Migration $migration) {
       global $DB;
 
-      if (!countElementsInTable('glpi_requesttypes', "`name`='OpenVAS'")) {
+      if (!countElementsInTable('glpi_requesttypes', ['name' => 'OpenVAS'])) {
          $requesttype = new RequestType();
          $requesttypes_id = $requesttype->add(['name'         => 'OpenVAS',
          'entities_id'  => 0,

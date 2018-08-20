@@ -64,9 +64,13 @@ class PluginOpenvasItem extends CommonDBChild {
 
       // can exists for template
       if ($itemtype::canView()) {
-         $nb = countElementsInTable('glpi_plugin_openvas_items',
-         "`itemtype`='".$item->getType()."'
-         AND `items_id`='".$item->getID()."'");
+         $nb = countElementsInTable(
+            'glpi_plugin_openvas_items',
+            [
+               'itemtype' => $item->getType(),
+               'items_id' => $item->getID(),
+            ]
+         );
          return self::createTabEntry(self::getTypeName(Session::getPluralNumber()), $nb);
       }
    }
