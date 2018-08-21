@@ -231,6 +231,7 @@ class PluginOpenvasItem extends CommonDBChild {
                .__('Setup')."</th><th>"
                .__('Scanner', 'openvas')."</th><th>"
                .__("Last run")."</th><th>"
+               .__("Begin date")."</th><th>"
                ._n("Report", "Reports", 1)."</th></tr>";
                foreach ($tasks as $task_id => $task) {
                   echo "<tr class='tab_bg_1' align='center'>";
@@ -252,6 +253,7 @@ class PluginOpenvasItem extends CommonDBChild {
                   echo "<td>".$task['scanner']."</td>";
                   echo "<td>".$task['config']."</td>";
                   echo "<td>".$task['date_last_scan']."</td>";
+                  echo "<td>".$task['begindate_last_scan']."</td>";
                   echo "<td>";
                   if (!PluginOpenvasOmp::isTaskRunning($task['status'])) {
                      $link = PluginOpenvasConfig::getConsoleURL();
@@ -351,14 +353,15 @@ class PluginOpenvasItem extends CommonDBChild {
 
       //First: check if the host provided is already associated with an asset
       $iterator = $DB->request('glpi_plugin_openvas_items',
-                               [ 'FIELDS' => [ 'itemtype', 'items_id'],
+                               [ 'FIELDS' => [ 'itemtype', 'items_id', 'openvas_id'],
                                  'OR'     => [ 'openvas_host' => $host,
                                  'openvas_name' => $host]
                                ]);
       if ($iterator->numrows()) {
          $tmp = $iterator->next();
          self::$host_matching[$host] = [ 'itemtype' => $tmp['itemtype'],
-                                         'items_id' => $tmp['items_id']
+                                         'items_id' => $tmp['items_id'],
+                                         'openvas_id' => $tmp['openvas_id']
                                        ];
          return self::$host_matching[$host];
       } else {
@@ -647,6 +650,17 @@ class PluginOpenvasItem extends CommonDBChild {
                  'openvas_severity' => null
                 ];
          if ($item->update($tmp)) {
+            $index++;
+         }
+      }
+      //Clean items without openvas id
+      $query = "SELECT `id`
+                FROM `glpi_plugin_openvas_items`
+                WHERE `openvas_id` = 'N/A'";
+      foreach ($DB->request($query) as $target) {
+         $tmp = ['id'               => $target['id']
+                ];
+         if ($item->delete($tmp, true)) {
             $index++;
          }
       }

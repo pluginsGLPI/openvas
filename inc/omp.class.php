@@ -502,6 +502,15 @@ class PluginOpenvasOmp {
          }
       }
 
+      $scan_begindate = date('Y-m-d H:i:s');
+      if (isset($task->$node->report->timestamp)) {
+         $timestamp = strval($task->$node->report->timestamp);
+         if (!empty($timestamp)) {
+            $date_timestamp = new DateTime($timestamp);
+            $scan_begindate     = date_format($date_timestamp, 'Y-m-d H:i:s');
+         }
+      }
+
       if (isset($task->$node->report)
          && isset($task->$node->report->attributes()->id)) {
          $report_id = strval($task->$node->report->attributes()->id);
@@ -510,19 +519,20 @@ class PluginOpenvasOmp {
       $config  = strval($task->config->name);
       $scanner = strval($task->scanner->name);
 
-      $results       = [ 'name'           => $name,
-                         'config'         => $config,
-                         'scanner'        => $scanner,
-                         'status'         => $status,
-                         'progress'       => $progress,
-                         'date_last_scan' => $scan_date,
-                         'severity'       => $severity,
-                         'report'         => $report_id,
-                         'id'             => $id,
-                         'target'         => $tid,
-                         'target_name'    => $tname,
-                         'threat'         => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
-                      ];
+      $results = ['name'                => $name,
+                  'config'              => $config,
+                  'scanner'             => $scanner,
+                  'status'              => $status,
+                  'progress'            => $progress,
+                  'date_last_scan'      => $scan_date,
+                  'begindate_last_scan' => $scan_begindate,
+                  'severity'            => $severity,
+                  'report'              => $report_id,
+                  'id'                  => $id,
+                  'target'              => $tid,
+                  'target_name'         => $tname,
+                  'threat'              => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
+      ];
       return $results;
    }
 
