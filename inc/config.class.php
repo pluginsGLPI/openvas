@@ -231,7 +231,7 @@ class PluginOpenvasConfig extends CommonDBTM {
             PRIMARY KEY  (`id`),
             KEY `openvas_host` (`openvas_host`),
             KEY `openvas_results_last_sync` (`openvas_results_last_sync`)
-         ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
          $tmp = [ 'id'                    => 1,
