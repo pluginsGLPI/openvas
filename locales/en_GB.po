@@ -1,22 +1,21 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# English translations for PACKAGE package.
+# Copyright (C) 2018 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
-#, fuzzy
+# Automatically generated, 2018.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-08-21 15:14+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: liAnGjiA <liangjia@qq.com>, 2018\n"
-"Language-Team: Chinese (China) (https://www.transifex.com/teclib/teams/28042/zh_CN/)\n"
+"PO-Revision-Date: 2018-08-21 15:14+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: en_GB\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_CN\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: front/vulnerability.form.php:36 front/task.php:34 front/task.form.php:34
 #: front/config.form.php:52 front/vulnerability.php:37 hook.php:58 hook.php:66
@@ -28,174 +27,174 @@ msgstr "OpenVAS"
 
 #: front/task.form.php:41
 msgid "Task created"
-msgstr "任务已创建"
+msgstr "Task created"
 
 #: front/target.form.php:37
 msgid "Add a new target"
-msgstr ""
+msgstr "Add a new target"
 
 #: front/target.form.php:48
 msgid "Target created"
-msgstr ""
+msgstr "Target created"
 
 #: front/target.form.php:52
 msgid "No ip address for item, can't create target"
-msgstr ""
+msgstr "No ip address for item, can't create target"
 
 #: front/schedule.form.php:37
 msgid "Add a new schedule"
-msgstr ""
+msgstr "Add a new schedule"
 
 #: front/schedule.form.php:49
 msgid "Schedule created"
-msgstr ""
+msgstr "Schedule created"
 
 #: hook.php:59
 msgid "Target ID"
-msgstr "目标 ID"
+msgstr "Target ID"
 
 #: hook.php:67 inc/task.class.php:65 inc/rulevulnerability.class.php:75
 #: inc/vulnerability_item.class.php:182 inc/vulnerability.class.php:85
 #: inc/vulnerability.class.php:253 inc/vulnerability.class.php:491
 msgid "Threat"
-msgstr ""
+msgstr "Threat"
 
 #: hook.php:82 inc/task.class.php:62 inc/task.class.php:162
 #: inc/item.class.php:140
 msgid "Target"
-msgstr "目标"
+msgstr "Target"
 
 #: hook.php:105 inc/item.class.php:207 inc/item.class.php:230
 #: inc/rulevulnerability.class.php:76 inc/vulnerability.class.php:76
 #: inc/vulnerability.class.php:490
 msgid "Severity"
-msgstr "严重程度"
+msgstr "Severity"
 
 #: hook.php:123 inc/rulevulnerability.class.php:94
 #: inc/vulnerabilitycategory.class.php:47
 msgid "Vulnerability category"
-msgstr ""
+msgstr "Vulnerability category"
 
 #: inc/profile.class.php:45 inc/config.class.php:131
 #: inc/vulnerability_item.class.php:183 inc/vulnerability.class.php:42
 msgid "Vulnerability"
-msgstr ""
+msgstr "Vulnerability"
 
 #: inc/config.class.php:62 setup.php:105
 msgid "GLPi openvas Connector"
-msgstr "GLPI 的 openvas 连接器"
+msgstr "GLPi openvas Connector"
 
 #: inc/config.class.php:78
 msgid "Host"
-msgstr "主机"
+msgstr "Host"
 
 #: inc/config.class.php:82
 msgid "Manager port"
-msgstr "端口管理"
+msgstr "Manager port"
 
 #: inc/config.class.php:89
 msgid "Path to omp"
-msgstr "OMP路径"
+msgstr "Path to omp"
 
 #: inc/config.class.php:93
 msgid "Console port"
-msgstr "控制端口"
+msgstr "Console port"
 
 #: inc/config.class.php:111
 msgid "Target retention delay"
-msgstr "目标保留延迟"
+msgstr "Target retention delay"
 
 #: inc/config.class.php:116
 msgid "Number of days for searches"
-msgstr "检索天数"
+msgstr "Number of days for searches"
 
 #: inc/task.class.php:67 inc/task.class.php:148 inc/item.class.php:232
 msgid "Scanner"
-msgstr ""
+msgstr "Scanner"
 
 #: inc/task.class.php:102 inc/task.class.php:103 inc/item.class.php:152
 #: inc/item.class.php:153 inc/item.class.php:263 inc/item.class.php:264
 msgid "View in OpenVAS"
-msgstr ""
+msgstr "View in OpenVAS"
 
 #: inc/task.class.php:112 inc/task.class.php:135 inc/task.class.php:250
 #: inc/task.class.php:310 inc/item.class.php:145
 msgid "Cannot contact OpenVAS"
-msgstr ""
+msgstr "Cannot contact OpenVAS"
 
 #: inc/task.class.php:155
 msgid "Config"
-msgstr "配置"
+msgstr "Config"
 
 #: inc/task.class.php:175
 msgid "Schedule"
-msgstr "计划"
+msgstr "Schedule"
 
 #: inc/task.class.php:215
 msgid "Start Requested"
-msgstr "开始请求"
+msgstr "Start Requested"
 
 #: inc/task.class.php:224
 msgid "Stop Requested"
-msgstr "结束请求"
+msgstr "Stop Requested"
 
 #: inc/task.class.php:245
 msgid "New target"
-msgstr ""
+msgstr "New target"
 
 #: inc/task.class.php:264 inc/task.class.php:279
 msgid "Credentials for "
-msgstr ""
+msgstr "Credentials for "
 
 #: inc/task.class.php:270
 msgid "On port:"
-msgstr ""
+msgstr "On port:"
 
 #: inc/task.class.php:305
 msgid "New schedule"
-msgstr ""
+msgstr "New schedule"
 
 #: inc/task.class.php:325
 msgid "First time"
-msgstr ""
+msgstr "First time"
 
 #: inc/task.class.php:334
 msgid "Period (in days)"
-msgstr ""
+msgstr "Period (in days)"
 
 #: inc/item.class.php:49
 msgid "Openvas Item"
-msgstr "Openvas 项目"
+msgstr "Openvas Item"
 
 #: inc/item.class.php:694
 msgid "Synchronize OpenVAS hosts"
-msgstr "同步 OpenVAS 主机"
+msgstr "Synchronize OpenVAS hosts"
 
 #: inc/item.class.php:696
 msgid "Clean OpenVAS infos"
-msgstr "清除 OpenVAS 信息"
+msgstr "Clean OpenVAS infos"
 
 #: inc/rulevulnerability.class.php:46
 #: inc/rulevulnerabilitycollection.class.php:60
 msgid "Rules for OpenVAS vulnerabilities"
-msgstr ""
+msgstr "Rules for OpenVAS vulnerabilities"
 
 #: inc/rulevulnerability.class.php:90
 msgid "Create a new ticket using a template"
-msgstr "使用模板新建一个工单"
+msgstr "Create a new ticket using a template"
 
 #: inc/vulnerability_item.class.php:115
 msgid "Result ID"
-msgstr "结果ID"
+msgstr "Result ID"
 
 #: inc/vulnerability.class.php:235
 msgid "Name"
-msgstr "名称"
+msgstr "Name"
 
 #: inc/vulnerability.class.php:239
 msgid "Port"
-msgstr "端口"
+msgstr "Port"
 
 #: inc/vulnerability.class.php:509
 msgid "Synchronize OpenVAS vulnerabilities"
-msgstr ""
+msgstr "Synchronize OpenVAS vulnerabilities"
