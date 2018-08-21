@@ -58,15 +58,19 @@ class PluginOpenvasItem extends CommonDBChild {
    /**
    * @see CommonGLPI::getTabNameForItem()
    **/
-   function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
+   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
 
       $itemtype = $item->getType();
 
       // can exists for template
       if ($itemtype::canView()) {
-         $nb = countElementsInTable('glpi_plugin_openvas_items',
-         "`itemtype`='".$item->getType()."'
-         AND `items_id`='".$item->getID()."'");
+         $nb = countElementsInTable(
+            'glpi_plugin_openvas_items',
+            [
+               'itemtype' => $item->getType(),
+               'items_id' => $item->getID(),
+            ]
+         );
          return self::createTabEntry(self::getTypeName(Session::getPluralNumber()), $nb);
       }
    }
@@ -77,7 +81,7 @@ class PluginOpenvasItem extends CommonDBChild {
    * @param $tabnum          (default 1)
    * @param $withtemplate    (default 0)
    */
-   static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
+   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0) {
       $ovitem = new self();
       $ovitem->getFromDBForItem($item->getType(), $item->getID());
 
@@ -639,8 +643,8 @@ class PluginOpenvasItem extends CommonDBChild {
                    INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
          $tmp = ['id'               => $target['id'],
-                 'openvas_threat'   => NULL,
-                 'openvas_severity' => NULL
+                 'openvas_threat'   => null,
+                 'openvas_severity' => null
                 ];
          if ($item->update($tmp)) {
             $index++;
@@ -725,11 +729,11 @@ class PluginOpenvasItem extends CommonDBChild {
       $cron = new CronTask;
       if (!$cron->getFromDBbyName(__CLASS__, 'openvasSynchronize')) {
          CronTask::Register(__CLASS__, 'openvasSynchronize', DAY_TIMESTAMP,
-         array('param' => 24, 'mode' => CronTask::MODE_EXTERNAL));
+         ['param' => 24, 'mode' => CronTask::MODE_EXTERNAL]);
       }
       if (!$cron->getFromDBbyName(__CLASS__, 'openvasClean')) {
          CronTask::Register(__CLASS__, 'openvasClean', DAY_TIMESTAMP,
-         array('param' => 24, 'mode' => CronTask::MODE_EXTERNAL));
+         ['param' => 24, 'mode' => CronTask::MODE_EXTERNAL]);
       }
    }
 

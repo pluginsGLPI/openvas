@@ -133,22 +133,22 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . _x('priority', 'High') . "</td>";
       echo "<td>";
-      Html::showColorField('severity_high_color', array('value' => $this->fields["severity_high_color"]));
+      Html::showColorField('severity_high_color', ['value' => $this->fields["severity_high_color"]]);
       echo "</td>";
       echo "<td>" . _x('priority', 'Medium') . "</td>";
       echo "<td>";
-      Html::showColorField('severity_medium_color', array('value' => $this->fields["severity_medium_color"]));
+      Html::showColorField('severity_medium_color', ['value' => $this->fields["severity_medium_color"]]);
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . _x('priority', 'Low') . "</td>";
       echo "<td>";
-      Html::showColorField('severity_low_color', array('value' => $this->fields["severity_low_color"]));
+      Html::showColorField('severity_low_color', ['value' => $this->fields["severity_low_color"]]);
       echo "</td>";
       echo "<td>" . __("None") . "</td>";
       echo "<td>";
-      Html::showColorField('severity_none_color', array('value' => $this->fields["severity_none_color"]));
+      Html::showColorField('severity_none_color', ['value' => $this->fields["severity_none_color"]]);
       echo "</tr>";
       echo "</td>";
 
@@ -190,7 +190,7 @@ class PluginOpenvasConfig extends CommonDBTM {
    public static function install(Migration $migration) {
       global $DB;
 
-      if (!countElementsInTable('glpi_requesttypes', "`name`='OpenVAS'")) {
+      if (!countElementsInTable('glpi_requesttypes', ['name' => 'OpenVAS'])) {
          $requesttype = new RequestType();
          $requesttypes_id = $requesttype->add(['name'         => 'OpenVAS',
          'entities_id'  => 0,

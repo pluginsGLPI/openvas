@@ -167,7 +167,7 @@ class PluginOpenvasTask extends CommonDBTM {
                             onClick=\"" . Html::jsGetElementbyID('add_target') . ".dialog('open');\">";
          echo Ajax::createIframeModalWindow('add_target',
                                             $CFG_GLPI['root_doc'] . "/plugins/openvas/front/target.form.php",
-                                            array('display' => false, 'reloadonclose' => true));
+                                            ['display' => false, 'reloadonclose' => true]);
          echo "</td>";
          echo "</tr>";
 
@@ -180,7 +180,7 @@ class PluginOpenvasTask extends CommonDBTM {
                             onClick=\"" . Html::jsGetElementbyID('add_schedule') . ".dialog('open');\">";
          echo Ajax::createIframeModalWindow('add_schedule',
                                             $CFG_GLPI['root_doc'] . "/plugins/openvas/front/schedule.form.php",
-                                            array('display' => false, 'reloadonclose' => true));
+                                            ['display' => false, 'reloadonclose' => true]);
          echo "</td>";
          echo "</tr>";
 
@@ -253,9 +253,9 @@ class PluginOpenvasTask extends CommonDBTM {
 
          echo '<tr class="tab_bg_1">';
          echo '<td colspan="4">';
-         Dropdown::showSelectItemFromItemtypes(array('itemtype_name'       => 'item',
-                                                     'items_id_name'       => 'add_items_id',
-                                                     'itemtypes'           => $CFG_GLPI["asset_types"]));
+         Dropdown::showSelectItemFromItemtypes(['itemtype_name' => 'item',
+                                                'items_id_name' => 'add_items_id',
+                                                'itemtypes'     => $CFG_GLPI["asset_types"]]);
          echo '</td>';
          echo '</tr>';
 
@@ -284,7 +284,7 @@ class PluginOpenvasTask extends CommonDBTM {
          echo '</tr>';
 
          echo "<tr class='tab_bg_2 center'><td colspan='4'>";
-         echo Html::submit(_x('button', 'Add'), array('name' => 'add'));
+         echo Html::submit(_x('button', 'Add'), ['name' => 'add']);
          echo "</td></tr>";
          echo "</table>";
          Html::closeForm();
@@ -339,7 +339,7 @@ class PluginOpenvasTask extends CommonDBTM {
          echo '</tr>';
 
          echo "<tr class='tab_bg_2 center'><td colspan='2'>";
-         echo Html::submit(_x('button', 'Add'), array('name' => 'add'));
+         echo Html::submit(_x('button', 'Add'), ['name' => 'add']);
          echo "</td></tr>";
          echo "</table>";
          Html::closeForm();
