@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: tr_TR\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: hook.php:57 hook.php:65 hook.php:72 hook.php:80 hook.php:88 hook.php:96
 #: hook.php:104 hook.php:110 inc/profile.class.php:67 inc/menu.class.php:35
