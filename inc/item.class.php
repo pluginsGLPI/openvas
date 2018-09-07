@@ -138,7 +138,11 @@ class PluginOpenvasItem extends CommonDBChild {
       if ($alive && $item->canUpdate()) {
          PluginOpenvasOmp::dropdownTargets('openvas_id', $openvas_item->fields['openvas_id']);
       } else {
-         echo __("Cannot contact OpenVAS", "openvas");
+         if($config  = PluginOpenvasConfig::getInstance()) {
+            echo __("Cannot contact OpenVAS", "openvas");
+         } else {
+            echo __('No openvas server defined for this entity', 'openvas');
+         }
       }
       if ($openvas_item->fields['openvas_id']) {
          $link = PluginOpenvasConfig::getConsoleURL();
@@ -429,67 +433,71 @@ class PluginOpenvasItem extends CommonDBChild {
       //Total of export lines
       $index = 0;
 
-      $config = PluginOpenvasConfig::getInstance();
-      $days   = $config->fields['search_max_days'];
-      $hosts  = [];
+      if($config = PluginOpenvasConfig::getInstance()){
 
-      //First step : request targets
-      $response = PluginOpenvasOmp::getTargets();
-      foreach ($response->target as $target) {
+         $days   = $config->fields['search_max_days'];
+         $hosts  = [];
 
-         //Do not process target without host,
-         //or 127.0.0.1 or localhost (to large to match a specific asset)
-         if (!isset($target->hosts)
-            || $target->hosts->__toString() == '127.0.0.1'
-            || $target->hosts->__toString() == 'localhost') {
-            continue;
-         }
+         //First step : request targets
+         $response = PluginOpenvasOmp::getTargets();
+         foreach ($response->target as $target) {
 
-         //Check if the host has already been processed
-         if (!in_array($target->hosts->__toString(), $hosts)) {
-            $hosts[] = $target->hosts->__toString();
-         } else {
-            continue;
-         }
+            //Do not process target without host,
+            //or 127.0.0.1 or localhost (to large to match a specific asset)
+            if (!isset($target->hosts)
+               || $target->hosts->__toString() == '127.0.0.1'
+               || $target->hosts->__toString() == 'localhost') {
+               continue;
+            }
 
-         //Get openvas UUID
-         $openvas_id = $target->attributes()->id->__toString();
+            //Check if the host has already been processed
+            if (!in_array($target->hosts->__toString(), $hosts)) {
+               $hosts[] = $target->hosts->__toString();
+            } else {
+               continue;
+            }
 
-         $tmp = [ 'openvas_host'    => $target->hosts->__toString(),
-                  'openvas_name'    => $target->name->__toString(),
-                  'openvas_id'      => $target->attributes()->id->__toString(),
-                  'openvas_comment' => $target->comment->__toString()
-                ];
+            //Get openvas UUID
+            $openvas_id = $target->attributes()->id->__toString();
 
-         $id = $item->addOrUpdateItem($openvas_id, $tmp, $tmp['openvas_host'],
-         $index);
+            $tmp = [ 'openvas_host'    => $target->hosts->__toString(),
+                     'openvas_name'    => $target->name->__toString(),
+                     'openvas_id'      => $target->attributes()->id->__toString(),
+                     'openvas_comment' => $target->comment->__toString()
+                   ];
 
-         //If the host is linked to an asset: update last task infos
-         if ($id) {
-            self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
-         }
-      }
+            $id = $item->addOrUpdateItem($openvas_id, $tmp, $tmp['openvas_host'],
+            $index);
 
-      //Second step : try to get assets from reports
-      $response = PluginOpenvasOmp::getReports([ 'type'   => 'assets',
-                                                 'pos'    => 1,
-                                                 'filter' => [ 'extra' => 'modification_time<'.$days.'d' ]
-                                               ]);
-      if (isset($response->report->report->host)) {
-         foreach ($response->report->report->host as $ovhost) {
-            $host = $ovhost->ip->__toString();
-            $id   = $item->addOrUpdateItem(NOT_AVAILABLE,
-                                           [ 'openvas_host' => $host,
-                                             'openvas_id'   => NOT_AVAILABLE
-                                           ], $host, $index);
+            //If the host is linked to an asset: update last task infos
             if ($id) {
                self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
             }
          }
-      }
 
-      $task->addVolume($index);
-      return true;
+         //Second step : try to get assets from reports
+         $response = PluginOpenvasOmp::getReports([ 'type'   => 'assets',
+                                                    'pos'    => 1,
+                                                    'filter' => [ 'extra' => 'modification_time<'.$days.'d' ]
+                                                  ]);
+         if (isset($response->report->report->host)) {
+            foreach ($response->report->report->host as $ovhost) {
+               $host = $ovhost->ip->__toString();
+               $id   = $item->addOrUpdateItem(NOT_AVAILABLE,
+                                              [ 'openvas_host' => $host,
+                                                'openvas_id'   => NOT_AVAILABLE
+                                              ], $host, $index);
+               if ($id) {
+                  self::updateTaskInfosForTarget($tmp['openvas_id'], $id);
+               }
+            }
+         }
+
+         $task->addVolume($index);
+         return true;
+      } else{
+         return false;
+      }
    }
 
    /**
@@ -631,47 +639,51 @@ class PluginOpenvasItem extends CommonDBChild {
    static function cronOpenvasClean($task) {
       global $DB;
 
-      $config = PluginOpenvasConfig::getInstance();
-      $item   = new self();
-      $index  = 0;
+      if($config = PluginOpenvasConfig::getInstance()){
 
-      //TODO to replace by a non SQL query when dbiterator will be able to handle the query
-      $query = "SELECT `id`
-                FROM `glpi_plugin_openvas_items`
-                WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(),
-                   INTERVAL -".$config->fields['retention_delay']." DAY)";
-      foreach ($DB->request($query) as $target) {
-         $tmp = ['id'               => $target['id'],
-                 'openvas_threat'   => NULL,
-                 'openvas_severity' => NULL
-                ];
-         if ($item->update($tmp)) {
+         $item   = new self();
+         $index  = 0;
+
+         //TODO to replace by a non SQL query when dbiterator will be able to handle the query
+         $query = "SELECT `id`
+                   FROM `glpi_plugin_openvas_items`
+                   WHERE `openvas_date_last_scan` < DATE_ADD(CURDATE(),
+                      INTERVAL -".$config->fields['retention_delay']." DAY)";
+         foreach ($DB->request($query) as $target) {
+            $tmp = ['id'               => $target['id'],
+                    'openvas_threat'   => NULL,
+                    'openvas_severity' => NULL
+                   ];
+            if ($item->update($tmp)) {
+               $index++;
+            }
+         }
+
+         $vuln_item = new PluginOpenvasVulnerability_Item();
+         $ids = [];
+         $query = "SELECT `id`
+                   FROM `glpi_plugin_openvas_vulnerabilities_items`
+                   WHERE `creation_time` < DATE_ADD(CURDATE(),
+                      INTERVAL -".$config->fields['retention_delay']." DAY)";
+         foreach ($DB->request($query, '', true) as $target) {
+            $vuln_item->delete($target);
             $index++;
          }
-      }
 
-      $vuln_item = new PluginOpenvasVulnerability_Item();
-      $ids = [];
-      $query = "SELECT `id`
-                FROM `glpi_plugin_openvas_vulnerabilities_items`
-                WHERE `creation_time` < DATE_ADD(CURDATE(),
-                   INTERVAL -".$config->fields['retention_delay']." DAY)";
-      foreach ($DB->request($query, '', true) as $target) {
-         $vuln_item->delete($target);
-         $index++;
+         $vuln = new PluginOpenvasVulnerability();
+         $query = "SELECT `id`
+                   FROM `glpi_plugin_openvas_vulnerabilities`
+                   WHERE `id` NOT IN (SELECT DISTINCT `plugin_openvas_vulnerabilities_id`
+                      FROM `glpi_plugin_openvas_vulnerabilities_items`)";
+         foreach ($DB->request($query, '', true) as $target) {
+            $vuln->delete($target);
+            $index++;
+         }
+         $task->addVolume($index);
+         return true;
+      } else{
+         return false;
       }
-
-      $vuln = new PluginOpenvasVulnerability();
-      $query = "SELECT `id`
-                FROM `glpi_plugin_openvas_vulnerabilities`
-                WHERE `id` NOT IN (SELECT DISTINCT `plugin_openvas_vulnerabilities_id`
-                   FROM `glpi_plugin_openvas_vulnerabilities_items`)";
-      foreach ($DB->request($query, '', true) as $target) {
-         $vuln->delete($target);
-         $index++;
-      }
-      $task->addVolume($index);
-      return true;
    }
 
    static function cronInfo($name) {

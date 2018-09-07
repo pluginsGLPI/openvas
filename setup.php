@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.1.0');
+define('PLUGIN_OPENVAS_VERSION', '1.1.1');
 
 /**
  * Init hooks of the plugin.
@@ -66,10 +66,10 @@ function plugin_init_openvas() {
       }
 
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
-      $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
+      $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.php';
 
       // require spectrum (for glpi >= 9.2)
-      $CFG_GLPI['javascript']['tools']['pluginopenvasmenu']['PluginOpenvasConfig'] = ['colorpicker'];
+      $CFG_GLPI['javascript']['tools']['pluginopenvasmenu']['openvasconfig'] = ['colorpicker'];
 
       if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
          Plugin::registerClass('PluginOpenvasRuleVulnerabilityCollection',
