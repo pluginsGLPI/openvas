@@ -72,36 +72,53 @@ class PluginOpenvasConfig extends CommonDBTM {
       return __("GLPi openvas Connector", 'openvas');
    }
 
-   function getSearchOptions() {
+   function rawSearchOptions() {
 
       $tab = [];
 
-      $tab['common'] = self::getTypeName();
+       $tab[] = [
+           'id'     => 'common',
+           'name'   => self::getTypeName()
+       ];
 
-      $tab[1]['table']         = $this->getTable();
-      $tab[1]['field']         = 'openvas_host';
-      $tab[1]['name']          = __("Host", "openvas");
-      $tab[1]['datatype']      = 'itemlink';
-      $tab[1]['itemlink_type'] = $this->getType();
-      $tab[1]['massiveaction'] = false;
+       $tab[] = [
+           'id'             => 1,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_host',
+           'name'           => __("Host", "openvas"),
+           'datatype'       => 'itemlink',
+           'itemlink_type'  => $this->getType(),
+           'massiveaction'  => false
+       ];
 
-      $tab[2]['table']         = $this->getTable();
-      $tab[2]['field']         = 'id';
-      $tab[2]['name']          = __('ID');
-      $tab[2]['massiveaction'] = false;
+       $tab[] = [
+           'id'             => 2,
+           'table'          => $this->getTable(),
+           'field'          => 'id',
+           'name'           => __('ID'),
+           'massiveaction'  => false,
+       ];
 
-      $tab[3]['table']         = $this->getTable();
-      $tab[3]['field']         = 'openvas_port';
-      $tab[3]['name']          = __('Manager port');
+       $tab[] = [
+           'id'             => 3,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_port',
+           'name'           => __('Manager port')
+       ];
 
+       $tab[] = [
+           'id'             => 4,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_console_port',
+           'name'           => __('Console port')
+       ];
 
-      $tab[4]['table']         = $this->getTable();
-      $tab[4]['field']         = 'openvas_console_port';
-      $tab[4]['name']          = __('Console port');
-
-      $tab[5]['table']         = $this->getTable();
-      $tab[5]['field']         = 'requesttypes_id';
-      $tab[5]['name']          = RequestType::getTypeName(1);
+       $tab[] = [
+           'id'             => 5,
+           'table'          => $this->getTable(),
+           'field'          => 'requesttypes_id',
+           'name'           => RequestType::getTypeName(1)
+       ];
 
       $tab[] = [
          'id'                 => '80',
@@ -112,41 +129,68 @@ class PluginOpenvasConfig extends CommonDBTM {
          'datatype'           => 'dropdown'
       ];
 
-      $tab[7]['table']         = $this->getTable();
-      $tab[7]['field']         = 'openvas_username';
-      $tab[7]['name']          = User::getTypeName(1);
+       $tab[] = [
+           'id'             => 7,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_username',
+           'name'           => User::getTypeName(1)
+       ];
 
-      $tab[8]['table']         = $this->getTable();
-      $tab[8]['field']         = 'openvas_password';
-      $tab[8]['name']          = __("Password");
+       $tab[] = [
+           'id'             => 8,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_password',
+           'name'           => __("Password")
+       ];
 
-      $tab[9]['table']         = $this->getTable();
-      $tab[9]['field']         = 'openvas_omp_path';
-      $tab[9]['name']          = __("Path to omp", "openvas");
+       $tab[] = [
+           'id'             => 9,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_omp_path',
+           'name'           => __("Path to omp", "openvas")
+       ];
 
-      $tab[10]['table']         = $this->getTable();
-      $tab[10]['field']         = 'retention_delay';
-      $tab[10]['name']          = __("Target retention delay", "openvas");
+       $tab[] = [
+           'id'             => 10,
+           'table'          => $this->getTable(),
+           'field'          => 'retention_delay',
+           'name'           => __("Target retention delay", "openvas")
+       ];
 
-      $tab[11]['table']         = $this->getTable();
-      $tab[11]['field']         = 'search_max_days';
-      $tab[11]['name']          = __("Number of days for searches", "openvas");
+       $tab[] = [
+           'id'             => 11,
+           'table'          => $this->getTable(),
+           'field'          => 'search_max_days',
+           'name'           => __("Number of days for searches", "openvas")
+       ];
 
-      $tab[12]['table']         = $this->getTable();
-      $tab[12]['field']         = 'severity_medium_color';
-      $tab[12]['name']          = _x('priority', 'Medium');
+       $tab[] = [
+           'id'             => 12,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_medium_color',
+           'name'           => _x('priority', 'Medium')
+       ];
 
-      $tab[13]['table']         = $this->getTable();
-      $tab[13]['field']         = 'severity_low_color';
-      $tab[13]['name']          = _x('priority', 'Low');
+       $tab[] = [
+           'id'             => 13,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_low_color',
+           'name'           => _x('priority', 'Low')
+       ];
 
-      $tab[14]['table']         = $this->getTable();
-      $tab[14]['field']         = 'severity_high_color';
-      $tab[14]['name']          = _x('priority', 'High');
+       $tab[] = [
+           'id'             => 14,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_high_color',
+           'name'           => _x('priority', 'High')
+       ];
 
-      $tab[15]['table']         = $this->getTable();
-      $tab[15]['field']         = 'severity_none_color';
-      $tab[15]['name']          = __("None");
+       $tab[] = [
+           'id'             => 15,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_none_color',
+           'name'           => __("None")
+       ];
 
       return $tab;
    }

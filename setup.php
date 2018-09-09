@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.1.1');
+define('PLUGIN_OPENVAS_VERSION', '2.0.0');
 
 /**
  * Init hooks of the plugin.
@@ -105,7 +105,7 @@ function plugin_version_openvas() {
       'homepage'       => 'https://github.com/pluginsglpi/openvas',
       'requirements'   => [
          'glpi' => [
-            'min' => '9.2',
+            'min' => '9.3',
             'dev' => true
          ]
       ]
