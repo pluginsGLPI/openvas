@@ -47,28 +47,161 @@ class PluginOpenvasConfig extends CommonDBTM {
    public static function getInstance() {
       if (is_null(self::$_config)) {
          $config = new self();
-         $config->getFromDB(1);
-         self::$_config = $config;
+         if(strpos($_SERVER['HTTP_REFERER'],'/config.form.php?id=')>0){
+            $id = substr($_SERVER['HTTP_REFERER'],strpos($_SERVER['HTTP_REFERER'],'?id=')+4);
+            $config->getFromDB($id);
+         } else{
+            $id_entities = $_SESSION["glpiactive_entity"];
+            $config->getFromDBByCrit(["entities_id = ".$id_entities]);
+         }
+         if(!isset($config->fields['id'])){
+            return false;
+         } else{
+            self::$_config = $config;
+         }
       }
       return self::$_config;
    }
 
-   static function reloadConfiguration() {
-      self::$_config = null;
-      self::getInstance();
-   }
+//   static function reloadConfiguration() {
+//      self::$_config = null;
+//      self::getInstance();
+//   }
 
    public static function getTypeName($nb = 0) {
       return __("GLPi openvas Connector", 'openvas');
    }
 
-   public function showForm() {
-      $this->getFromDB(1);
+   function rawSearchOptions() {
+
+      $tab = [];
+
+       $tab[] = [
+           'id'     => 'common',
+           'name'   => self::getTypeName()
+       ];
+
+       $tab[] = [
+           'id'             => 1,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_host',
+           'name'           => __("Host", "openvas"),
+           'datatype'       => 'itemlink',
+           'itemlink_type'  => $this->getType(),
+           'massiveaction'  => false
+       ];
+
+       $tab[] = [
+           'id'             => 2,
+           'table'          => $this->getTable(),
+           'field'          => 'id',
+           'name'           => __('ID'),
+           'massiveaction'  => false,
+       ];
+
+       $tab[] = [
+           'id'             => 3,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_port',
+           'name'           => __('Manager port')
+       ];
+
+       $tab[] = [
+           'id'             => 4,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_console_port',
+           'name'           => __('Console port')
+       ];
+
+       $tab[] = [
+           'id'             => 5,
+           'table'          => $this->getTable(),
+           'field'          => 'requesttypes_id',
+           'name'           => RequestType::getTypeName(1)
+       ];
+
+      $tab[] = [
+         'id'                 => '80',
+         'table'              => 'glpi_entities',
+         'field'              => 'completename',
+         'name'               => __('Entity'),
+         'massiveaction'      => false,
+         'datatype'           => 'dropdown'
+      ];
+
+       $tab[] = [
+           'id'             => 7,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_username',
+           'name'           => User::getTypeName(1)
+       ];
+
+       $tab[] = [
+           'id'             => 8,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_password',
+           'name'           => __("Password")
+       ];
+
+       $tab[] = [
+           'id'             => 9,
+           'table'          => $this->getTable(),
+           'field'          => 'openvas_omp_path',
+           'name'           => __("Path to omp", "openvas")
+       ];
+
+       $tab[] = [
+           'id'             => 10,
+           'table'          => $this->getTable(),
+           'field'          => 'retention_delay',
+           'name'           => __("Target retention delay", "openvas")
+       ];
+
+       $tab[] = [
+           'id'             => 11,
+           'table'          => $this->getTable(),
+           'field'          => 'search_max_days',
+           'name'           => __("Number of days for searches", "openvas")
+       ];
+
+       $tab[] = [
+           'id'             => 12,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_medium_color',
+           'name'           => _x('priority', 'Medium')
+       ];
+
+       $tab[] = [
+           'id'             => 13,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_low_color',
+           'name'           => _x('priority', 'Low')
+       ];
+
+       $tab[] = [
+           'id'             => 14,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_high_color',
+           'name'           => _x('priority', 'High')
+       ];
+
+       $tab[] = [
+           'id'             => 15,
+           'table'          => $this->getTable(),
+           'field'          => 'severity_none_color',
+           'name'           => __("None")
+       ];
+
+      return $tab;
+   }
+
+   public function showForm($ID,$options = []) {
+
+      $this->initForm($ID,$options);
+      $this->showFormHeader($options);
 
       echo "<div class='center'>";
       echo "<form name='form' method='post' action='" . $this->getFormURL() . "'>";
-
-      echo "<input type='hidden' name='id' value='1'>";
 
       echo "<table class='tab_cadre_fixe'>";
 
@@ -93,7 +226,6 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<td>" . __("Console port", "openvas") . "</td>";
       echo "<td>";
       Html::autocompletionTextField($this, "openvas_console_port");
-      echo "</td>";
       echo "</td>";
       echo "</tr>";
 
@@ -124,10 +256,14 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<td>".RequestType::getTypeName(1)."</td>";
       echo "<td>";
       Dropdown::show('RequestType', [ 'name' => 'requesttypes_id',  'value' => $this->fields['requesttypes_id']]);
-      echo "</td><td colspan='2'></td>";
+      echo "</td>";
+      echo "<td>".__('Entity')."</td>";
+      echo "<td>";
+      Dropdown::show('Entity', [ 'name' => 'entities_id',  'value' => $this->fields['entities_id']]);
+     echo  "</td>";
       echo "</tr>";
 
-      echo "<tr class='tab_bg_1' align='center'>";
+           echo "<tr class='tab_bg_1' align='center'>";
       echo "<th colspan='4'>" . __('Vulnerability', 'openvas'). ' - '. __("Color palette") . "</th></tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
@@ -149,19 +285,18 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<td>" . __("None") . "</td>";
       echo "<td>";
       Html::showColorField('severity_none_color', array('value' => $this->fields["severity_none_color"]));
-      echo "</tr>";
       echo "</td>";
+      echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td colspan='4' align='center'>";
-      echo "<input type='submit' name='update' value=\"" . __("Update") . "\" class='submit' >";
       echo "&nbsp<input type='submit' name='test' value=\"" . _sx("button", "Test") . "\" class='submit' >";
       echo"</td>";
       echo "</tr>";
 
-      echo "</table>";
+      $this->showFormButtons();
+
       Html::closeForm();
-      echo "</div>";
    }
 
 
@@ -190,7 +325,9 @@ class PluginOpenvasConfig extends CommonDBTM {
    public static function install(Migration $migration) {
       global $DB;
 
-      if (!countElementsInTable('glpi_requesttypes', "`name`='OpenVAS'")) {
+      $dbu = new DbUtils();
+
+      if (!$dbu->countElementsInTable('glpi_requesttypes', ["`name`" => "OpenVAS"])) {
          $requesttype = new RequestType();
          $requesttypes_id = $requesttype->add(['name'         => 'OpenVAS',
          'entities_id'  => 0,
@@ -218,6 +355,7 @@ class PluginOpenvasConfig extends CommonDBTM {
             `openvas_port` int(11) NOT NULL DEFAULT '0',
             `openvas_console_port` int(11) NOT NULL DEFAULT '0',
             `requesttypes_id` int(11) NOT NULL DEFAULT '0',
+            `entities_id` int(11) NOT NULL DEFAULT '0',
             `openvas_username` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
             `openvas_password` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
             `openvas_omp_path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL,
@@ -235,7 +373,7 @@ class PluginOpenvasConfig extends CommonDBTM {
          $DB->query($query) or die ($DB->error());
 
          $tmp = [ 'id'                    => 1,
-                  'fusioninventory_url'   => 'localhost',
+                  'openvas_host'   => 'localhost',
                   'openvas_port'          => '9390',
                   'openvas_console_port'  => '9392',
                   'openvas_username'      => 'admin',
@@ -250,6 +388,10 @@ class PluginOpenvasConfig extends CommonDBTM {
                   'requesttypes_id'        => $requesttypes_id
                ];
          $config->add($tmp);
+      }
+      if($DB->tableExists("glpi_plugin_openvas_configs") && !$DB->fieldExists("glpi_plugin_openvas_configs", "entities_id")){
+         $query = "ALTER TABLE `glpi_plugin_openvas_configs` ADD `entities_id` int(11) NOT NULL DEFAULT '0';";
+         $DB->query($query) or die ($DB->error());
       }
    }
 
