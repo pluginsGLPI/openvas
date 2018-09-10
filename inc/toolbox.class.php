@@ -117,25 +117,28 @@ class PluginOpenvasToolbox {
    * @return the threat color
    */
    static function getThreatColor($threat) {
-      $config = PluginOpenvasConfig::getInstance();
+      if($config = PluginOpenvasConfig::getInstance()) {
 
-      $color = false;
-      switch ($threat) {
-         case PluginOpenvasOmp::THREAT_HIGH:
-            $color = $config->fields['severity_high_color'];
-            break;
-         case PluginOpenvasOmp::THREAT_MEDIUM:
-            $color = $config->fields['severity_medium_color'];
-            break;
-         case PluginOpenvasOmp::THREAT_LOW:
-            $color = $config->fields['severity_low_color'];
-            break;
-         case PluginOpenvasOmp::THREAT_ERROR:
-         case PluginOpenvasOmp::THREAT_LOG:
-            $color = $config->fields['severity_none_color'];
-            break;
+         $color = false;
+         switch ($threat) {
+            case PluginOpenvasOmp::THREAT_HIGH:
+               $color = $config->fields['severity_high_color'];
+               break;
+            case PluginOpenvasOmp::THREAT_MEDIUM:
+               $color = $config->fields['severity_medium_color'];
+               break;
+            case PluginOpenvasOmp::THREAT_LOW:
+               $color = $config->fields['severity_low_color'];
+               break;
+            case PluginOpenvasOmp::THREAT_ERROR:
+            case PluginOpenvasOmp::THREAT_LOG:
+               $color = $config->fields['severity_none_color'];
+               break;
+         }
+         return $color;
+      } else{
+         return null;
       }
-      return $color;
    }
 
    /**

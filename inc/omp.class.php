@@ -245,19 +245,23 @@ class PluginOpenvasOmp {
    * @return the command's result, as a SimpleXMLObject
    */
    private static function executeCommand($action, $options = array(), $raw = false) {
-      $config = PluginOpenvasConfig::getInstance();
-      $omp    = new self();
+      if($config = PluginOpenvasConfig::getInstance()){
 
-      //Get the command in XML format
-      if (!$raw) {
-         $command = self::getXMLForAction($action, $options);
-      } else {
-         $command = $options['command'];
-      }
-      $content = $omp->sendCommand($config, $command);
-      if ($content) {
-         return simplexml_load_string($content);
-      } else {
+         $omp    = new self();
+
+         //Get the command in XML format
+         if (!$raw) {
+            $command = self::getXMLForAction($action, $options);
+         } else {
+            $command = $options['command'];
+         }
+         $content = $omp->sendCommand($config, $command);
+         if ($content) {
+            return simplexml_load_string($content);
+         } else {
+            return false;
+         }
+      } else{
          return false;
       }
    }
@@ -322,17 +326,22 @@ class PluginOpenvasOmp {
    * @return true if a connection can be opened to the server
    */
    static function ping() {
-      $config  = PluginOpenvasConfig::getInstance();
-      $errCode = $errStr = '';
-      $result  = false;
-      $fp = @fsockopen($config->fields['openvas_host'],
-      $config->fields['openvas_port'],
-      $errCode, $errStr, 1);
-      if ($errCode == 0) {
-         $result = true;
-         fclose($fp);
+      if($config  = PluginOpenvasConfig::getInstance()){
+         $errCode = $errStr = '';
+         $result  = false;
+         $fp = @fsockopen($config->fields['openvas_host'],
+         $config->fields['openvas_port'],
+         $errCode, $errStr, 1);
+         if ($errCode == 0) {
+            if($fp){
+               $result = true;
+               fclose($fp);
+            }
+         }
+         return $result;
+      } else{
+         return false;
       }
-      return $result;
    }
 
    /**

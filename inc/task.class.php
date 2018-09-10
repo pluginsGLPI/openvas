@@ -107,10 +107,17 @@ class PluginOpenvasTask extends CommonDBTM {
          }
          echo "</table>";
       } else {
-         echo "<table class='tab_cadre_fixe' id='taskformtable'>";
-         echo "<tr class='tab_bg_1' align='center'>";
-         echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
-         echo "</tr></table>";
+         if($config  = PluginOpenvasConfig::getInstance()){
+            echo "<table class='tab_cadre_fixe' id='taskformtable'>";
+            echo "<tr class='tab_bg_1' align='center'>";
+            echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
+            echo "</tr></table>";
+         } else{
+            echo "<table class='tab_cadre_fixe' id='taskformtable'>";
+            echo "<tr class='tab_bg_1' align='center'>";
+            echo "<th>".__('No openvas server defined for this entity', 'openvas')."</th>";
+            echo "</tr></table>";
+         }
       }
    }
 
@@ -130,9 +137,15 @@ class PluginOpenvasTask extends CommonDBTM {
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<th colspan='2'>".__('New task')."</th></tr>";
       if (!PluginOpenvasOmp::ping()) {
-         echo "<tr class='tab_bg_1' align='center'>";
-         echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
-         echo "</tr>";
+         if($config  = PluginOpenvasConfig::getInstance()){
+            echo "<tr class='tab_bg_1' align='center'>";
+            echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
+            echo "</tr>";
+         } else{
+            echo "<tr class='tab_bg_1' align='center'>";
+            echo "<th>".__("Cannot contact OpenVAS", "openvas")."</th>";
+            echo "</tr>";
+         }
       } else {
          echo "<tr class='tab_bg_1' align='center'>";
          echo "<td>".__('Name')."</td>";

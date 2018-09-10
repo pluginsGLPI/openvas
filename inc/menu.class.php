@@ -42,11 +42,15 @@ class PluginOpenvasMenu extends CommonGLPI {
       && !Session::haveRight('plugin_openvas_vulnerability', READ)) {
          return [];
       }
+    /*  $menu                    = [];
+      $menu['title']           = self::getMenuName();
+      $menu['page']            = "/plugins/openvas/front/config.php";
+      $menu['links']['search'] = "/plugins/openvas/front/config.php";*/
+
       $menu          = [];
       $menu['title'] = self::getTypeName(2);
       $menu['page']  = PluginOpenvasVulnerability::getSearchURL(false);
       $menu['links']['search']  = PluginOpenvasVulnerability::getSearchURL(false);
-
       if (Session::haveRight('plugin_openvas_vulnerability', READ)) {
 
          $image_task  = "<img src='".$CFG_GLPI["root_doc"]."/pics/plan.png' title='";
@@ -57,6 +61,11 @@ class PluginOpenvasMenu extends CommonGLPI {
          $menu['options']['PluginOpenvasVulnerability']['page']  = PluginOpenvasVulnerability::getSearchURL(false);
          $menu['options']['PluginOpenvasVulnerability']['links']['search'] = PluginOpenvasVulnerability::getSearchURL(false);
 
+         $menu['options']['openvasconfig']['title']           = PluginOpenvasConfig::getTypeName(2);
+         $menu['options']['openvasconfig']['page']           = PluginOpenvasConfig::getSearchURL(false);
+         $menu['options']['openvasconfig']['links']['add']          = '/plugins/openvas/front/config.form.php';
+         $menu['options']['openvasconfig']['links']['search']           = PluginOpenvasConfig::getSearchURL(false);
+
          if (Session::haveRight('plugin_openvas_task', READ)) {
             $menu['options']['PluginOpenvasVulnerability']['links'][$image_task]  = PluginOpenvasTask::getSearchURL(false);
          }
@@ -66,6 +75,7 @@ class PluginOpenvasMenu extends CommonGLPI {
          $menu['rulevulnerability']['links']['search'] = PluginOpenvasRuleVulnerabilityCollection::getSearchURL(false);
 
       }
+
 
       if (Session::haveRight('plugin_openvas_task', READ)) {
          $image_vuln  = "<img src='".$CFG_GLPI["root_doc"]."/pics/menu_show.png' title='";
