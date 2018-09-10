@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.1.0');
+define('PLUGIN_OPENVAS_VERSION', '1.2.0');
 
 // Minimal GLPI version, inclusive
 define('PLUGIN_OPENVAS_MIN_GLPI', '9.3');
