@@ -50,11 +50,13 @@ class PluginOpenvasOmp {
    const CONFIG   = 'get_configs';
    const SCANNER  = 'get_scanners';
    const SCHEDULE = 'get_schedules';
-
+   const CREDENTIAL = 'get_credentials';
    //Execute actions
-   const START_TASK  = 'start_task';
-   const CANCEL_TASK = 'stop_task';
-   const ADD_TASK    = 'create_task';
+   const START_TASK     = 'start_task';
+   const CANCEL_TASK    = 'stop_task';
+   const ADD_TASK       = 'create_task';
+   const ADD_TARGET     = 'create_target';
+   const ADD_SCHEDULE   = 'create_schedule';
 
    const SORT_ASC   = 'sort'; //Ascending sort
    const SORT_DESC  = 'sort-reverse'; //Descending sort
@@ -80,7 +82,7 @@ class PluginOpenvasOmp {
    * @param $options options as an array
    * @return a string representing the filter to be applied during query
    */
-   private static function getFilter($options = array ()) {
+   private static function getFilter($options = []) {
 
       $filter = '';
       $params = [];
@@ -244,7 +246,7 @@ class PluginOpenvasOmp {
    * @param send raw command or it should be processed
    * @return the command's result, as a SimpleXMLObject
    */
-   private static function executeCommand($action, $options = array(), $raw = false) {
+   private static function executeCommand($action, $options = [], $raw = false) {
       $config = PluginOpenvasConfig::getInstance();
       $omp    = new self();
 
@@ -343,14 +345,14 @@ class PluginOpenvasOmp {
    * @param value the selected value to show
    * @return the dropdown ID (is needed)
    */
-   static function dropdownTargets($name, $value='') {
+   static function dropdownTargets($name, $value = '') {
       global $DB;
 
       //Get all targets
       $results = self::getTargetsAsArray();
 
       //Get targets uuid already in use
-      $used    = array();
+      $used    = [];
       foreach ($DB->request('glpi_plugin_openvas_items',
                             [ 'NOT' => [ 'openvas_id' => $value]]) as $val) {
          $used[$val['openvas_id']] = $val['openvas_id'];
@@ -373,8 +375,9 @@ class PluginOpenvasOmp {
    */
    static function getTargetsAsArray() {
       $target_response = self::executeCommand(self::TARGET);
-      $results       = array();
-      $targets = (isset($target_response->target)?$target_response->target:array());
+
+      $results = [];
+      $targets = isset($target_response->target) ? $target_response->target : [];
       if (count($targets) > 0) {
          foreach ($target_response->target as $response) {
             $host         = $response->hosts->__toString();
@@ -405,7 +408,7 @@ class PluginOpenvasOmp {
                  ];
       $target_response = self::executeCommand(self::TARGET, $options);
 
-      $target          = array();
+      $target          = [];
       foreach ($target_response->target as $response) {
          $target['host']    = $response->hosts->__toString();
          $target['name']    = $response->name->__toString();
@@ -441,7 +444,7 @@ class PluginOpenvasOmp {
       }
 
       //Array to store the results
-      $results        = array();
+      $results        = [];
 
       foreach (self::$tasks_cache_response->task as $response) {
          $tid = strval($response->target->attributes()->id);
@@ -502,6 +505,15 @@ class PluginOpenvasOmp {
          }
       }
 
+      $scan_begindate = date('Y-m-d H:i:s');
+      if (isset($task->$node->report->timestamp)) {
+         $timestamp = strval($task->$node->report->timestamp);
+         if (!empty($timestamp)) {
+            $date_timestamp = new DateTime($timestamp);
+            $scan_begindate     = date_format($date_timestamp, 'Y-m-d H:i:s');
+         }
+      }
+
       if (isset($task->$node->report)
          && isset($task->$node->report->attributes()->id)) {
          $report_id = strval($task->$node->report->attributes()->id);
@@ -510,19 +522,20 @@ class PluginOpenvasOmp {
       $config  = strval($task->config->name);
       $scanner = strval($task->scanner->name);
 
-      $results       = [ 'name'           => $name,
-                         'config'         => $config,
-                         'scanner'        => $scanner,
-                         'status'         => $status,
-                         'progress'       => $progress,
-                         'date_last_scan' => $scan_date,
-                         'severity'       => $severity,
-                         'report'         => $report_id,
-                         'id'             => $id,
-                         'target'         => $tid,
-                         'target_name'    => $tname,
-                         'threat'         => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
-                      ];
+      $results = ['name'                => $name,
+                  'config'              => $config,
+                  'scanner'             => $scanner,
+                  'status'              => $status,
+                  'progress'            => $progress,
+                  'date_last_scan'      => $scan_date,
+                  'begindate_last_scan' => $scan_begindate,
+                  'severity'            => $severity,
+                  'report'              => $report_id,
+                  'id'                  => $id,
+                  'target'              => $tid,
+                  'target_name'         => $tname,
+                  'threat'              => PluginOpenvasToolbox::getThreatForSeverity($severity, 0)
+      ];
       return $results;
    }
 
@@ -557,15 +570,17 @@ class PluginOpenvasOmp {
       $response = self::executeCommand($action);
       $returns  = [];
 
+      if ($empty) {
+         $returns[''] = Dropdown::EMPTY_VALUE;
+      }
       foreach ($response->$name as $res) {
          $id = strval($res->attributes()->id);
          $returns[$id] = strval($res->name);
       }
-      if ($empty) {
-         $returns[''] = Dropdown::EMPTY_VALUE;
-      }
+
       return Dropdown::showFromArray($name, $returns);
    }
+
 
    /**
    * Add a task
@@ -588,5 +603,63 @@ class PluginOpenvasOmp {
       $response = self::executeCommand(self::ADD_TASK,
       ['command' => $command], true);
       return ($response->status == '201');
+   }
+
+
+   /**
+    * Add a target
+    * @since 1.0
+    *
+    * @param $options the target parameters
+    *
+    * @return true if the target was correctly added
+    */
+   static function addTarget($options) {
+      $command = "<create_target><name>" . $options['name'] . "</name>";
+      //$command.= "<comment>".$options['content']."</comment>";
+      $command .= "<hosts>" . $options['host'] . "</hosts>";
+      if (!empty($options['credential_ssh'])) {
+         $command .= "<ssh_credential id='" . $options['credential_ssh']
+                     . "'><port>" . $options['port'] . "</port>"
+                     . "</ssh_credential>";
+      }
+      if (!empty($options['credential_smb'])) {
+         $command .= "<smb_credential id='" . $options['credential_smb'] . "'></smb_credential>";
+      }
+      $command .= "</create_target>";
+
+      $response = self::executeCommand(self::ADD_TARGET,
+                                       ['command' => $command], true);
+      return ($response['status'] == '201');
+   }
+
+
+   /**
+    * Add a Schedule
+    * @since 1.0
+    *
+    * @param $options the schedule parameters
+    *
+    * @return true if the schedule was correctly added
+    */
+   static function addSchedule($options) {
+      $command = "<create_schedule><name>" . $options['name'] . "</name>";
+      //$command.= "<comment>".$options['content']."</comment>";
+      $command .= "<first_time>";
+      $command .= "<day_of_month>" . $options['day'] . "</day_of_month>";
+      $command .= "<hour>" . $options['hour'] . "</hour>";
+      $command .= "<minute>" . $options['min'] . "</minute>";
+      $command .= "<month>" . $options['month'] . "</month>";
+      $command .= "<year>" . $options['year'] . "</year>";
+      $command .= "</first_time>";
+      if (!empty($options['period'])) {
+         $command .= "<period>" . $options['period'];
+         $command .= "<unit>day</unit>";
+         $command .= "</period>";
+      }
+      $command  .= "</create_schedule>";
+      $response = self::executeCommand(self::ADD_SCHEDULE,
+                                       ['command' => $command], true);
+      return ($response['status'] == '201');
    }
 }

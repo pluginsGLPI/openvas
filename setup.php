@@ -36,7 +36,12 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.1.0');
+define('PLUGIN_OPENVAS_VERSION', '1.2.0');
+
+// Minimal GLPI version, inclusive
+define('PLUGIN_OPENVAS_MIN_GLPI', '9.3');
+// Maximum GLPI version, exclusive
+define('PLUGIN_OPENVAS_MAX_GLPI', '9.4');
 
 /**
  * Init hooks of the plugin.
@@ -54,7 +59,7 @@ function plugin_init_openvas() {
       $PLUGIN_HOOKS['status']['openvas'] = 'plugin_openvas_Status';
 
       Plugin::registerClass('PluginOpenvasProfile',
-                          array('addtabon' => array('Profile')));
+                          ['addtabon' => ['Profile']]);
 
       if (Session::haveRight('plugin_openvas_item', READ)) {
          Plugin::registerClass('PluginOpenvasItem',
@@ -95,18 +100,17 @@ function plugin_init_openvas() {
  * @return array
  */
 function plugin_version_openvas() {
-   global $LANG;
 
    return [
-      'name'           => __("GLPi openvas Connector", 'openvas'),
+      'name'           => __('GLPi openvas Connector', 'GLPi openvas Connector'),
       'version'        => PLUGIN_OPENVAS_VERSION,
       'author'         => "<a href='http://www.teclib-edition.com'>Teclib'</a>",
       'license'        => 'GPLv3',
       'homepage'       => 'https://github.com/pluginsglpi/openvas',
       'requirements'   => [
          'glpi' => [
-            'min' => '9.2',
-            'dev' => true
+            'min' => PLUGIN_OPENVAS_MIN_GLPI,
+            'max' => PLUGIN_OPENVAS_MAX_GLPI,
          ]
       ]
    ];
@@ -119,11 +123,25 @@ function plugin_version_openvas() {
  * @return boolean
  */
 function plugin_openvas_check_prerequisites() {
-   $version = rtrim(GLPI_VERSION, '-dev');
-   if (version_compare($version, '9.2', 'lt')) {
-      echo "This plugin requires GLPI 9.2";
-      return false;
+
+   //Version check is not done by core in GLPI < 9.2 but has to be delegated to core in GLPI >= 9.2.
+   if (!method_exists('Plugin', 'checkGlpiVersion')) {
+      $version = preg_replace('/^((\d+\.?)+).*$/', '$1', GLPI_VERSION);
+      $matchMinGlpiReq = version_compare($version, PLUGIN_OPENVAS_MIN_GLPI, '>=');
+      $matchMaxGlpiReq = version_compare($version, PLUGIN_OPENVAS_MAX_GLPI, '<');
+
+      if (!$matchMinGlpiReq || !$matchMaxGlpiReq) {
+         echo vsprintf(
+            'This plugin requires GLPI >= %1$s and < %2$s.',
+            [
+               PLUGIN_OPENVAS_MIN_GLPI,
+               PLUGIN_OPENVAS_MAX_GLPI,
+            ]
+         );
+         return false;
+      }
    }
+
    return true;
 }
 

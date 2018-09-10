@@ -58,15 +58,19 @@ class PluginOpenvasItem extends CommonDBChild {
    /**
    * @see CommonGLPI::getTabNameForItem()
    **/
-   function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
+   function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
 
       $itemtype = $item->getType();
 
       // can exists for template
       if ($itemtype::canView()) {
-         $nb = countElementsInTable('glpi_plugin_openvas_items',
-         "`itemtype`='".$item->getType()."'
-         AND `items_id`='".$item->getID()."'");
+         $nb = countElementsInTable(
+            'glpi_plugin_openvas_items',
+            [
+               'itemtype' => $item->getType(),
+               'items_id' => $item->getID(),
+            ]
+         );
          return self::createTabEntry(self::getTypeName(Session::getPluralNumber()), $nb);
       }
    }
@@ -77,7 +81,7 @@ class PluginOpenvasItem extends CommonDBChild {
    * @param $tabnum          (default 1)
    * @param $withtemplate    (default 0)
    */
-   static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
+   static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0) {
       $ovitem = new self();
       $ovitem->getFromDBForItem($item->getType(), $item->getID());
 
@@ -230,6 +234,7 @@ class PluginOpenvasItem extends CommonDBChild {
                .__('Setup')."</th><th>"
                .__('Scanner', 'openvas')."</th><th>"
                .__("Last run")."</th><th>"
+               .__("Begin date")."</th><th>"
                ._n("Report", "Reports", 1)."</th></tr>";
                foreach ($tasks as $task_id => $task) {
                   echo "<tr class='tab_bg_1' align='center'>";
@@ -251,6 +256,7 @@ class PluginOpenvasItem extends CommonDBChild {
                   echo "<td>".$task['scanner']."</td>";
                   echo "<td>".$task['config']."</td>";
                   echo "<td>".$task['date_last_scan']."</td>";
+                  echo "<td>".$task['begindate_last_scan']."</td>";
                   echo "<td>";
                   if (!PluginOpenvasOmp::isTaskRunning($task['status'])) {
                      $link = PluginOpenvasConfig::getConsoleURL();
@@ -350,14 +356,15 @@ class PluginOpenvasItem extends CommonDBChild {
 
       //First: check if the host provided is already associated with an asset
       $iterator = $DB->request('glpi_plugin_openvas_items',
-                               [ 'FIELDS' => [ 'itemtype', 'items_id'],
+                               [ 'FIELDS' => [ 'itemtype', 'items_id', 'openvas_id'],
                                  'OR'     => [ 'openvas_host' => $host,
                                  'openvas_name' => $host]
                                ]);
       if ($iterator->numrows()) {
          $tmp = $iterator->next();
          self::$host_matching[$host] = [ 'itemtype' => $tmp['itemtype'],
-                                         'items_id' => $tmp['items_id']
+                                         'items_id' => $tmp['items_id'],
+                                         'openvas_id' => $tmp['openvas_id']
                                        ];
          return self::$host_matching[$host];
       } else {
@@ -642,10 +649,21 @@ class PluginOpenvasItem extends CommonDBChild {
                    INTERVAL -".$config->fields['retention_delay']." DAY)";
       foreach ($DB->request($query) as $target) {
          $tmp = ['id'               => $target['id'],
-                 'openvas_threat'   => NULL,
-                 'openvas_severity' => NULL
+                 'openvas_threat'   => null,
+                 'openvas_severity' => null
                 ];
          if ($item->update($tmp)) {
+            $index++;
+         }
+      }
+      //Clean items without openvas id
+      $query = "SELECT `id`
+                FROM `glpi_plugin_openvas_items`
+                WHERE `openvas_id` = 'N/A'";
+      foreach ($DB->request($query) as $target) {
+         $tmp = ['id'               => $target['id']
+                ];
+         if ($item->delete($tmp, true)) {
             $index++;
          }
       }
@@ -718,7 +736,7 @@ class PluginOpenvasItem extends CommonDBChild {
             KEY `openvas_date_last_scan` (`openvas_date_last_scan`),
             KEY `date_creation` (`date_creation`),
             KEY `date_mod` (`date_mod`)
-         ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
          $DB->query($query) or die ($DB->error());
 
          //New installation : add default profile
@@ -728,11 +746,11 @@ class PluginOpenvasItem extends CommonDBChild {
       $cron = new CronTask;
       if (!$cron->getFromDBbyName(__CLASS__, 'openvasSynchronize')) {
          CronTask::Register(__CLASS__, 'openvasSynchronize', DAY_TIMESTAMP,
-         array('param' => 24, 'mode' => CronTask::MODE_EXTERNAL));
+         ['param' => 24, 'mode' => CronTask::MODE_EXTERNAL]);
       }
       if (!$cron->getFromDBbyName(__CLASS__, 'openvasClean')) {
          CronTask::Register(__CLASS__, 'openvasClean', DAY_TIMESTAMP,
-         array('param' => 24, 'mode' => CronTask::MODE_EXTERNAL));
+         ['param' => 24, 'mode' => CronTask::MODE_EXTERNAL]);
       }
    }
 

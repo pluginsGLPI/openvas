@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-18 22:13+0100\n"
+"POT-Creation-Date: 2018-08-21 15:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,46 +17,70 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: hook.php:57 hook.php:65 hook.php:72 hook.php:80 hook.php:88 hook.php:96
-#: hook.php:104 hook.php:110 inc/profile.class.php:67 inc/menu.class.php:35
-#: inc/item.class.php:128 inc/vulnerability.class.php:48
-#: front/config.form.php:52 front/vulnerability.form.php:36
-#: front/vulnerability.php:37 front/task.form.php:34 front/task.php:34
+#: front/vulnerability.form.php:36 front/task.php:34 front/task.form.php:34
+#: front/config.form.php:52 front/vulnerability.php:37 hook.php:58 hook.php:66
+#: hook.php:73 hook.php:81 hook.php:89 hook.php:97 hook.php:105 hook.php:111
+#: inc/profile.class.php:67 inc/menu.class.php:35 inc/item.class.php:133
+#: inc/vulnerability.class.php:51
 msgid "OpenVAS"
 msgstr ""
 
-#: hook.php:58
+#: front/task.form.php:41
+msgid "Task created"
+msgstr ""
+
+#: front/target.form.php:37
+msgid "Add a new target"
+msgstr ""
+
+#: front/target.form.php:48
+msgid "Target created"
+msgstr ""
+
+#: front/target.form.php:52
+msgid "No ip address for item, can't create target"
+msgstr ""
+
+#: front/schedule.form.php:37
+msgid "Add a new schedule"
+msgstr ""
+
+#: front/schedule.form.php:49
+msgid "Schedule created"
+msgstr ""
+
+#: hook.php:59
 msgid "Target ID"
 msgstr ""
 
-#: hook.php:66 inc/vulnerability.class.php:70 inc/vulnerability.class.php:223
-#: inc/vulnerability.class.php:369 inc/task.class.php:65
-#: inc/rulevulnerability.class.php:75 inc/vulnerability_item.class.php:174
+#: hook.php:67 inc/task.class.php:65 inc/rulevulnerability.class.php:75
+#: inc/vulnerability_item.class.php:182 inc/vulnerability.class.php:85
+#: inc/vulnerability.class.php:253 inc/vulnerability.class.php:491
 msgid "Threat"
 msgstr ""
 
-#: hook.php:81 inc/item.class.php:135 inc/task.class.php:62
-#: inc/task.class.php:161
+#: hook.php:82 inc/task.class.php:62 inc/task.class.php:162
+#: inc/item.class.php:140
 msgid "Target"
 msgstr ""
 
-#: hook.php:104 inc/item.class.php:202 inc/item.class.php:225
-#: inc/vulnerability.class.php:64 inc/vulnerability.class.php:368
-#: inc/rulevulnerability.class.php:76
+#: hook.php:105 inc/item.class.php:207 inc/item.class.php:230
+#: inc/rulevulnerability.class.php:76 inc/vulnerability.class.php:76
+#: inc/vulnerability.class.php:490
 msgid "Severity"
 msgstr ""
 
-#: hook.php:125 inc/vulnerabilitycategory.class.php:47
-#: inc/rulevulnerability.class.php:95
+#: hook.php:123 inc/rulevulnerability.class.php:94
+#: inc/vulnerabilitycategory.class.php:47
 msgid "Vulnerability category"
 msgstr ""
 
-#: inc/profile.class.php:45 inc/vulnerability.class.php:42
-#: inc/vulnerability_item.class.php:175
+#: inc/profile.class.php:45 inc/config.class.php:131
+#: inc/vulnerability_item.class.php:183 inc/vulnerability.class.php:42
 msgid "Vulnerability"
 msgstr ""
 
-#: inc/config.class.php:62 setup.php:97
+#: inc/config.class.php:62 setup.php:105
 msgid "GLPi openvas Connector"
 msgstr ""
 
@@ -84,72 +108,93 @@ msgstr ""
 msgid "Number of days for searches"
 msgstr ""
 
+#: inc/task.class.php:67 inc/task.class.php:148 inc/item.class.php:232
+msgid "Scanner"
+msgstr ""
+
+#: inc/task.class.php:102 inc/task.class.php:103 inc/item.class.php:152
+#: inc/item.class.php:153 inc/item.class.php:263 inc/item.class.php:264
+msgid "View in OpenVAS"
+msgstr ""
+
+#: inc/task.class.php:112 inc/task.class.php:135 inc/task.class.php:250
+#: inc/task.class.php:310 inc/item.class.php:145
+msgid "Cannot contact OpenVAS"
+msgstr ""
+
+#: inc/task.class.php:155
+msgid "Config"
+msgstr ""
+
+#: inc/task.class.php:175
+msgid "Schedule"
+msgstr ""
+
+#: inc/task.class.php:215
+msgid "Start Requested"
+msgstr ""
+
+#: inc/task.class.php:224
+msgid "Stop Requested"
+msgstr ""
+
+#: inc/task.class.php:245
+msgid "New target"
+msgstr ""
+
+#: inc/task.class.php:264 inc/task.class.php:279
+msgid "Credentials for "
+msgstr ""
+
+#: inc/task.class.php:270
+msgid "On port:"
+msgstr ""
+
+#: inc/task.class.php:305
+msgid "New schedule"
+msgstr ""
+
+#: inc/task.class.php:325
+msgid "First time"
+msgstr ""
+
+#: inc/task.class.php:334
+msgid "Period (in days)"
+msgstr ""
+
 #: inc/item.class.php:49
 msgid "Openvas Item"
 msgstr ""
 
-#: inc/item.class.php:140 inc/task.class.php:112 inc/task.class.php:134
-msgid "Cannot contact OpenVAS"
-msgstr ""
-
-#: inc/item.class.php:147 inc/item.class.php:148 inc/item.class.php:256
-#: inc/item.class.php:257 inc/task.class.php:103 inc/task.class.php:104
-msgid "View in OpenVAS"
-msgstr ""
-
-#: inc/item.class.php:227 inc/task.class.php:67 inc/task.class.php:147
-msgid "Scanner"
-msgstr ""
-
-#: inc/item.class.php:676
+#: inc/item.class.php:694
 msgid "Synchronize OpenVAS hosts"
 msgstr ""
 
-#: inc/item.class.php:678
+#: inc/item.class.php:696
 msgid "Clean OpenVAS infos"
 msgstr ""
 
-#: inc/vulnerability.class.php:201
-msgid "Name"
-msgstr ""
-
-#: inc/vulnerability.class.php:205
-msgid "Port"
-msgstr ""
-
-#: inc/vulnerability.class.php:446
-msgid "Synchronize OpenVAS vulnerabilities"
-msgstr ""
-
-#: inc/rulevulnerabilitycollection.class.php:60
 #: inc/rulevulnerability.class.php:46
+#: inc/rulevulnerabilitycollection.class.php:60
 msgid "Rules for OpenVAS vulnerabilities"
 msgstr ""
 
-#: inc/task.class.php:154
-msgid "Config"
-msgstr ""
-
-#: inc/task.class.php:168
-msgid "Schedule"
-msgstr ""
-
-#: inc/task.class.php:202
-msgid "Start Requested"
-msgstr ""
-
-#: inc/task.class.php:211
-msgid "Stop Requested"
-msgstr ""
-
-#: inc/rulevulnerability.class.php:91
+#: inc/rulevulnerability.class.php:90
 msgid "Create a new ticket using a template"
 msgstr ""
 
-#: inc/vulnerability_item.class.php:107
+#: inc/vulnerability_item.class.php:115
 msgid "Result ID"
 msgstr ""
 
-#: front/task.form.php:41
-msgid "Task created"
+#: inc/vulnerability.class.php:235
+msgid "Name"
+msgstr ""
+
+#: inc/vulnerability.class.php:239
+msgid "Port"
+msgstr ""
+
+#: inc/vulnerability.class.php:509
+msgid "Synchronize OpenVAS vulnerabilities"
 msgstr ""

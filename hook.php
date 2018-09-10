@@ -120,10 +120,10 @@ function plugin_openvas_getAddSearchOptions($itemtype) {
 }
 
 function plugin_openvas_getDropdown() {
-   return array('PluginOpenvasVulnerabilityCategory' => __('Vulnerability category', 'openvas'));
+   return ['PluginOpenvasVulnerabilityCategory' => __('Vulnerability category', 'openvas')];
 }
 
-function plugin_openvas_giveItem($type,$ID,$data,$num) {
+function plugin_openvas_giveItem($type, $ID, $data, $num) {
    $searchopt = &Search::getOptions($type);
    $table = $searchopt[$ID]["table"];
    $field = $searchopt[$ID]["field"];
@@ -135,7 +135,7 @@ function plugin_openvas_giveItem($type,$ID,$data,$num) {
    return "";
 }
 
-function plugin_openvas_addOrderBy($type,$ID,$order,$key=0) {
+function plugin_openvas_addOrderBy($type, $ID, $order, $key = 0) {
    $searchopt = &Search::getOptions($type);
    $table     = $searchopt[$ID]["table"];
    $field     = $searchopt[$ID]["field"];
@@ -164,7 +164,7 @@ function plugin_openvas_searchOptionsValues($item) {
    if ($item['searchoption']['table'] == 'glpi_plugin_openvas_vulnerabilities'
    AND $item['searchoption']['field'] == 'threat') {
       PluginOpenvasToolbox::dropdownThreats($item['name'], $item['value']);
-      return TRUE;
+      return true;
    }
 }
 
