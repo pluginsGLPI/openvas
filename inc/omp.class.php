@@ -161,7 +161,7 @@ class PluginOpenvasOmp {
    static function getResults($extra_params = false) {
       return self::executeCommand(self::RESULT,
       [ 'filter'  => [ 'rows' => -1,
-      self::SORT_DESC => 'creation_time',
+      self::SORT_DESC => 'severity',
       'extra' => $extra_params] ]);
    }
 
@@ -376,12 +376,15 @@ class PluginOpenvasOmp {
    static function getTargetsAsArray() {
       $target_response = self::executeCommand(self::TARGET);
 
-      $results       = [];
-      foreach ($target_response->target as $response) {
-         $host         = $response->hosts->__toString();
-         $name         = $response->name->__toString();
-         $id           = $response->attributes()->id->__toString();
-         $results[$id] = $host." ($name)";
+      $results = [];
+      $targets = isset($target_response->target) ? $target_response->target : [];
+      if (count($targets) > 0) {
+         foreach ($target_response->target as $response) {
+            $host         = $response->hosts->__toString();
+            $name         = $response->name->__toString();
+            $id           = $response->attributes()->id->__toString();
+            $results[$id] = $host." ($name)";
+         }
       }
       return $results;
    }
