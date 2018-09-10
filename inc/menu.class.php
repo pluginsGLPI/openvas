@@ -57,6 +57,11 @@ class PluginOpenvasMenu extends CommonGLPI {
          $menu['options']['PluginOpenvasVulnerability']['page']  = PluginOpenvasVulnerability::getSearchURL(false);
          $menu['options']['PluginOpenvasVulnerability']['links']['search'] = PluginOpenvasVulnerability::getSearchURL(false);
 
+         $menu['options']['openvasconfig']['title']           = PluginOpenvasConfig::getTypeName(2);
+         $menu['options']['openvasconfig']['page']           = PluginOpenvasConfig::getSearchURL(false);
+         $menu['options']['openvasconfig']['links']['add']          = '/plugins/openvas/front/config.form.php';
+         $menu['options']['openvasconfig']['links']['search']           = PluginOpenvasConfig::getSearchURL(false);
+
          if (Session::haveRight('plugin_openvas_task', READ)) {
             $menu['options']['PluginOpenvasVulnerability']['links'][$image_task]  = PluginOpenvasTask::getSearchURL(false);
          }
