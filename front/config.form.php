@@ -58,7 +58,7 @@ if (isset($_POST["update"])) {
 
    Session::checkRight("config", UPDATE);
    $id = -1;
-   if(isset($_GET['id'])){
+   if (isset($_GET['id'])) {
       $id = $_GET['id'];
    }
    $iterator = $DB->request('glpi_requesttypes', ['name' => 'OpenVAS']);
@@ -82,7 +82,7 @@ if (isset($_POST["update"])) {
                'severity_none_color'   => '#000000',
                'requesttypes_id'        => $requesttypes_id
    ];
-   $config->showForm($id,$options);
+   $config->showForm($id, $options);
 
    Html::footer();
 

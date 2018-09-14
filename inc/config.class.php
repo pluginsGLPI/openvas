@@ -47,16 +47,16 @@ class PluginOpenvasConfig extends CommonDBTM {
    public static function getInstance() {
       if (is_null(self::$_config)) {
          $config = new self();
-         if(strpos($_SERVER['HTTP_REFERER'],'/config.form.php?id=')>0){
-            $id = substr($_SERVER['HTTP_REFERER'],strpos($_SERVER['HTTP_REFERER'],'?id=')+4);
+         if (strpos($_SERVER['HTTP_REFERER'], '/config.form.php?id=')>0) {
+            $id = substr($_SERVER['HTTP_REFERER'], strpos($_SERVER['HTTP_REFERER'], '?id=')+4);
             $config->getFromDB($id);
-         } else{
+         } else {
             $id_entities = $_SESSION["glpiactive_entity"];
             $config->getFromDBByCrit(["entities_id = ".$id_entities]);
          }
-         if(!isset($config->fields['id'])){
+         if (!isset($config->fields['id'])) {
             return false;
-         } else{
+         } else {
             self::$_config = $config;
          }
       }
@@ -115,14 +115,14 @@ class PluginOpenvasConfig extends CommonDBTM {
            'name'           => RequestType::getTypeName(1)
        ];
 
-      $tab[] = [
+       $tab[] = [
          'id'                 => '80',
          'table'              => 'glpi_entities',
          'field'              => 'completename',
          'name'               => __('Entity'),
          'massiveaction'      => false,
          'datatype'           => 'dropdown'
-      ];
+       ];
 
        $tab[] = [
            'id'             => 7,
@@ -187,12 +187,12 @@ class PluginOpenvasConfig extends CommonDBTM {
            'name'           => __("None")
        ];
 
-      return $tab;
+       return $tab;
    }
 
-   public function showForm($ID,$options = []) {
+   public function showForm($ID, $options = []) {
 
-      $this->initForm($ID,$options);
+      $this->initForm($ID, $options);
       $this->showFormHeader($options);
 
       echo "<div class='center'>";
@@ -267,22 +267,22 @@ class PluginOpenvasConfig extends CommonDBTM {
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . _x('priority', 'High') . "</td>";
       echo "<td>";
-      Html::showColorField('severity_high_color', array('value' => $this->fields["severity_high_color"]));
+      Html::showColorField('severity_high_color', ['value' => $this->fields["severity_high_color"]]);
       echo "</td>";
       echo "<td>" . _x('priority', 'Medium') . "</td>";
       echo "<td>";
-      Html::showColorField('severity_medium_color', array('value' => $this->fields["severity_medium_color"]));
+      Html::showColorField('severity_medium_color', ['value' => $this->fields["severity_medium_color"]]);
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1' align='center'>";
       echo "<td>" . _x('priority', 'Low') . "</td>";
       echo "<td>";
-      Html::showColorField('severity_low_color', array('value' => $this->fields["severity_low_color"]));
+      Html::showColorField('severity_low_color', ['value' => $this->fields["severity_low_color"]]);
       echo "</td>";
       echo "<td>" . __("None") . "</td>";
       echo "<td>";
-      Html::showColorField('severity_none_color', array('value' => $this->fields["severity_none_color"]));
+      Html::showColorField('severity_none_color', ['value' => $this->fields["severity_none_color"]]);
       echo "</td>";
       echo "</tr>";
 
@@ -385,7 +385,7 @@ class PluginOpenvasConfig extends CommonDBTM {
                ];
          $config->add($tmp);
       }
-      if($DB->tableExists("glpi_plugin_openvas_configs") && !$DB->fieldExists("glpi_plugin_openvas_configs", "entities_id")){
+      if ($DB->tableExists("glpi_plugin_openvas_configs") && !$DB->fieldExists("glpi_plugin_openvas_configs", "entities_id")) {
          $query = "ALTER TABLE `glpi_plugin_openvas_configs` ADD `entities_id` int(11) NOT NULL DEFAULT '0';";
          $DB->query($query) or die ($DB->error());
       }
