@@ -36,7 +36,7 @@
  ----------------------------------------------------------------------
  */
 
-define('PLUGIN_OPENVAS_VERSION', '1.2.0');
+define('PLUGIN_OPENVAS_VERSION', '1.2.1');
 
 // Minimal GLPI version, inclusive
 define('PLUGIN_OPENVAS_MIN_GLPI', '9.3');
@@ -71,7 +71,7 @@ function plugin_init_openvas() {
       }
 
       $PLUGIN_HOOKS['use_massive_action']['openvas'] = 1;
-      $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.form.php';
+      $PLUGIN_HOOKS['config_page']['openvas'] = 'front/config.php';
 
       // require spectrum (for glpi >= 9.2)
       $CFG_GLPI['javascript']['tools']['pluginopenvasmenu']['PluginOpenvasConfig'] = ['colorpicker'];

@@ -142,7 +142,11 @@ class PluginOpenvasItem extends CommonDBChild {
       if ($alive && $item->canUpdate()) {
          PluginOpenvasOmp::dropdownTargets('openvas_id', $openvas_item->fields['openvas_id']);
       } else {
-         echo __("Cannot contact OpenVAS", "openvas");
+         if ($config  = PluginOpenvasConfig::getInstance()) {
+            echo __("Cannot contact OpenVAS", "openvas");
+         } else {
+            echo __('No openvas server defined for this entity', 'openvas');
+         }
       }
       if ($openvas_item->fields['openvas_id']) {
          $link = PluginOpenvasConfig::getConsoleURL();
